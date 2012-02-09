@@ -1,0 +1,28 @@
+import(ncdfFlow)
+importFrom(RSVGTipsDevice,devSVGTips,setSVGShapeToolTip,setSVGShapeURL)
+#importFrom(zoo,as.yearmon)
+#importFrom(car,logit)
+importFrom(reshape,melt,cast)
+importFrom(hwriter,openPage,hwrite,closePage)
+importFrom(MASS, rlm)
+#importFrom(MASS,huber)
+
+	
+exportClasses(qaTask)
+
+export(	"queryStats"
+		,"qa.singlePlot"
+		,"qa.GroupPlot"
+		,"saveToDB"
+		,"makeQaTask"
+		,"qa.report"
+		,"proportion.outliers.robust"
+		,"proportion.outliers.mle"
+		,"qoutlier"
+		,"outlier.cutoff"
+		,"outlier.t"
+		,"outlier.norm"
+		)
+
+
+exportMethods("plot","qaCheck","getQAStats")              

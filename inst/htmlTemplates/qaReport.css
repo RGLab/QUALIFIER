@@ -1,0 +1,116 @@
+body {  
+	background: #FFFFFF;  
+	color: #000000; 
+	}  
+
+ .tablesort  {
+    cursor: pointer ;
+    behavior:url(tablesort.htc);
+    -moz-binding: url(tablesort.htc);
+    }
+    
+H1 { font-family: Arial, Helvetica, sans-serif; font-size: 20pt; font-style: normal; font-weight: normal; color: #FFFFFF; background: #004080; text-align: left; margin: 10pt 2.5%}
+H2 { font-family: Arial, Helvetica, sans-serif; font-size: 18pt; font-style: normal; font-weight: normal; color: #FFFFFF; background: #000000}
+H2.index { font-family: Arial, Helvetica, sans-serif; font-size: 18pt; font-style: normal; font-weight: normal; color: #FFFFFF; background: #000000; margin: 10pt 5%}
+H3 { font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-style: normal; font-weight: bold; color: #004080;  margin: 10pt 2.5%}
+H4 { font-family: T, Helvetica, sans-serif; font-size: 10pt; font-style: normal; font-weight: bold; color: #000000; line-height: 16pt'' ;margin: 10pt 2.5%}
+
+LI { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt ;margin: 10pt 2.5%}
+
+A { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt ;text-decoration:none}
+
+
+.caption{font-style:italic}
+.title2{ font-family: Arial, Helvetica, sans-serif; font-size: 14pt; font-style: normal; font-weight: bold; color: #004080  }
+.count{color:red}
+
+.ReportTitle { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 20pt ;font-weight:normal;text-align: center}
+.ReportSubTitle { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 15pt ;font-weight:normal;text-align: center}
+.qaTaskTitle { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12pt ;font-weight:bold;color: black;margin: 10pt 2.5%}
+.splash{font-size:10pt;text-align:right;margin: 10pt 2.5%}
+.runningText { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt ;font-weight:normal}
+.command {font-family=verdana, arial; color=red	}
+.function{font-family=verdana, arial; color=blue}
+.partitle{font-family=verdana, arial; font-weight:bold}
+
+
+XMP{font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt }
+.function{font-family=courier; color=blue; font-size: 10pt }
+
+table, th, td
+{
+	border: 0px ;
+	cellspacing:0; 
+	color:black;
+	margin: 10pt 2.5%;
+	 
+	/*display:none*/
+}
+
+TR{font-family: Arial, Helvetica,Times, Helvetica, sans-serif; font-size: 10pt; font-style: normal  ; padding:0 0}
+
+
+TR.ListBackTitle{color: #FFFFFF; background: #000000;text-align=left;font-weight: bold}
+
+
+
+TD{background=#FFFFFF; padding:0 0}
+TD.ListBackMain{background: #E0E0E0; padding:0 0}
+TD.firstcolumn{padding:5 10;background:#C0C0C0;text-align=right}
+TD.cellinside{padding:5 10;background:#FFFFFF;text-align=right}
+
+TD.firstline{color: #FFFFFF; background: #000000;text-align=center;font-weight: bold}
+TD.lastline{padding:5 10;background:#FFFFFF;text-align=right;font-weight: bold}
+TD.lastcolumn{padding:5 10;background:#FFFFFF;text-align=right;font-weight: bold;color:black}
+
+
+div.QADetTrigger
+{
+ 
+   float:left;
+position:relative;
+right:2px;
+   /* 
+ margin: 10pt 2.5%;
+	 color:#05006d;
+	margin-top:3px;
+
+    margin-left:3px;
+ 
+  
+    
+   
+    bottom:11px;
+    
+    font-size:20px;
+    font-weight:bold;
+    z-index:10;*/
+}
+
+div.QADetTrigger:hover
+{
+    color:#76ade0;
+    cursor:pointer;
+}
+
+
+/* CORRELATION MATRIX TRAFFIC HIGHLIGHT*/
+
+TD.corvarname{background-color="#FFFFFF" ;color=black;  height:1.1cm; text-align:right; font-weight:bold}
+TD.corsep{width:0.5cm}
+TD.cordiag{background-color=#fffff;color=white}
+TD.cor0{background-color="#FFFFFF" ;color=black;  width:1.1cm; height:1.1cm; text-align:center}
+TD.cor1{background-color="#E6E6E6" ;color=black;  width:1.1cm; height:1.1cm; text-align:center}
+TD.cor2{background-color="#CCCCCC" ;color=black;   width:1.1cm; height:1.1cm; text-align:center}
+TD.cor3{background-color="#B3B3B3" ;color=black;   width:1.1cm; height:1.1cm; text-align:center}
+TD.cor4{background-color="#999999" ;color=black;   width:1.1cm; height:1.1cm; text-align:center}
+TD.cor5{background-color="#808080" ;color=white;   width:1.1cm; height:1.1cm; text-align:center}
+TD.cor6{background-color="#666666" ;color=white;  width:1.1cm; height:1.1cm; text-align:center} 
+TD.cor7{background-color="#4D4D4D" ;color=white;  width:1.1cm; height:1.1cm; text-align:center} 
+TD.cor8{background-color="#333333" ;color=white;  width:1.1cm; height:1.1cm; text-align:center} 
+TD.cor9{background-color="#1A1A1A" ;color=yellow; width:1.1cm; height:1.1cm; text-align:center} 
+TD.cor10{background-color="#000000";color=yellow;  width:1.1cm; height:1.1cm; text-align:center}
+						
+
+
+ 

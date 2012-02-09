@@ -1,0 +1,14 @@
+Package: flowQA
+Type: Package
+Title: Qualitiy control for flow cytometry
+Version: 0.99.0
+Author: Mike Jiang,Greg Finak,Raphael Gottardo
+Maintainer: Mike Jiang <wjiang2@fhcrc.org>
+Description: Provides quality control and quality assessment tools for flow
+             cytometry data. 
+Depends: R (>= 2.14.0),flowWorkspace,MASS
+Imports: flowStats,MASS,ncdfFlow,RColorBrewer,hwriter,reshape,RSVGTipsDevice
+Collate:AllGeneric.R AllClasses.R  AllFunctions.R  outlier.R  qaPanelFunction.R trellisPlot.R qaCheck.R qaPlot.R qaTask-accessor-Methods.R getBoundary.R getQAStats.R 
+License: Artistic-2.0
+biocViews:  Infrastructure, Flowcytometry, CellBasedAssays
+
