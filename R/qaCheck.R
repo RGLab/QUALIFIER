@@ -3,9 +3,15 @@
 # Author: mike
 ###############################################################################
 
-
-
-
+#setMethod("qaCheck", signature=c(x="qaTask"),
+#		function(x,y,...){
+#			if(missing(y))
+#				y<-NULL
+#			plot.qaTask(qaObj=x,formula=y,...)
+#		})
+#
+#plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
+#{
 
 setMethod("qaCheck", signature=c(obj="qaTask"),
 		function(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...){

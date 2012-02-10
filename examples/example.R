@@ -17,8 +17,9 @@ outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
 dest<-file.path(outDir,"trellis_plot/")
 
 ###read annotation data
-metaFile="~/rglab/workspace/flowQA/misc/ITN029ST/FCS_File_mapping.csv"
+metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 anno<-read.csv(metaFile)
+
 
 
 ################################################################################  
@@ -28,6 +29,7 @@ anno<-read.csv(metaFile)
 #so that it be loaded directly from disk later on for the further processing 
 ###############################################################################
 ws<-openWorkspace("~/rglab/workspace/flowQA/misc/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
+
 
 #ncfs<-read.ncdfFlowSet(files =file.path(ws@path
 #												,c(flowWorkspace:::getFileNames(ws)[1:10]
@@ -64,29 +66,30 @@ Sys.time()-time1
 #
 save(db,file="ITN029.rda")#save stats
 
-#unique(db$anno$Tube)
-#unique(db$statsOfGS$channel)
+#read pre-determined events number for tubes from csv file
+##pannel name should be in place of tube name since the entire package is using pannel name 
+##to represent the tube
+tubesEvents<-read.csv("~/rglab/workspace/QUALIFIER/misc/tubesevents.csv",row.names=1)
+tubesEvents<-.TubeNameMapping(db,tubesEvents)
 
-##select a smaller subset for demo
-#sampleCount<-table(db$anno$coresampleid[db$anno$name%in%t1$fcsFile[1:50]])
-#sampleSelected<-names(sampleCount[sampleCount>2])
-#db$anno<-db$anno[db$anno$coresampleid%in%sampleSelected,]
-#db$statsOfGS<-db$statsOfGS[db$statsOfGS$id%in%db$anno$id,]
+
 
 
 ################################################################################  
 #3. perform different QA checks
 ###############################################################################
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
-data("ITN029")#load stats from disk
+data("ITN029_all")#load stats from disk
 #db$G<-G
 checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
+
 ###80% of the pre-defined the value for each pannel
-qaCheck(qaTask.list[["NumberOfEvents"]]
+qaCheck1(qaTask.list[["NumberOfEvents"]]
+		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
-		,lBound=0.8
+		,lBound=0.8*tubesEvents
 )
 
 qaCheck(qaTask.list[["BoundaryEvents"]]
@@ -111,7 +114,7 @@ qaCheck(qaTask.list[["RBCLysis"]]
 
 qaCheck(qaTask.list[["spike"]],outlierfunc=outlier.t,alpha=0.00001)
 
-qaCheck(qaTask.list[["MNC"]],formula=percent ~ coresampleid|Tube,outlierfunc=qoutlier,alpha=1.5)
+qaCheck(qaTask.list[["MNC"]],formula=percent ~ coresampleid,outlierfunc=qoutlier,alpha=1.5)
 
 qaCheck(qaTask.list[["RedundantStain"]],outlierfunc=qoutlier,alpha=1.5)
 
@@ -120,7 +123,7 @@ qaCheck(qaTask.list[["RedundantStain"]],outlierfunc=qoutlier,alpha=1.5)
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qa.report(db,outDir="~/rglab/workspace/flowQA/output",plotAll=F)
+qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=F)
 
 
 
@@ -161,22 +164,18 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 #	,plotAll=T
 )
 
-plot(qaTask.list[["MNC"]],percent ~ coresampleid|Tube
+plot(qaTask.list[["MNC"]],percent ~ coresampleid
 #		,dest="image"
 )	
 
 plot(qaTask.list[["RedundantStain"]]
-		,subset="stain%in%c('CD3','CD4','CD8')",drop.unused.levels=TRUE
+		,subset="stain%in%c('CD3')&stain",drop.unused.levels=TRUE
 #		,dest="image"
 #		,plotAll=T
 )
 
 
 
-################################################################################  
-#5.qa report in html
-###############################################################################
-qa.report(db,outDir="~/rglab/workspace/flowQA/output")
 
 
 

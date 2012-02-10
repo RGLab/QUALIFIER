@@ -104,6 +104,7 @@ saveToDB<-function(db,G,annoData)
 #	objID.table<-ncfs@phenoData@data
 #	objID.table$id<-1:nrow(objID.table)
 #	annoData<-merge(annoData,objID.table,by.x="FCS_Files",by.y="name")
+	
 	annoData$id<-1:nrow(annoData)
 #	browser()
 	#do some filtering for annoData
@@ -122,16 +123,22 @@ saveToDB<-function(db,G,annoData)
 	G<-G[which(getSamples(G)%in%annoData$name)]
 	
 	annoData<-annoData[getSamples(G),]	#sort by sample order in gh
-#	pData(ncfs)<-annoData
-#	varM<-varMetadata(phenoData(ncfs))
-#	varM[-1,]<-rownames(varM)[-1]
-#	varMetadata(phenoData(ncfs))<-varM
-#	ncFlowSet(G)<-ncfs
+
+	##extract tubeID from filename by stripping the first two prefix (presummably date and fileid on each tube)
+	annoData$tubeID<-unlist(lapply(annoData$name,function(x){
+#			browser()
+						strsplit(
+								paste(strsplit(as.character(x),"_")[[1]][c(-1,-2)],collapse="_")
+								,"\\.")[[1]][[1]]
+					}))
+
+
 	pData(G)<-annoData
 	#do the filtering for Gating set
 	
 	
 	###append the data to db
+
 	db$params<-colnames(getData(G[[1]]))
 	db$G<-G
 	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)

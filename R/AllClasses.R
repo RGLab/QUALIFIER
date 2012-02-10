@@ -22,4 +22,3 @@ setClass("qaTask",
 						)
 		)
 
-
