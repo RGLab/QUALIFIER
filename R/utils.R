@@ -3,24 +3,7 @@
 # Author: wjiang2
 ###############################################################################
 
-qaCheck1<-function(obj,...){
-			
-			call.f<-match.call(expand.dots = F)
-			
-			lBound<-list(...)$lBound
 
-			if(!is.null(lBound))
-			{
-				for(tid in rownames(lBound))
-				{
-#					browser()
-					
-					call.f$...$lBound<-lBound[tid,]
-					eval(call.f)
-				}
-			}
-			
-		}
 
 .TubeNameMapping<-function(db,tubesEvents)
 {

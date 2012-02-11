@@ -86,10 +86,11 @@ qaTask.list<-makeQaTask(db,checkListFile)
 
 
 ###80% of the pre-defined the value for each pannel
-qaCheck1(qaTask.list[["NumberOfEvents"]]
+qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 )
 
 qaCheck(qaTask.list[["BoundaryEvents"]]
@@ -136,7 +137,7 @@ qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=F)
 
 
 plot(qaTask.list[["NumberOfEvents"]]
-	#	,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
 )
 #

@@ -3,18 +3,69 @@
 # Author: mike
 ###############################################################################
 
-#setMethod("qaCheck", signature=c(x="qaTask"),
-#		function(x,y,...){
-#			if(missing(y))
-#				y<-NULL
-#			plot.qaTask(qaObj=x,formula=y,...)
-#		})
-#
-#plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
-#{
-
 setMethod("qaCheck", signature=c(obj="qaTask"),
 		function(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...){
+			
+			call.f<-match.call(expand.dots = F)
+			
+			cutoff<-list(...)[[1]]
+#			browser()
+			argname<-names(list(...))
+			if(!is.null(cutoff))
+			{
+				
+				
+				#convert to named vector
+				if(class(cutoff)=="data.frame")
+				{
+					
+					cutoff<-apply(cutoff,1,"[",1)
+				}else
+				{
+					if(class(cutoff)=="list")
+					{
+						cutoff<-unlist(cutoff)
+					}
+				}
+				#if the cutoff is a multipe-value data structure
+				#then try each individual cutoff for each conditioning value
+				if(length(cutoff)>1)
+				{
+					formuRes<-.formulaParser(formula)
+					for(curConVal in names(cutoff))
+					{
+#						browser()
+						cur.call.f<-call.f
+					
+						cur.call.f[[1]]<-quote(.qaCheck)
+						cur.call.f$formula<-formula
+						cur.call.f$outlierfunc<-outlierfunc
+						cur.call.f$rFunc<-rFunc
+						cur.call.f$subset<-paste(formuRes$groupBy,"=='",curConVal,"'",sep="")
+						
+						cur.call.f$...<-NULL
+						eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
+						
+												#replace the cutoff value 
+						eval(cur.call.f)
+					
+					}
+				}else
+				{
+					#if single scalar, then call the qacheck function directly
+					.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,rFunc=rFunc,...)
+								
+					
+				}
+				
+			}else
+			{
+				stop("threshold has to be provided for outlier detection!")
+			}
+			
+		})
+
+.qaCheck<-function(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...){
 #	browser()
 
 	qaID<-qaID(obj)
@@ -118,18 +169,12 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	stats_list<-unlist(stats_list,use.names = FALSE)
 #	browser()
 	
-#	yy<-do.call("rbind",stats_list)
-	
-#	ret<-subset(yy,outlier==TRUE)
-#	rownames(ret)<-NULL
 
-	
-	#remove old records
 #	browser()
 	
 	##clean the old results
-	db$outlierResult<-db$outlierResult[!db$outlierResult$qaID==qaID,]
-	db$GroupOutlierResult<-db$GroupOutlierResult[!db$GroupOutlierResult$qaID==qaID,]
+	db$outlierResult<-db$outlierResult[!db$outlierResult$sid%in%stats_list,]
+	db$GroupOutlierResult<-db$GroupOutlierResult[!db$GroupOutlierResult$sid%in%stats_list,]
 	
 	#append the new one
 	if(length(stats_list)>0)
@@ -146,7 +191,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 	
 	
-	})
+	}
 
 	
 
