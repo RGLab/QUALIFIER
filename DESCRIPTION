@@ -8,7 +8,18 @@ Description: Provides quality control and quality assessment tools for flow
              cytometry data. 
 Depends: R (>= 2.14.0),flowWorkspace,MASS
 Imports: flowStats,MASS,ncdfFlow,RColorBrewer,hwriter,reshape,RSVGTipsDevice
-Collate:AllGeneric.R AllClasses.R  AllFunctions.R  outlier.R  qaPanelFunction.R trellisPlot.R qaCheck.R qaPlot.R qaTask-accessor-Methods.R getBoundary.R getQAStats.R 
+Collate:AllGeneric.R 
+		AllClasses.R  
+		AllFunctions.R  
+		outlier.R  
+		qaPanelFunction.R 
+		trellisPlot.R 
+		qaCheck.R 
+		qaPlot.R 
+		qaTask-accessor-Methods.R 
+		getBoundary.R 
+		getQAStats.R
+		utils.R 
 License: Artistic-2.0
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays
 

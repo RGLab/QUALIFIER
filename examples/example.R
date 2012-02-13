@@ -64,7 +64,7 @@ time1<-Sys.time()
 getQAStats(db,nslaves=10)
 Sys.time()-time1
 #
-save(db,file="ITN029.rda")#save stats
+save(db,file="data/ITN029_all.rda")#save stats
 
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
@@ -170,7 +170,8 @@ plot(qaTask.list[["MNC"]],percent ~ coresampleid
 )	
 
 plot(qaTask.list[["RedundantStain"]]
-		,subset="stain%in%c('CD3')&stain",drop.unused.levels=TRUE
+		,subset="stain%in%c('CD3','CD4')"
+		,y=percent~coresampleid|channel:stain
 #		,dest="image"
 #		,plotAll=T
 )

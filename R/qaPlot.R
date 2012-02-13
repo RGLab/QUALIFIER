@@ -208,6 +208,7 @@ qa.singlePlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
+#			browser()
 			if(missing(y))
 				y<-NULL
 			plot.qaTask(qaObj=x,formula=y,...)
@@ -257,8 +258,17 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 
 	yy<-queryStats(db,formula,subset,pop=getPop(qaObj))
 #	browser()
-	
-	
+	#check if the conditioning variable is of factor type
+	for(curGroupBy in groupBy)
+	{
+
+		curCol<-substitute(yy$v,list(v=curGroupBy))
+		if(!class(eval(curCol))=="factor")
+		{
+			eval(substitute(v<-as.factor(v),list(v=curCol)))
+		}
+	}
+#			browser()
 	if(getName(qaObj)=="BoundaryEvents")
 		yy<-subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
 
