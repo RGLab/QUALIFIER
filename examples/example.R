@@ -77,6 +77,10 @@ tubesEvents<-.TubeNameMapping(db,tubesEvents)
 
 ################################################################################  
 #3. perform different QA checks
+#interactive lattice plot for each individual qatask
+#a)customized formula can be supplied to overwrite the default one
+#b)by default dest=NULL, which plots on the regular R device,otherwise it is a
+#character indicating the path to save the svg plot
 ###############################################################################
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
 data("ITN029_all")#load stats from disk
@@ -90,62 +94,34 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents
+#		,lBound=0
 #		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 )
-
-qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(percent) ~ RecdDt | name
-		,outlierfunc=outlier.cutoff
-		,uBound=0.0003
-
-
-)
-
-qaCheck(qaTask.list[["MFIOverTime"]]
-		,outlierfunc=outlier.norm
-		,rFunc=rlm
-		,z.cutoff=3
-)
-
-qaCheck(qaTask.list[["RBCLysis"]]
-		,formula=percent ~ RecdDt | Tube
-		,outlierfunc=outlier.cutoff
-		,lBound=0.8
-)
-
-qaCheck(qaTask.list[["spike"]],outlierfunc=outlier.t,alpha=0.00001)
-
-qaCheck(qaTask.list[["MNC"]],formula=percent ~ coresampleid,outlierfunc=qoutlier,alpha=1.5)
-
-qaCheck(qaTask.list[["RedundantStain"]],outlierfunc=qoutlier,alpha=1.5)
-
-################################################################################  
-#4.qa report in html format 
-#set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
-#otherwise only plots for outliers are generated.
-###############################################################################
-qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=F)
-
-
-
-################################################################################  
-#5.interactive lattice plot for each individual qatask
-#a)customized formula can be supplied to overwrite the default one
-#b)by default dest=NULL, which plots on the regular R device,otherwise it is a
-#character indicating the path to save the svg plot
-###############################################################################
-
 
 plot(qaTask.list[["NumberOfEvents"]]
 #		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
 )
-#
+
+
+
+qaCheck(qaTask.list[["BoundaryEvents"]]
+		,sum(percent) ~ RecdDt | name
+		,outlierfunc=outlier.cutoff
+		,uBound=0.0003
+)
 plot(qaTask.list[["BoundaryEvents"]]
 		,percent ~ RecdDt | channel
 #		,dest="image"
 )
 
+
+
+qaCheck(qaTask.list[["MFIOverTime"]]
+#		,outlierfunc=outlier.norm
+		,rFunc=rlm
+		,z.cutoff=3
+)
 plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
 		,subset="channel%in%c('FITC-A')"
 		,rFunc=rlm
@@ -155,26 +131,60 @@ plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
 
 )
 
-plot(qaTask.list[["RBCLysis"]],subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
-		#,dest="image"
+
+qaCheck(qaTask.list[["RBCLysis"]]
+		,formula=percent ~ RecdDt | Tube
+		,outlierfunc=outlier.cutoff
+		,lBound=0.8
+)
+plot(qaTask.list[["RBCLysis"]]
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+#		,dest="image"
+#	,plotAll="none"
 )	
 
+
+qaCheck(qaTask.list[["spike"]]
+		,outlierfunc=outlier.t
+		,alpha=0.0001)
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')"
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')"
 #	,dest="image"
 #	,plotAll=T
 )
 
+
+qaCheck(qaTask.list[["MNC"]],formula=percent ~ coresampleid,outlierfunc=qoutlier,alpha=1.5)
 plot(qaTask.list[["MNC"]],percent ~ coresampleid
 #		,dest="image"
 )	
 
+
+qaCheck(qaTask.list[["RedundantStain"]],outlierfunc=qoutlier,alpha=1.5)
 plot(qaTask.list[["RedundantStain"]]
 		,subset="stain%in%c('CD3','CD4')"
 		,y=percent~coresampleid|channel:stain
 #		,dest="image"
-#		,plotAll=T
+#		,plotAll="none"
 )
+################################################################################  
+#4.qa report in html format 
+#set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
+#otherwise only plots for outliers are generated.
+###############################################################################
+qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -42,11 +42,14 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 						cur.call.f$outlierfunc<-outlierfunc
 						cur.call.f$rFunc<-rFunc
 						cur.call.f$subset<-paste(formuRes$groupBy,"=='",curConVal,"'",sep="")
-						
+						if(!is.null(subset))
+							cur.call.f$subset<-paste(cur.call.f$subset,subset,sep="&")
 						cur.call.f$...<-NULL
+						#replace the cutoff value
 						eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
+#						browser()
 						
-												#replace the cutoff value 
+												 
 						eval(cur.call.f)
 					
 					}
@@ -73,7 +76,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	pop<-getPop(obj)
 	
 	if(missing(outlierfunc))
-		stop("outlierfunc is missing!")
+	{
+		outlierfunc<-outlier.norm
+		message("outlierfunc is missing!outlier.norm is used.")
+		
+	}
 		
 
 #browser()
@@ -86,11 +93,15 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	
-#	browser()
+
 	##query db
 	yy<-queryStats(db,formula,subset,pop)
-		
-
+#		browser()	
+	if(nrow(yy)==0)
+		{
+			warning("empty subsets:",subset)
+			return()
+		}
 	factors<-lapply(groupBy,function(x){
 				eval(substitute(yy$v,list(v=x)))
 			})
@@ -104,7 +115,10 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #		factors<-as.factor(apply(yy[,groupBy],1,paste,collapse="_"))
 		gOutlierfunc<-list(...)$gOutlierfunc
 		if(is.null(gOutlierfunc))
-			gOutlierfunc<-outlierfunc
+		{
+			gOutlierfunc<-outlier.norm
+			message("gOutlierfunc is missing!outlier.norm is used for group outlier detection.")
+		}
 		
 		groupOutSids<-by(yy,factors,function(x){
 											
@@ -173,8 +187,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #	browser()
 	
 	##clean the old results
-	db$outlierResult<-db$outlierResult[!db$outlierResult$sid%in%stats_list,]
-	db$GroupOutlierResult<-db$GroupOutlierResult[!db$GroupOutlierResult$sid%in%stats_list,]
+	db$outlierResult<-db$outlierResult[!db$outlierResult$sid%in%yy$sid,]
+	db$GroupOutlierResult<-db$GroupOutlierResult[!db$GroupOutlierResult$sid%in%yy$sid,]
 	
 	#append the new one
 	if(length(stats_list)>0)

@@ -439,21 +439,12 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 		ret<-dev.off()
 		message("Saving to ",sfile)
 
-#		if(!file.exists(file.path(dest,"individual")))
-#			system(paste("mkdir",file.path(dest,"individual")))
-		
 
-
-#		outRows<-subset(yy,outlier==TRUE)
-#		if(nrow(outRows)>0)
-#			qa.singlePlot(db$G,outRows,dest)
-#				browser()
 		fileNames<-ls(plotObjs)
 		
-		if(!is.null(fileNames))
+		if(!is.null(fileNames)&&plotAll!="none")
 		{
 #			browser()
-#			fileNames<-fileNames[!is.na(fileNames)]
 #			t1<-Sys.time()
 			for(dfile in fileNames)
 			{

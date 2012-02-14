@@ -155,7 +155,7 @@ outlier.cutoff<-function(x,lBound=NULL,uBound=NULL)
 
 
 #outlier detection based on the given probability vector(p) and threshold(alpha)
-outlierDetection<-function(cp,alpha = 0.1,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE)
+outlierDetection<-function(cp,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE)
 {
 if(is.null(z.cutoff)){
 #	browser()

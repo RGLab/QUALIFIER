@@ -151,7 +151,7 @@ panel.xyplotEx <-
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
-					if(curOutRow$outlier||plotAll)
+					if(curOutRow$outlier||plotAll==TRUE)
 					{
 						##save the individual plot obj
 #						browser()
@@ -494,7 +494,7 @@ panel.bwplotEx <-
 			setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
 			##lattice plot for outlier group
 			
-			if((cur.btw.groups.outliers||plotAll)&&!is.null(dest))
+			if((cur.btw.groups.outliers||plotAll==TRUE)&&!is.null(dest))
 			{
 #				browser()
 				paths<-flowQA:::.FileNameGen(prefix="s"
