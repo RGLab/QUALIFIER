@@ -95,11 +95,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		if(plotType(obj)=="bwplot")
 		{
 			outlierfunc<-qoutlier
-			message("qoutlier is used.")
+			message("qoutlier is used for outlier detection.")
 		}else
 		{
 			outlierfunc<-outlier.norm
-			message("outlier.norm is used.")
+			message("outlier.norm is used for outlier detection.")
 		}
 	
 	}

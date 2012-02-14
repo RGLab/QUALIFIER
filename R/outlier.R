@@ -92,19 +92,27 @@ outlier.norm <-function (x,plot=FALSE,...)
 {
 #	browser()
 	#estimate mu and sd
-	par<-huber(y=x)
-	mu<-par[[1]]
-	sigma<-par[[2]]
-	if(is.null(list(...)$z.cutoff)){
-	#stardarize x
+	par<-try(huber(y=x),silent=TRUE)
+	if(class(par)=="try-error")
+	{
+#		gettext(par)
+		isOutlier<-rep(FALSE,length(x))
+	}else
+	{
+		mu<-par[[1]]
+		sigma<-par[[2]]
+		if(is.null(list(...)$z.cutoff)){
+			#stardarize x
 #	x1<-(x - mu)/sigma
-	#calculate the cumulative probability of each x value
-	cp<-pnorm(x,mu,sigma)
-	}else{
-		#standardize to z-score
-		cp<-(x-mu)/sigma
+			#calculate the cumulative probability of each x value
+			cp<-pnorm(x,mu,sigma)
+		}else{
+			#standardize to z-score
+			cp<-(x-mu)/sigma
+		}
+		isOutlier<-outlierDetection(cp,...)
 	}
-	isOutlier<-outlierDetection(cp,...)
+	
 
 	if(plot)
 	{	

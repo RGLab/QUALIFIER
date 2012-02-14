@@ -168,7 +168,7 @@ plot(qaTask.list[["MNC"]],percent ~ coresampleid
 
 
 qaCheck(qaTask.list[["RedundantStain"]]
-			,gOutlierfunc=qoutlier
+#			,gOutlierfunc=qoutlier
 #			,outlierfunc=qoutlier
 #			,alpha=1.5
 #			,z.cutoff=2
