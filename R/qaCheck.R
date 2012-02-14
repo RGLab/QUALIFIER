@@ -4,82 +4,104 @@
 ###############################################################################
 
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...){
+		function(obj,formula=NULL,subset=NULL,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
 			
 			call.f<-match.call(expand.dots = F)
+
 			
-			cutoff<-list(...)[[1]]
-#			browser()
+
 			argname<-names(list(...))
-			if(!is.null(cutoff))
+#			browser()		
+			##try to run the qa for each individual cutoff value if multiple values are provided 
+			##through lbound or rbound arugments
+			if(!is.null(argname))
 			{
-				
-				
-				#convert to named vector
-				if(class(cutoff)=="data.frame")
+				if(length(argname)==1&&grepl("[UuLl][Bb][Oo][Uu][Nn][Dd]",argname))
 				{
+					cutoff<-list(...)[[1]]
 					
-					cutoff<-apply(cutoff,1,"[",1)
-				}else
-				{
-					if(class(cutoff)=="list")
+					#convert to named vector
+					if(class(cutoff)=="data.frame")
 					{
-						cutoff<-unlist(cutoff)
-					}
-				}
-				#if the cutoff is a multipe-value data structure
-				#then try each individual cutoff for each conditioning value
-				if(length(cutoff)>1)
-				{
-					formuRes<-.formulaParser(formula)
-					for(curConVal in names(cutoff))
-					{
-#						browser()
-						cur.call.f<-call.f
-					
-						cur.call.f[[1]]<-quote(.qaCheck)
-						cur.call.f$formula<-formula
-						cur.call.f$outlierfunc<-outlierfunc
-						cur.call.f$rFunc<-rFunc
-						cur.call.f$subset<-paste(formuRes$groupBy,"=='",curConVal,"'",sep="")
-						if(!is.null(subset))
-							cur.call.f$subset<-paste(cur.call.f$subset,subset,sep="&")
-						cur.call.f$...<-NULL
-						#replace the cutoff value
-						eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
-#						browser()
 						
-												 
-						eval(cur.call.f)
-					
+						cutoff<-apply(cutoff,1,"[",1)
+					}else
+					{
+						if(class(cutoff)=="list")
+						{
+							cutoff<-unlist(cutoff)
+						}
 					}
-				}else
-				{
-					#if single scalar, then call the qacheck function directly
-					.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,rFunc=rFunc,...)
-								
-					
+					#if the cutoff is a multipe-value data structure
+					#then try each individual cutoff for each conditioning value
+					if(length(cutoff)>1)
+					{
+						formuRes<-.formulaParser(formula)
+						for(curConVal in names(cutoff))
+						{
+#						browser()
+							cur.call.f<-call.f
+							
+							cur.call.f[[1]]<-quote(.qaCheck)
+							cur.call.f$formula<-formula
+							cur.call.f$outlierfunc<-outlierfunc
+							cur.call.f$gOutlierfunc<-gOutlierfunc
+							cur.call.f$rFunc<-rFunc
+							cur.call.f$subset<-paste(formuRes$groupBy,"=='",curConVal,"'",sep="")
+							if(!is.null(subset))
+								cur.call.f$subset<-paste(cur.call.f$subset,subset,sep="&")
+							cur.call.f$...<-NULL
+							#replace the cutoff value
+							eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
+#						browser()
+							
+							
+							eval(cur.call.f)
+							
+						}
+						return()
+					}
 				}
 				
-			}else
-			{
-				stop("threshold has to be provided for outlier detection!")
-			}
+			}	
+				
+#				}else
+#				{
+#					#if single scalar, then call the qacheck function directly
+#					.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,rFunc=rFunc,...)
+#								
+#					
+#				}
+				
+#			}else
+#			{
+				#if single scalar, then call the qacheck function directly
+				.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+#								
+#				stop("threshold has to be provided for outlier detection!")
+#			}
 			
 		})
 
-.qaCheck<-function(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...){
+.qaCheck<-function(obj,formula=NULL,subset=NULL,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
 #	browser()
 
 	qaID<-qaID(obj)
 	db<-getData(obj)
 	pop<-getPop(obj)
-	
-	if(missing(outlierfunc))
+#	browser()
+	if(is.null(outlierfunc))
 	{
-		outlierfunc<-outlier.norm
-		message("outlierfunc is missing!outlier.norm is used.")
-		
+		if(plotType(obj)=="bwplot")
+		{
+			outlierfunc<-qoutlier
+			message("qoutlier is used.")
+		}else
+		{
+			outlierfunc<-outlier.norm
+			message("outlier.norm is used.")
+		}
+	
 	}
 		
 
@@ -113,11 +135,12 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		##merge multipe conditioning variable to one to make a simply factor
 		
 #		factors<-as.factor(apply(yy[,groupBy],1,paste,collapse="_"))
-		gOutlierfunc<-list(...)$gOutlierfunc
+#		gOutlierfunc<-list(...)$gOutlierfunc
+#	browser()
 		if(is.null(gOutlierfunc))
 		{
 			gOutlierfunc<-outlier.norm
-			message("gOutlierfunc is missing!outlier.norm is used for group outlier detection.")
+			message("outlier.norm is used for group outlier detection.")
 		}
 		
 		groupOutSids<-by(yy,factors,function(x){
@@ -134,7 +157,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					
 #		groupOutlier<-toutlier(log(IQRs),isLower=FALSE)
 					#log transform for between groups outlier call
-					curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE)
+#					browser()
+					curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
 					
 					curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
 					curOutSids<-x[curFactor%in%curOutGroupID,]$sid
@@ -173,7 +197,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					regResult<-rFunc(as.formula(f1),x)
 					inputVec<-regResult$residuals
 				}
-				
+#				browser()
 				outlierVec<-outlierfunc(inputVec,...)
 				
 				x[outlierVec,]$sid

@@ -122,7 +122,8 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 		,rFunc=rlm
 		,z.cutoff=3
 )
-plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
+plot(qaTask.list[["MFIOverTime"]]
+		,y=MFI~RecdDt|stain
 		,subset="channel%in%c('FITC-A')"
 		,rFunc=rlm
 		,relation="free"
@@ -145,22 +146,33 @@ plot(qaTask.list[["RBCLysis"]]
 
 
 qaCheck(qaTask.list[["spike"]]
-		,outlierfunc=outlier.t
-		,alpha=0.0001)
+		,outlierfunc=outlier.norm#outlier.t
+		,z.cutoff=5
+#		,alpha=0.00001
+)
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')"
+		,subset="Tube=='CD11c/CD80/DUMP/HLADr/CD123'"
 #	,dest="image"
 #	,plotAll=T
 )
 
 
-qaCheck(qaTask.list[["MNC"]],formula=percent ~ coresampleid,outlierfunc=qoutlier,alpha=1.5)
+qaCheck(qaTask.list[["MNC"]]
+		,formula=percent ~ coresampleid
+#		,outlierfunc=qoutlier
+#		,alpha=1.5
+		,z.cutoff=2)
 plot(qaTask.list[["MNC"]],percent ~ coresampleid
 #		,dest="image"
 )	
 
 
-qaCheck(qaTask.list[["RedundantStain"]],outlierfunc=qoutlier,alpha=1.5)
+qaCheck(qaTask.list[["RedundantStain"]]
+			,gOutlierfunc=qoutlier
+#			,outlierfunc=qoutlier
+#			,alpha=1.5
+#			,z.cutoff=2
+		)
 plot(qaTask.list[["RedundantStain"]]
 		,subset="stain%in%c('CD3','CD4')"
 		,y=percent~coresampleid|channel:stain

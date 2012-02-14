@@ -51,8 +51,8 @@ proportion.outliers.mle<-function (dat, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 }
 
 
-##based on boxplot 
-qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
+##based on boxplot ... is the argument passed from parent call which is ignored here
+qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...) 
 {
 #	browser()
 	if (alpha < 0) 
@@ -104,7 +104,7 @@ outlier.norm <-function (x,plot=FALSE,...)
 		#standardize to z-score
 		cp<-(x-mu)/sigma
 	}
-	isOutlier<-flowQA:::outlierDetection(cp,...)
+	isOutlier<-outlierDetection(cp,...)
 
 	if(plot)
 	{	
