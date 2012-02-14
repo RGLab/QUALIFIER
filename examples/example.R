@@ -97,9 +97,15 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 #		,lBound=0
 #		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 )
-
+#isPass<-lapply(rownames(subset(pData(db$G),Tube=='CD8/CD25/CD4/CD3/CD62L')),function(curFile)
+#{
+##	browser()
+#	tid<-strsplit(strsplit(curFile,"_")[[1]][[3]],"\\.")[[1]][[1]]
+#	nrow(read.FCS(file.path("/loc/no-backup/mike/ITN029ST/",curFile)))>tubesEvents[tid,]
+#})
+#which(unlist(isPass))
 plot(qaTask.list[["NumberOfEvents"]]
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
 )
 
