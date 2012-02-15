@@ -3,6 +3,32 @@ var bg="#7896b1";
 var fg="#c9d8e5";
 
 
+function toggleTable(id){
+    var hide = "none";
+    var show = "inline";
+    var obj = document.getElementById("table_"+id);
+    var state = obj.style.display;
+    if(state == show){
+	obj.style.display=hide;
+    }else{
+	obj.style.display=show;
+    }
+
+var inTrig;
+var outTrig;
+
+inTrig = document.getElementById("detTriggerIn_"+id);
+outTrig = document.getElementById("detTriggerOut_"+id);
+if(state == show){
+inTrig.style.display=show;
+outTrig.style.display=hide;
+}else{
+inTrig.style.display=hide;
+outTrig.style.display=show;
+}
+
+}
+
 function toggleSection(id){
     var hide = "none";
     var show = "inline";

@@ -32,7 +32,7 @@ A { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt ;text-de
 .command {font-family=verdana, arial; color=red	}
 .function{font-family=verdana, arial; color=blue}
 .partitle{font-family=verdana, arial; font-weight:bold}
-
+.showtable { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt ;font-weight:normal;margin: 10pt 2.5%}
 
 XMP{font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt }
 .function{font-family=courier; color=blue; font-size: 10pt }

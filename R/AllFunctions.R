@@ -450,18 +450,32 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 								castResult$fcsFile<-as.character(castResult$fcsFile)
 								castResult<-rbind(castResult,c(fcsFile="Total",colSums(castResult[,-1])))
 								rownames(castResult)<-NULL#1:nrow(castResult)
-							
 								hwrite(
-										hwrite(castResult
-												,row.class="firstline"
-												,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
-										)
+										paste(hwrite("hide/show table"#add toggle word
+													,onclick=paste("toggleTable(",db$objcount,")",sep="")
+													,link="#"
+													,class="showtable"
+													)
+											,hwrite(#encapsulate into div in order to have an id
+													hwrite(castResult#output table
+															,row.class="firstline"
+															,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
+													)
+													,div=TRUE
+													,style="display: none;"
+													,id=paste("table",db$objcount,sep="_")
+													)
+											
+											,sep=""
+											)
 										,p
 										,div=TRUE
 										,style="display: none;"
 										,id=paste("section",db$objcount,sep="_")
 								
-								)
+									)
+#									browser()
+									
 							}
 							##group outlier
 							if(nGroupFailed>0)
@@ -492,15 +506,29 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 								rownames(castResult)<-NULL#1:nrow(castResult)
 								
 								hwrite(
-										hwrite(castResult
-												,row.class="firstline"
-												,col.class=eval(parse(text=paste("list('"
-																				,groupField
-																				,"'='firstcolumn','subTotal'='lastcolumn')"
-																				,sep="")
+										paste(hwrite("hide/show table"#add toggle word
+														,onclick=paste("toggleTable(",db$objcount,")",sep="")
+														,link="#"
+														,class="showtable"
+												)
+												,hwrite(#encapsulate into div in order to have an id
+														hwrite(castResult
+																,row.class="firstline"
+																,col.class=eval(parse(text=paste("list('"
+																						,groupField
+																						,"'='firstcolumn','subTotal'='lastcolumn')"
+																						,sep="")
+																		)
 																)
-															)
+														)
+														,div=TRUE
+														,style="display: none;"
+														,id=paste("table",db$objcount,sep="_")
+												)
+												
+												,sep=""
 										)
+										
 										,p
 										,div=TRUE
 										,style="display: none;"
@@ -508,7 +536,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 								
 								)
 							}
-							
+#							browser()
 							yy<-queryStats(db,formula1,pop=getPop(curQa))
 							factors<-lapply(groupBy,function(x){
 										eval(substitute(yy$v,list(v=x)))
