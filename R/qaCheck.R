@@ -191,11 +191,20 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					inputVec<-x$value
 					
 				}else
-				{#using regression function to fit the data and calculate the outliers based on the residuals
+				{
+					#using regression function to fit the data and 
+					#calculate the outliers based on the residuals if applicable
 					f1<-substitute(value~x,list(x=xTerm))
 #					browser()
-					regResult<-rFunc(as.formula(f1),x)
-					inputVec<-regResult$residuals
+					regResult<-try(rFunc(as.formula(f1),x),silent=TRUE)
+					if(all(class(regResult)!="try-error"))
+					{
+						inputVec<-regResult$residuals
+					}else
+					{
+#						browser()
+						inputVec<-x$value
+					}
 				}
 #				browser()
 				outlierVec<-outlierfunc(inputVec,...)

@@ -65,7 +65,6 @@ panel.xyplotEx <-
 				factor = 0.5, amount = NULL,
 				identifier = "xyplot")
 {
-#	browser()
 	if (all(is.na(x) | is.na(y))) return()
 	plot.symbol <- trellis.par.get("plot.symbol")
 	plot.line <- trellis.par.get("plot.line")
@@ -93,6 +92,7 @@ panel.xyplotEx <-
 		if (is.numeric(abline)) abline <- as.list(abline)
 		do.call(panel.abline, abline)
 	}
+#	browser()
 	
 	if (!is.null(groups))
 		panel.superpose(x, y,

@@ -6,7 +6,7 @@ library(flowQA)
 library(Rmpi)
 library(multicore)
 library(snow)
-#unloadNamespace("flowQA")
+unloadNamespace("flowQA")
 library(ncdfFlow)
 #library(flowWorkspace)
 #unloadNamespace("flowWorkspace")
@@ -19,7 +19,7 @@ dest<-file.path(outDir,"trellis_plot/")
 ###read annotation data
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 anno<-read.csv(metaFile)
-
+example()
 
 
 ################################################################################  
@@ -83,7 +83,7 @@ tubesEvents<-.TubeNameMapping(db,tubesEvents)
 #character indicating the path to save the svg plot
 ###############################################################################
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
-data("ITN029_all")#load stats from disk
+data("ITN029")#load stats from disk
 #db$G<-G
 checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
@@ -105,7 +105,7 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 #})
 #which(unlist(isPass))
 plot(qaTask.list[["NumberOfEvents"]]
-		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
 )
 
@@ -130,7 +130,7 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 )
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
-		,subset="channel%in%c('FITC-A')"
+		,subset="channel%in%c('PE-Cy7-A')"
 		,rFunc=rlm
 		,relation="free"
 #		,dest="image"
@@ -153,7 +153,7 @@ plot(qaTask.list[["RBCLysis"]]
 
 qaCheck(qaTask.list[["spike"]]
 		,outlierfunc=outlier.norm#outlier.t
-		,z.cutoff=5
+		,z.cutoff=6
 #		,alpha=0.00001
 )
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
@@ -180,7 +180,7 @@ qaCheck(qaTask.list[["RedundantStain"]]
 #			,z.cutoff=2
 		)
 plot(qaTask.list[["RedundantStain"]]
-		,subset="stain%in%c('CD3','CD4')"
+		,subset="stain%in%c('CD3')"
 		,y=percent~coresampleid|channel:stain
 #		,dest="image"
 #		,plotAll="none"
@@ -190,7 +190,7 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=FALSE)
 
 
 

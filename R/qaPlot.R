@@ -339,47 +339,50 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 						if(!is.null(rFunc))
 						{
 #							browser()
-							reg.res<-rFunc(y~x)
-							sumry<-summary(reg.res)
-							if(class(sumry)=="summary.rlm"){
-								coefs<-coef(sumry)
-								t.value<-coefs[,"t value"]
-								slope<-coefs[2,"Value"]
-								intercept<-coefs[1,"Value"]
-								df<-summary(reg.res)$df
-								pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+		
+							reg.res<-try(rFunc(y~x),silent=TRUE)
+							if(all(class(reg.res)!="try-error"))
+							{
+								sumry<-summary(reg.res)
+								if(class(sumry)=="summary.rlm"){
+									coefs<-coef(sumry)
+									t.value<-coefs[,"t value"]
+									slope<-coefs[2,"Value"]
+									intercept<-coefs[1,"Value"]
+									df<-summary(reg.res)$df
+									pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+									intercept.p<-pvalues[1]
+									slope.p<-pvalues[2]
+								}else if (class(sumry)=="summary.lm"){
+								pvalues<-coefficients(sumry)[,4]
+								slope<-coefficients(sumry)[2,1]
 								intercept.p<-pvalues[1]
 								slope.p<-pvalues[2]
-							}else if (class(sumry)=="summary.lm"){
-							pvalues<-coefficients(sumry)[,4]
-							slope<-coefficients(sumry)[2,1]
-							intercept.p<-pvalues[1]
-							slope.p<-pvalues[2]
-
-							}	
-							if(any(pvalues<0.05))
-							{
-								regLine.col<-"red"
-							}else
-							{
-								regLine.col<-"black"
+	
+								}	
+								if(any(pvalues<0.05))
+								{
+									regLine.col<-"red"
+								}else
+								{
+									regLine.col<-"black"
+								}
+								curVp<-current.viewport()
+								
+								
+	#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
+								panel.text(x=mean(curVp$xscale)
+											,y=quantile(curVp$yscale)[4]
+											,labels=paste("s=",format(slope*30,digits=2)
+	#														," v=",format(var(y),digits=2)
+															,"\np=",paste(format(slope.p,digits=2),collapse=",")
+															)
+											,cex=0.5
+	#										,col="white"		
+											)
+																				
+								panel.abline(reg.res,col=regLine.col,lty="dashed")
 							}
-							curVp<-current.viewport()
-							
-							
-#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
-							panel.text(x=mean(curVp$xscale)
-										,y=quantile(curVp$yscale)[4]
-										,labels=paste("s=",format(slope*30,digits=2)
-#														," v=",format(var(y),digits=2)
-														,"\np=",paste(format(slope.p,digits=2),collapse=",")
-														)
-										,cex=0.5
-#										,col="white"		
-										)
-																			
-							panel.abline(reg.res,col=regLine.col,lty="dashed")
-							
 						}
 #						browser()
 									

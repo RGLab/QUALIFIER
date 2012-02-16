@@ -553,7 +553,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 #
 										db<-getData(curQa)
 										db$objcount<-db$objcount+1		
-										
+#										browser()
 										##heading
 										hwrite(paste(
 														hwrite("+",div=TRUE
@@ -607,35 +607,56 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 										imageName<-eval(parse(text=plotCallStr))
 										rownames(curOut)<-NULL#1:nrow(sub2)
 										rownames(curgOut)<-NULL#1:nrow(sub2)
+										#section
 										hwrite(paste(
-														##table	
-														ifelse(nrow(curOut)>0	
-																,hwrite(curOut[,c("fcsFile","channel")]
-																				,row.class="firstline"
-																				,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
-																		)
-																,"")
-														,ifelse(nrow(curgOut)>0	
-																,hwrite(unique(curgOut[,c(groupField,"channel")])
-																		,row.class="firstline"
-																		,col.class=eval(parse(text=paste("list('"
-																								,groupField
-																								,"'='firstcolumn','subTotal'='lastcolumn')"
-																								,sep="")
+														##tables+toggler	
+														paste(	#toggler
+																hwrite("hide/show table"
+																		,onclick=paste("toggleTable(",db$objcount,")",sep="")
+																		,link="#"
+																		,class="showtable"
+																)
+																#encapsulate tables into div in order to have an id
+																,hwrite(
+																		paste(
+																				ifelse(nrow(curOut)>0	
+																					,hwrite(curOut[,c("fcsFile","channel")]
+																							,row.class="firstline"
+																							,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
 																							)
-																						)
-																				
+																					,"")
+																				,ifelse(nrow(curgOut)>0	
+																					,hwrite(unique(curgOut[,c(groupField,"channel")])
+																							,row.class="firstline"
+																							,col.class=eval(parse(text=paste("list('"
+																													,groupField
+																													,"'='firstcolumn','subTotal'='lastcolumn')"
+																													,sep="")
+																												)
+																											)
+																					
+																							)
+																					,"")
+																			,sep=""
+																			)
+																		,div=TRUE
+																		,style="display: none;"
+																		,id=paste("table",db$objcount,sep="_")
 																		)
-																,"")
+																		
+																
+																,sep=""
+																)
+														
 														##image								
 														,hwrite(paste("<embed src='"
 																		,imageName
 																		,"' type='image/svg+xml' width=1000 height=800/>"
 																		,sep=""
-																)
+																	)
 																,div=TRUE
-														)
-												)
+																)
+													)
 												,p
 												,div=TRUE
 												,style="display: none;"
@@ -691,40 +712,61 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 							
 #							browser()
 							rownames(castResult)<-NULL#1:nrow(castResult)
+							#section
 							hwrite(paste(
-											##table		
-											ifelse(nrow(t1)>0	
-													,hwrite(castResult
-															,row.class="firstline"
-															,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
-													)
-													,"")
-											,ifelse(nrow(g1)>0	
-													,hwrite(gcastResult
-															,row.class="firstline"
-															,col.class=eval(parse(text=paste("list('"
-																					,groupField
-																					,"'='firstcolumn','subTotal'='lastcolumn')"
-																					,sep="")
-																					)
+											paste(
+													hwrite("hide/show table"#add toggle word
+															,onclick=paste("toggleTable(",db$objcount,")",sep="")
+															,link="#"
+															,class="showtable"
+															)
+													,hwrite(#encapsulate into div in order to have an id
+															paste(
+																	ifelse(nrow(t1)>0	
+																			,hwrite(castResult
+																					,row.class="firstline"
+																					,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
 																			)
-																					
+																			,"")
+																	,ifelse(nrow(g1)>0	
+																			,hwrite(gcastResult
+																					,row.class="firstline"
+																					,col.class=eval(parse(text=paste("list('"
+																											,groupField
+																											,"'='firstcolumn','subTotal'='lastcolumn')"
+																											,sep="")
+																											)
+																									)
+																			
+																					)
+																			,"")
+																	,sep=""
+																	)
+															,div=TRUE
+															,style="display: none;"
+															,id=paste("table",db$objcount,sep="_")
+														)
+													
+													,sep=""
 													)
-													,"")
+							
+											##table	
+											
 															##image								
 											,hwrite(paste("<embed src='"
 															,imageName
 															,"' type='image/svg+xml' width=1000 height=800/>"
 															,sep=""
-													)
+															)
 													,div=TRUE
+													)
+											,sep=""
 											)
-									)
 									,p
 									,div=TRUE
 									,style="display: none;"
 									,id=paste("section",db$objcount,sep="_")
-							)
+									)
 							
 						}
 					}

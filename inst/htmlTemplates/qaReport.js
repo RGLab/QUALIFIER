@@ -14,18 +14,18 @@ function toggleTable(id){
 	obj.style.display=show;
     }
 
-var inTrig;
-var outTrig;
-
-inTrig = document.getElementById("detTriggerIn_"+id);
-outTrig = document.getElementById("detTriggerOut_"+id);
-if(state == show){
-inTrig.style.display=show;
-outTrig.style.display=hide;
-}else{
-inTrig.style.display=hide;
-outTrig.style.display=show;
-}
+//var inTrig;
+//var outTrig;
+//
+//inTrig = document.getElementById("detTriggerIn_"+id);
+//outTrig = document.getElementById("detTriggerOut_"+id);
+//if(state == show){
+//inTrig.style.display=show;
+//outTrig.style.display=hide;
+//}else{
+//inTrig.style.display=hide;
+//outTrig.style.display=show;
+//}
 
 }
 
