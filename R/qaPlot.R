@@ -332,7 +332,7 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 						ans
 					}			
 					,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
-						
+#						browser()
 						panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
 						
 						#if regression function is supplied, then plot the regression line
@@ -467,7 +467,7 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 #		browser()
 		.postProcessSVG(sfile)
 			
-		return(sfile)
+		return(basename(sfile))
 	}
 	
 	

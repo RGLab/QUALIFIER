@@ -6,8 +6,8 @@ Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: Provides quality control and quality assessment tools for flow
              cytometry data. 
-Depends: R (>= 2.14.0),flowWorkspace,MASS
-Imports: flowStats,MASS,ncdfFlow,RColorBrewer,hwriter,reshape,RSVGTipsDevice
+Depends: R (>= 2.14.0),flowWorkspace,reshape
+Imports: flowStats,MASS,ncdfFlow,RColorBrewer,hwriter,RSVGTipsDevice
 Collate:AllGeneric.R 
 		AllClasses.R  
 		AllFunctions.R  

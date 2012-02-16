@@ -151,19 +151,23 @@ panel.xyplotEx <-
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
-					if(curOutRow$outlier||plotAll==TRUE)
+					if(plotAll!="none"&&!is.null(dest))
 					{
-						##save the individual plot obj
+						if(curOutRow$outlier||plotAll==TRUE)
+						{
+							##save the individual plot obj
 #						browser()
-						assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
-				
+							assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
+							
 #						png(file.path(dest,paths))
 #						qa.singlePlot(db,curOutRow)
 #						dev.off()
 #						dev.set(2)
-
-						setSVGShapeURL(paths)	
+							
+							setSVGShapeURL(paths)	
+						}
 					}
+					
 					
 					panel.points(x = if (jitter.x) jitter(x[i], factor = factor, amount = amount) else x[i],
 							y = if (jitter.y) jitter(y[i], factor = factor, amount = amount) else y[i],
@@ -494,24 +498,28 @@ panel.bwplotEx <-
 			setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
 			##lattice plot for outlier group
 			
-			if((cur.btw.groups.outliers||plotAll==TRUE)&&!is.null(dest))
+			if(plotAll!="none"&&!is.null(dest))
 			{
+				if(cur.btw.groups.outliers||plotAll==TRUE)
+				{
 #				browser()
-				paths<-flowQA:::.FileNameGen(prefix="s"
-											,ID=curGroupID
-											,population=population
-											,stats.=stats)
-				
-				if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
-				paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
-
-				##can't print right away since there is issue with embeded lattice plot
-				##some how it alter the viewport or leves of parent lattice object 
-#				browser()
-				assign(basename(paths),qa.GroupPlot(db,curGroup),envir=plotObjs)
+					paths<-flowQA:::.FileNameGen(prefix="s"
+							,ID=curGroupID
+							,population=population
+							,stats.=stats)
 					
-				setSVGShapeURL(paths)
+					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
+					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+					
+					##can't print right away since there is issue with embeded lattice plot
+					##some how it alter the viewport or leves of parent lattice object 
+#				browser()
+					assign(basename(paths),qa.GroupPlot(db,curGroup),envir=plotObjs)
+					
+					setSVGShapeURL(paths)
+				}
 			}
+			
 			
 			panel.polygon(t(xs)[,i], t(ys)[,i],
 					lwd = box.rectangle$lwd,

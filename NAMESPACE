@@ -1,11 +1,7 @@
 import(ncdfFlow)
 importFrom(RSVGTipsDevice,devSVGTips,setSVGShapeToolTip,setSVGShapeURL)
-#importFrom(zoo,as.yearmon)
-#importFrom(car,logit)
-importFrom(reshape,melt,cast)
 importFrom(hwriter,openPage,hwrite,closePage)
-importFrom(MASS, rlm)
-#importFrom(MASS,huber)
+importFrom(MASS,rlm,huber)
 
 	
 exportClasses(qaTask)
@@ -22,6 +18,7 @@ export(	"queryStats"
 		,"outlier.cutoff"
 		,"outlier.t"
 		,"outlier.norm"
+		,rlm
 		)
 
 

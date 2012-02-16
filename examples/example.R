@@ -2,11 +2,11 @@
 # 
 # Author: mike
 ###############################################################################
+#unloadNamespace("flowQA")
 library(flowQA)
 library(Rmpi)
 library(multicore)
-library(snow)
-unloadNamespace("flowQA")
+
 library(ncdfFlow)
 #library(flowWorkspace)
 #unloadNamespace("flowWorkspace")
@@ -19,7 +19,6 @@ dest<-file.path(outDir,"trellis_plot/")
 ###read annotation data
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 anno<-read.csv(metaFile)
-example()
 
 
 ################################################################################  
@@ -28,7 +27,7 @@ example()
 #it is convienient to save the gatingset once it is done 
 #so that it be loaded directly from disk later on for the further processing 
 ###############################################################################
-ws<-openWorkspace("~/rglab/workspace/flowQA/misc/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
+ws<-openWorkspace("~/rglab/workspace/QUALIFIER/misc/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
 
 
 #ncfs<-read.ncdfFlowSet(files =file.path(ws@path
@@ -45,9 +44,9 @@ ws<-openWorkspace("~/rglab/workspace/flowQA/misc/ITN029ST/QA_MFI_RBC_bounary_eve
 
 time1<-Sys.time()
 ##filter samples by anno data 
-subsetID<-getFJWSubsetIndices(ws,key="$FIL",value=as.character(anno$FCS_Files),group=2)
+subsetID<-flowWorkspace::getFJWSubsetIndices(ws,key="$FIL",value=as.character(anno$FCS_Files),group=2)
 ##parse the workspace with the subset
-G<-parseWorkspace(ws,execute=T,isNcdf=T,name=2,nslaves=6,subset=subsetID)
+G<-parseWorkspace(ws,execute=T,isNcdf=T,name=1,nslaves=2,subset=subsetID)
 Sys.time()-time1
 #save the gating results
 saveNcdf("G","gatingHierarchy")
@@ -126,6 +125,7 @@ plot(qaTask.list[["BoundaryEvents"]]
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm
 		,rFunc=rlm
+#		,subset="channel%in%c('PE-Cy7-A')"
 		,z.cutoff=3
 )
 plot(qaTask.list[["MFIOverTime"]]
@@ -133,8 +133,8 @@ plot(qaTask.list[["MFIOverTime"]]
 		,subset="channel%in%c('PE-Cy7-A')"
 		,rFunc=rlm
 		,relation="free"
-#		,dest="image"
-#		,plotAll=T
+		,dest="image"
+		,plotAll="none"
 
 )
 
@@ -190,7 +190,7 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=FALSE)
+qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
 
 

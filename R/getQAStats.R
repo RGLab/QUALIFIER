@@ -3,7 +3,7 @@
 # Author: wjiang2
 ###############################################################################
 
-setMethod("getQAStats",signature("environment"),function(obj,isFlowCore=TRUE,nslaves=1,...){
+setMethod("getQAStats",signature("environment"),function(obj,isFlowCore=TRUE,nslaves=NULL,...){
 			
 			statsOfGS<-getQAStats(obj$G,isFlowCore,nslaves)
 #						browser()
@@ -20,10 +20,9 @@ setMethod("getQAStats",signature("environment"),function(obj,isFlowCore=TRUE,nsl
 		})
 
 
-setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslaves=1,...){
+setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslaves=NULL,...){
 			
-#			browser()
-#			statsOfGS<-NULL
+			
 			print("extracting stats...")
 			
 			glist<-obj@set
@@ -34,17 +33,30 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 			}
 			
 			names(glist)<-IDs
-	
-			if(nslaves>1)
+			
+			if(length(grep("parallel",loadedNamespaces()))==1)
 			{
-				cl<-makeCluster(nslaves,type="SOCK")
-				statsOfGS<-parLapply(cl,glist,function(gh){
+#				cores<-getOption("cores")
+				if(is.null(nslaves))
+				{
+					nslaves<-parallel::detectCores()
+				}
+				
+				
+			}
+			if(!is.null(nslaves)&&nslaves>1)
+			{
+				message("Using the parallel mode with ",nslaves," cores")
+				cl<-parallel::makeCluster(nslaves,type="SOCK")
+				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
 					library(flowQA)
 					getQAStats(gh)
 					})
-				stopCluster(cl)
+			parallel::stopCluster(cl)
 			}else
 			{
+				message("It is currently running in serial mode and the parallel mode is recommend for faster processing.")
+				
 				statsOfGS<-lapply(glist,getQAStats)
 			}
 			

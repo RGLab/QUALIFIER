@@ -275,6 +275,8 @@ closeDB<-function(cn){
 
 qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 {
+	if(missing(outDir))
+		stop("outDir has to be specified!")
 	options(warn=0)
 	anno<-pData(db$G)
 #	browser()
@@ -292,7 +294,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 	
 	names(gOutResult)[names(gOutResult)=="qaName"]<-"qaTask"
 	
-	imageDir<-"image"
+	imageDir<-file.path(outDir,"image")
 	#init the image folder
 	
 	dir.create(imageDir,showWarnings=F)
@@ -307,8 +309,8 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 	
 	p <- openPage(dirname=outDir
 						,filename="index.html"
-						,link.css=file.path(imageDir,"qaReport.css")
-						,link.javascript=file.path(imageDir,"qaReport.js")
+						,link.css=file.path(basename(imageDir),"qaReport.css")
+						,link.javascript=file.path(basename(imageDir),"qaReport.js")
 						,title = "qa report"
 	)
 	hwrite("Flow Data Quality Accessment Report",p,class="ReportTitle",div=TRUE,br=TRUE)
@@ -596,12 +598,14 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 #										if(nrow(curOut)>0||nrow(curgOut)>0)
 										if(getName(curQa)=="MFIOverTime")
 										{
+											relation<-"free"										
 											rFunc<-rlm
 										}else
 										{
+											relation<-NULL										
 											rFunc<-NULL
 										}	
-										plotCallStr<-paste("plot(curQa,formula1,dest=imageDir,rFunc.=rFunc,plotAll=plotAll,subset=\""
+										plotCallStr<-paste("plot(curQa,formula1,dest=imageDir,relation=relation,rFunc.=rFunc,plotAll=plotAll,subset=\""
 												,groupBy,"=='",curGroup,"'\")",sep="")
 #										browser()
 										imageName<-eval(parse(text=plotCallStr))
@@ -650,7 +654,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 														
 														##image								
 														,hwrite(paste("<embed src='"
-																		,imageName
+																		,file.path(basename(imageDir),imageName)
 																		,"' type='image/svg+xml' width=1000 height=800/>"
 																		,sep=""
 																	)
@@ -754,8 +758,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 											
 															##image								
 											,hwrite(paste("<embed src='"
-															,imageName
-															,"' type='image/svg+xml' width=1000 height=800/>"
+															,file.path(basename(imageDir),imageName)															,"' type='image/svg+xml' width=1000 height=800/>"
 															,sep=""
 															)
 													,div=TRUE
