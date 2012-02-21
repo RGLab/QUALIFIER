@@ -68,7 +68,7 @@ save(db,file="data/ITN029_all.rda")#save stats
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
-tubesEvents<-read.csv("~/rglab/workspace/QUALIFIER/misc/tubesevents.csv",row.names=1)
+tubesEvents<-read.csv(file.path(system.file("data",package="flowQA"),"tubesevents.csv"),row.names=1)
 tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
 
 

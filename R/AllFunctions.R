@@ -106,18 +106,20 @@ saveToDB<-function(db,G,annoData)
 #	annoData<-merge(annoData,objID.table,by.x="FCS_Files",by.y="name")
 	
 	annoData$id<-1:nrow(annoData)
+	if(!"name"%in%colnames(annoData))
+		stop("'name' column that stores FCS file names is missing in annotation data!")
 #	browser()
 	#do some filtering for annoData
-	annoData<-subset(annoData,!annoData$Tube%in%c("EMA/EMA/EMA/EMA/EMA","VD1/VD2/GD/BLK/CD3"))
-	annoData<-subset(annoData,FCS_Files%in%getSamples(G))
+#	annoData<-subset(annoData,!annoData$Tube%in%c("EMA/EMA/EMA/EMA/EMA","VD1/VD2/GD/BLK/CD3"))
+	annoData<-subset(annoData,name%in%getSamples(G))
 	
 	#do some format converting
-	annoData$RecdDt<-as.Date(annoData$RecdDt,"%m/%d/%y")
-	annoData$AnalysisDt<-as.Date(annoData$AnalysisDt,"%m/%d/%y")
+#	annoData$RecdDt<-as.Date(annoData$RecdDt,"%m/%d/%y")
+#	annoData$AnalysisDt<-as.Date(annoData$AnalysisDt,"%m/%d/%y")
 
 		
 	##fit it into GatingSet(or flowSet)
-	colnames(annoData)[which(colnames(annoData)=="FCS_Files")]<-"name"
+#	colnames(annoData)[which(colnames(annoData)=="FCS_Files")]<-"name"
 	rownames(annoData)<-annoData$name
 	
 	G<-G[which(getSamples(G)%in%annoData$name)]
