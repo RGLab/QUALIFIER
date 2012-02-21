@@ -11,7 +11,6 @@ library(ncdfFlow)
 #library(flowWorkspace)
 #unloadNamespace("flowWorkspace")
 #unloadNamespace("ncdfFlow")
-
 localDir<-"~/rglab"
 outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
 dest<-file.path(outDir,"trellis_plot/")
@@ -68,8 +67,9 @@ save(db,file="data/ITN029_all.rda")#save stats
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
-tubesEvents<-read.csv("~/rglab/workspace/QUALIFIER/misc/tubesevents.csv",row.names=1)
-tubesEvents<-.TubeNameMapping(db,tubesEvents)
+
+tubesEvents<-read.csv(file.path(system.file("data",package="flowQA"),"tubesevents.csv"),row.names=1)
+tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
 
 
 
@@ -104,7 +104,7 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 #})
 #which(unlist(isPass))
 plot(qaTask.list[["NumberOfEvents"]]
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
 )
 

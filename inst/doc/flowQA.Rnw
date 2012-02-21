@@ -107,10 +107,12 @@ Once this is done,the more interactive quality assessment task can be performed 
 
 We provide a function to create a list of \Rclass{qaTask} objects by reading external csv spreadsheet
 containing descriptions of each QA task:
+<<loadData, echo=FALSE, results=hide>>=
+data("ITN029")
 
+@
 <<makeQaTask, echo=true, results=verbatim>>=
 
-data("ITN029")
 
 checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
@@ -238,6 +240,29 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')"
 	)
 
+@
+
+When minitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
+<<tubesEvents results=hide,echo=FALSE>>=
+tubesEvents<-read.csv(file.path(system.file("data",package="flowQA"),"tubesevents.csv"),row.names=1)
+tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
+@
+
+<<plot-NumberOfEvents, fig=true, results=verbatim>>=
+qaCheck(qaTask.list[["NumberOfEvents"]]
+		,formula=count ~ RecdDt | Tube
+		,outlierfunc=outlier.cutoff
+		,lBound=0.8*tubesEvents
+	)
+plot(qaTask.list[["NumberOfEvents"]]
+		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+	)
+@
+
+\Robject{tubesEvents} could be a one-column data frame or a named list/vector. 
+Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
+<<tubesEvents results=verbatim>>=
+tubesEvents
 @
 
 <<plot-RedundantStain, fig=true, results=verbatim>>=
