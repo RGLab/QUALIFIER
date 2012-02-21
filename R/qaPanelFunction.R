@@ -145,7 +145,7 @@ panel.xyplotEx <-
 					FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
-					paths<-flowQA:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
 							,channel=as.character(curOutRow$channel)
 							,stats=as.character(curOutRow$stats))
 					
@@ -503,7 +503,7 @@ panel.bwplotEx <-
 				if(cur.btw.groups.outliers||plotAll==TRUE)
 				{
 #				browser()
-					paths<-flowQA:::.FileNameGen(prefix="s"
+					paths<-QUALIFIER:::.FileNameGen(prefix="s"
 							,ID=curGroupID
 							,population=population
 							,stats.=stats)
@@ -592,7 +592,7 @@ panel.bwplotEx <-
 					FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 	#				browser()
-					paths<-flowQA:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
 						,channel=as.character(curOutRow$channel)
 						,stats=as.character(curOutRow$stats))
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
@@ -822,7 +822,7 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 			p.stats<-sprintf("%.2f%%",p.stats*100)
 			
 			
-			bounds<-flowQA:::gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
+			bounds<-QUALIFIER:::gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
 			
 			for(i in 1:length(bounds))
 			{

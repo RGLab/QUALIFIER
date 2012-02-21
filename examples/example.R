@@ -3,7 +3,7 @@
 # Author: mike
 ###############################################################################
 #unloadNamespace("flowQA")
-library(flowQA)
+library(QUALIFIER)
 library(Rmpi)
 library(multicore)
 
@@ -68,8 +68,11 @@ save(db,file="data/ITN029_all.rda")#save stats
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
-tubesEvents<-read.csv(file.path(system.file("data",package="flowQA"),"tubesevents.csv"),row.names=1)
-tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
+
+
+tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
+tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents)
+
 
 
 
@@ -84,7 +87,7 @@ tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
 data("ITN029")#load stats from disk
 #db$G<-G
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 

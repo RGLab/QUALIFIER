@@ -4,7 +4,7 @@
 %\VignetteIndexEntry{Quality assessment for gated Flow Cytometry Data}
 %\VignetteDepends{flowWorkspace,hwriter}
 %\VignetteKeywords{QA,svg,flowCore}
-%\VignettePackage{flowQA}
+%\VignettePackage{QUALIFIER}
 \documentclass[11pt]{article}
 
 \usepackage{times}
@@ -31,7 +31,7 @@
 
 
 
-\title{flowQA: A package that provides automated flow data quality assessment based on gated cell populations}
+\title{QUALIFIER: Quality Assessment of Gated Flow Cytometry Data}
 \author{Mike Jiang,Greg Finak}
 
 \begin{document}
@@ -42,7 +42,7 @@
   The current \Rpackage{flowQ} package does the quality assessment on the ungated FCM data.However,there is need to
   identify deviant samples by monitoring the consistencies of the underlying statistical properties of different gated cell 
   populations(such as white blood cells,lymphacytes,monocytes etc). The current package was also not designed for dealing with
-  large datasets. To meet these needs, We developed \Rpackage{flowQA} package using the gating template created in flowJo and performing
+  large datasets. To meet these needs, We developed \Rpackage{QUALIFIER} package using the gating template created in flowJo and performing
   QA checks on different gated populations. It divides the data preprocessing from the actual outlier detection process so that the statistics
   are calcuated all at once and the outlier detections and visualization can be done more efficiently and interactively.
   \Rpackage{ncdfFlow} is used to solve the memory limit issue for large datasets. 
@@ -51,8 +51,8 @@
 \noindent \textbf{keywords} Flow cytometry,Quality Assessment, high throughput,svg,flowWorkspace,ncdfFlowSet
 \end{abstract}
 
-<<loadPackage-flowQA, echo=FALSE,results=hide>>=
-library(flowQA)
+<<loadPackage-QUALIFIER, echo=FALSE,results=hide>>=
+library(QUALIFIER)
 @
 
 \section{Parsing the QA gating template}
@@ -114,7 +114,7 @@ data("ITN029")
 <<makeQaTask, echo=true, results=verbatim>>=
 
 
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 qaTask.list[1:2]
 @
@@ -243,9 +243,9 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 @
 
 When minitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
-<<tubesEvents results=hide,echo=FALSE>>=
-tubesEvents<-read.csv(file.path(system.file("data",package="flowQA"),"tubesevents.csv"),row.names=1)
-tubesEvents<-flowQA:::.TubeNameMapping(db,tubesEvents)
+<<tubesEvents, results=hide,echo=FALSE>>=
+tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
+tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents)
 @
 
 <<plot-NumberOfEvents, fig=true, results=verbatim>>=
@@ -261,7 +261,7 @@ plot(qaTask.list[["NumberOfEvents"]]
 
 \Robject{tubesEvents} could be a one-column data frame or a named list/vector. 
 Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
-<<tubesEvents results=verbatim>>=
+<<tubesEvents, results=verbatim>>=
 tubesEvents
 @
 

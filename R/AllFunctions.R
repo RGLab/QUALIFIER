@@ -21,7 +21,7 @@
 
 #	browser()
 	
-	srcFile<-list.files(system.file("javascript",package="flowQA"),pattern="highlight.js",full=T)
+	srcFile<-list.files(system.file("javascript",package="QUALIFIER"),pattern="highlight.js",full=T)
 	srcFile<-file(srcFile, "r")
 	srcCode<-readLines(srcFile)
 	
@@ -299,9 +299,12 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 	imageDir<-file.path(outDir,"image")
 	#init the image folder
 	
-	dir.create(imageDir,showWarnings=F)
+	dir.create(imageDir,recursive=TRUE,showWarnings=F)
 #	file.remove(list.files(imageDir,full=TRUE))
-	file.copy(from=list.files(system.file("htmlTemplates",package="flowQA"),pattern="qaReport",full=T)
+	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full=T)
+	dir.create(imageDir)
+ 	imageDir<-file.path(imageDir,basename(from))	
+	file.copy(from=from
 				,to=imageDir)
 	
 
@@ -320,7 +323,7 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 	if(splash)
 		hwrite(paste("Generated on"
 					,date()	
-					, "by flowQA 0.99"
+					, "by QUALIFIER 0.99.1"
 				)
 				,div=TRUE
 				,class="splash"

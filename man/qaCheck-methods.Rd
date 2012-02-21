@@ -29,7 +29,7 @@ qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
 				"spike": 
 						the variance of intensity over time of each channel ,which indicating the stability of the fluorescence intensity.
 
-			x is normally used to specify the variable plotted on x-axis in \code{\link[flowQA:plot]{plot}} method.
+			x is normally used to specify the variable plotted on x-axis in \code{\link[QUALIFIER:plot]{plot}} method.
 			when \code{plotType} of the \code{qaTask} is "bwplot", it is also taken as the conditioning variable that divides the samples into subgroups within which
 			the \code{outlierfunc} is applied.   
 			
@@ -48,7 +48,7 @@ qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
 					}			
 
 	\item{outlierfunc}{a \code{function} to be used for outlier detection.
-					see \code{\link{outlierDeteciton}} for more details.
+					see \code{\link{outlierDetection}} for more details.
 			}
 	\item{rFunc}{a \code{function} for fitting regression model within each individual subgroup.
 					
@@ -59,7 +59,7 @@ qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
 }
 \details{
 The method parses the formula stored in qaTask or explicitly provided by the argument and select
-the appropriate gated population,extract the statistics that is pre-calculated by \code{\link{extractStats}} 
+the appropriate gated population,extract the statistics that is pre-calculated by \code{\link{getQAStats}} 
 and perform the outlier detection within a certain sample groups specified by the conditioning variables or x term in formula.
 Then the outliers detection results are save in database and ready for query or plotting.    
 }
@@ -71,14 +71,14 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 }
 
 \seealso{
-\code{\link[flowQA:plot]{plot}},\code{\link{getQAStats}}
+\code{\link[QUALIFIER:plot]{plot}},\code{\link{getQAStats}}
 }
 \examples{
 
 \dontrun{
 
 data("ITN029")
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 

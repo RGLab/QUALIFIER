@@ -116,7 +116,7 @@ outlier.norm <-function (x,plot=FALSE,...)
 
 	if(plot)
 	{	
-		flowQA:::outlier.plot(x,mu,isOutlier)
+		QUALIFIER:::outlier.plot(x,mu,isOutlier)
 	}
 	isOutlier
 }
