@@ -49,7 +49,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 				message("Using the parallel mode with ",nslaves," cores")
 				cl<-parallel::makeCluster(nslaves,type="SOCK")
 				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
-					library(flowQA)
+					library(QUALIFIER)
 					getQAStats(gh)
 					})
 			parallel::stopCluster(cl)
@@ -83,7 +83,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				
 				
 				##extract pop name
-				if(flowQA:::.isRoot(obj,curNode))
+				if(QUALIFIER:::.isRoot(obj,curNode))
 				{
 					curPopName<-"Total"
 				}else
@@ -103,7 +103,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)
 #				if(curPopName%in%c("margin","MFI"))
-				if(!flowQA:::.isRoot(obj,curNode))#&&!is.na(curGate)
+				if(!QUALIFIER:::.isRoot(obj,curNode))#&&!is.na(curGate)
 				{
 					chnl<-parameters(curGate)
 					#only 1D gate needs to save channel info
@@ -116,7 +116,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				statsOfNode<-data.frame(channel=chnl,stats=c("proportion","count"),value=c(statsOfNode$flowCore.freq,statsOfNode$flowCore.count),row.names=NULL)
 				
 				#get spikes meatures for each channel at root level
-				if(flowQA:::.isRoot(obj,curNode))
+				if(QUALIFIER:::.isRoot(obj,curNode))
 				{
 
 #					browser()

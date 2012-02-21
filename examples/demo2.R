@@ -2,7 +2,7 @@
 # 
 # Author: mike
 ###############################################################################
-library(flowQA)
+library(QUALIFIER)
 #library(Rmpi)
 #library(multicore)
 #unloadNamespace("flowQA")
@@ -14,8 +14,8 @@ library(flowQA)
 ###compile vignette
 setwd("inst/doc")
 library(tools)
-Sweave("flowQA.Rnw")
-texi2dvi("flowQA.tex",pdf = TRUE)
+Sweave("QUALIFIER.Rnw")
+texi2dvi("QUALIFIER.tex",pdf = TRUE)
 
 localDir<-"~/rglab"
 outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
@@ -63,7 +63,7 @@ nrow(db$statsOfGS)
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
 data("ITN029")#load stats from disk
 #db$G<-G
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 

@@ -45,7 +45,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 \examples{
 \dontrun{
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 }
 }

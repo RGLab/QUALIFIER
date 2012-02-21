@@ -55,14 +55,14 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 }
 
 \seealso{
-\code{\link{qaCheck}},\code{\link[flowQA:qa.report]{qa.report}}
+\code{\link{qaCheck}},\code{\link[QUALIFIER:qa.report]{qa.report}}
 }
 \examples{
 
 \dontrun{
 
 data("ITN029")
-checkListFile<-file.path(system.file("data",package="flowQA"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 #using formula to summing up the percentage of boundary events of each channel

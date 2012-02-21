@@ -99,7 +99,7 @@ individualPlot<-function(x,curGate,curRow)
 													,col="red"
 											)
 									)
-							,panel=flowQA:::panel.xyplot.flowframeEx
+							,panel=QUALIFIER:::panel.xyplot.flowframeEx
 					)
 #		}
 	}
@@ -217,7 +217,7 @@ setMethod("plot", signature=c(x="qaTask"),
 plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
 {
 	
-	lattice.options(print.function=flowQA:::plot.trellisEx)
+	lattice.options(print.function=QUALIFIER:::plot.trellisEx)
 #	formula1<-y
 #	browser()
 	db<-getData(qaObj)

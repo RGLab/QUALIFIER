@@ -1,9 +1,9 @@
-\name{flowQA-package}
-\alias{flowQA-package}
-\alias{flowQA}
+\name{QUALIFIER-package}
+\alias{QUALIFIER-package}
+\alias{QUALIFIER}
 \docType{package}
 \title{
-flowQA: A package that provides automated flow data quality assessment based on gated cell populations
+QUALIFIER: A package that provides automated flow data quality assessment based on gated cell populations
 }
 \description{
   The package provide two important methods:\code{qaCheck} and \code{plot}, which allows users to use \code{formula} as a general and flexible way
@@ -11,7 +11,7 @@ flowQA: A package that provides automated flow data quality assessment based on 
 }
 \details{
 \tabular{ll}{
-Package: \tab flowQA\cr
+Package: \tab QUALIFIER\cr
 Version: \tab 0.99.1\cr
 Date:\tab 2011-12-02\cr
 Depends: \tab R (>= 2.14), flowCore\cr
