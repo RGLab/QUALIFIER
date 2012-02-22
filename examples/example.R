@@ -174,7 +174,9 @@ qaCheck(qaTask.list[["MNC"]]
 plot(qaTask.list[["MNC"]],percent ~ coresampleid
 #		,dest="image"
 )	
-
+plot(qaTask.list[["MNC"]]
+		,scatterPlot=TRUE
+		,subset="coresampleid==10874&id==401")
 
 qaCheck(qaTask.list[["RedundantStain"]]
 #			,gOutlierfunc=qoutlier

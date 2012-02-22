@@ -76,7 +76,8 @@ individualPlot<-function(x,curGate,curRow)
 				mainTitle<-""
 			}
 			
-#			browser()
+#			browser()	browser()
+
 			xyplot(x=as.formula(t1)
 							,data=x
 #							xlim=range(exprs(x[[1]])[,parameters(curGate)[1]]),
@@ -115,8 +116,8 @@ qa.GroupPlot<-function(db,yy)
 
 #	browser()
 	##TODO:strange behavior happens again here :idexing G by sampleName failed
-#					curGate<-getGate(G[[curStats$name[1]]],as.character(curStats$node[1]))
-	sampleInds<-which(getSamples(db$G)%in%yy$name)
+	#make sure to extract gateing set by the order of yy$name
+	sampleInds<-match(yy$name,getSamples(db$G))
 	
 	
 	if(length(sampleInds)>0)#check if the target exist in the gateing hierarchy 
@@ -130,11 +131,11 @@ qa.GroupPlot<-function(db,yy)
 		parentNode<-getParent(curGh,curNode)
 		parentNodeInd<-which(getNodes(curGh)%in%parentNode)
 		fs1<-getData(db$G[sampleInds],parentNodeInd)
-		sampleNames(fs1)<-yy$name
-	
+		sampleNames(fs1)<-yy$name#the subset of gating set is in diffferent order than the yy$name
+
 		if(!"outlier"%in%colnames(yy))
 			yy$outlier<-FALSE
-		pData(fs1)$outlier<-yy$outlier
+		pData(fs1)$outlier<-yy[,]$outlier
 		varMetadata(fs1)["outlier",]<-"outlier"
 		fres<-filter(fs1,curGate)
 		if(length(parameters(fres[[1]]))==2)
@@ -209,10 +210,11 @@ qa.singlePlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
-#			browser()
+			
 			if(missing(y))
 				y<-NULL
 			plot.qaTask(qaObj=x,formula=y,...)
+
 		})
 
 plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
@@ -256,9 +258,9 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 		
 	}
 
-
-	yy<-queryStats(db,formula,subset,pop=getPop(qaObj))
 #	browser()
+	
+	yy<-queryStats(db,formula,subset,pop=getPop(qaObj))
 	#check if the conditioning variable is of factor type
 	for(curGroupBy in groupBy)
 	{
@@ -303,140 +305,153 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 	relation<-list(...)$relation
 	if(is.null(plotAll))
 		plotAll<-FALSE
+	
+	
 #	browser()
 	plotObjs=new.env()
-	if(plotType(qaObj)=="xyplot")
+	
+	scatterPlot<-list(...)$scatterPlot
+	if(!is.null(scatterPlot)&&scatterPlot)
 	{
-		print(xyplot(x=formula,data=yy
-					,groups=outlier
-					,xlab=as.character(xTerm),ylab=statsType
-					,main=paste(description(qaObj),curGroup,sep=":")
-					,pch=19,	
+		##if scatterPlot flag is true then just plot the scatter plot
+		print(qa.GroupPlot(db,yy))
+		
+	}else
+	{#otherwise, plot the summary plot (either xyplot or bwplot)
+		if(plotType(qaObj)=="xyplot")
+		{
+			print(xyplot(x=formula,data=yy
+							,groups=outlier
+							,xlab=as.character(xTerm),ylab=statsType
+							,main=paste(description(qaObj),curGroup,sep=":")
+							,pch=19,	
 #		,cex=0.5
-					,strip=TRUE
-					,subscripts=TRUE
-					,scales=list(x=c(cex=0.7
+							,strip=TRUE
+							,subscripts=TRUE
+							,scales=list(x=c(cex=0.7
 #						,rot=45	
-							),
-							y=c(
-						relation=relation
-							)	
-					)
-					
-					,par.strip.text=list(lines=2)
+									),
+									y=c(
+											relation=relation
+									)	
+							)
+							
+							,par.strip.text=list(lines=2)
 #		,layout = c(2,7)
-					,xscale.components = function(...) {
-						ans <- xscale.components.default(...)
-						ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-						ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-						ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
-						ans
-					}			
-					,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+							,xscale.components = function(...) {
+								ans <- xscale.components.default(...)
+								ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+								ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+								ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
+								ans
+							}			
+							,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
 #						browser()
-						panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
-						
-						#if regression function is supplied, then plot the regression line
-						if(!is.null(rFunc))
-						{
+								panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
+								
+								#if regression function is supplied, then plot the regression line
+								if(!is.null(rFunc))
+								{
 #							browser()
-		
-							reg.res<-try(rFunc(y~x),silent=TRUE)
-							if(all(class(reg.res)!="try-error"))
-							{
-								sumry<-summary(reg.res)
-								if(class(sumry)=="summary.rlm"){
-									coefs<-coef(sumry)
-									t.value<-coefs[,"t value"]
-									slope<-coefs[2,"Value"]
-									intercept<-coefs[1,"Value"]
-									df<-summary(reg.res)$df
-									pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
-									intercept.p<-pvalues[1]
-									slope.p<-pvalues[2]
-								}else if (class(sumry)=="summary.lm"){
-								pvalues<-coefficients(sumry)[,4]
-								slope<-coefficients(sumry)[2,1]
-								intercept.p<-pvalues[1]
-								slope.p<-pvalues[2]
-	
-								}	
-								if(any(pvalues<0.05))
-								{
-									regLine.col<-"red"
-								}else
-								{
-									regLine.col<-"black"
-								}
-								curVp<-current.viewport()
-								
-								
-	#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
-								panel.text(x=mean(curVp$xscale)
-											,y=quantile(curVp$yscale)[4]
-											,labels=paste("s=",format(slope*30,digits=2)
-	#														," v=",format(var(y),digits=2)
-															,"\np=",paste(format(slope.p,digits=2),collapse=",")
-															)
-											,cex=0.5
-	#										,col="white"		
-											)
-																				
-								panel.abline(reg.res,col=regLine.col,lty="dashed")
-							}
-						}
-#						browser()
 									
-					}
-			))
+									reg.res<-try(rFunc(y~x),silent=TRUE)
+									if(all(class(reg.res)!="try-error"))
+									{
+										sumry<-summary(reg.res)
+										if(class(sumry)=="summary.rlm"){
+											coefs<-coef(sumry)
+											t.value<-coefs[,"t value"]
+											slope<-coefs[2,"Value"]
+											intercept<-coefs[1,"Value"]
+											df<-summary(reg.res)$df
+											pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+											intercept.p<-pvalues[1]
+											slope.p<-pvalues[2]
+										}else if (class(sumry)=="summary.lm"){
+											pvalues<-coefficients(sumry)[,4]
+											slope<-coefficients(sumry)[2,1]
+											intercept.p<-pvalues[1]
+											slope.p<-pvalues[2]
+											
+										}	
+										if(any(pvalues<0.05))
+										{
+											regLine.col<-"red"
+										}else
+										{
+											regLine.col<-"black"
+										}
+										curVp<-current.viewport()
+										
+										
+										#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
+										panel.text(x=mean(curVp$xscale)
+												,y=quantile(curVp$yscale)[4]
+												,labels=paste("s=",format(slope*30,digits=2)
+														#														," v=",format(var(y),digits=2)
+														,"\np=",paste(format(slope.p,digits=2),collapse=",")
+												)
+												,cex=0.5
+										#										,col="white"		
+										)
+										
+										panel.abline(reg.res,col=regLine.col,lty="dashed")
+									}
+								}
+#						browser()
+								
+							}
+					))
 		}
-	
 		
-	if(plotType(qaObj)=="bwplot")
-	{
 		
-		plot.symbol<-trellis.par.get("plot.symbol")
-		plot.symbol$col<-"red"
-		trellis.par.set("plot.symbol",plot.symbol)
-		
+		if(plotType(qaObj)=="bwplot")
+		{
+			
+			plot.symbol<-trellis.par.get("plot.symbol")
+			plot.symbol$col<-"red"
+			trellis.par.set("plot.symbol",plot.symbol)
+			
 #		lattice.options(print.function=plot.trellisEx)
-
-	
-		groupBy.Panel<-as.character(xTerm)#formula[[3]][[2]])
-		xTerm<-substitute(factor(y),list(y=xTerm))
-		if(length(bTerm)>1)
-		{
-			formula[[3]][[2]]<-xTerm
-		}else
-		{
-			formula[[3]]<-xTerm
-		}
-		
+			
+			
+			groupBy.Panel<-as.character(xTerm)#formula[[3]][[2]])
+			xTerm<-substitute(factor(y),list(y=xTerm))
+			if(length(bTerm)>1)
+			{
+				formula[[3]][[2]]<-xTerm
+			}else
+			{
+				formula[[3]]<-xTerm
+			}
+			
 #		browser()
-		
-		print(bwplot(x=formula,data=yy
-						,xlab=groupBy.Panel
-						,ylab=statsType,main=paste(description(qaObj),curGroup,sep=":")
-						,pch=".",cex=5
-						,scales=list(x=c(cex=0.9
-										,rot=45	
-								),
-								y=c(relation=relation
-								)	
-						)
-						,subscripts=TRUE
-						,groupBy=groupBy.Panel
-						,strip=TRUE
-						,par.strip.text=list(lines=2)
-						
-						,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+			
+			print(bwplot(x=formula,data=yy
+							,xlab=groupBy.Panel
+							,ylab=statsType,main=paste(description(qaObj),curGroup,sep=":")
+							,pch=".",cex=5
+							,scales=list(x=c(cex=0.9
+											,rot=45	
+									),
+									y=c(relation=relation
+									)	
+							)
+							,subscripts=TRUE
+							,groupBy=groupBy.Panel
+							,strip=TRUE
+							,par.strip.text=list(lines=2)
+							
+							,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
 #							browser()
-					panel.bwplotEx(data.=data,dest.=dest
+								panel.bwplotEx(data.=data,dest.=dest
 										,plotObjs.=plotObjs
 										,plotAll.=plotAll,db=db,...)
-						}
-				))
+							}
+					))
+		}
 	}
+	
 #	browser()
 	if(isSvg)
 	{
