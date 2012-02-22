@@ -481,7 +481,7 @@ panel.bwplotEx <-
 		if(is.null(plotAll))
 			plotAll=FALSE
 		
-		dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))))
+		dataGroups<-split(data,f=as.character(eval(parse(text=paste("data$",groupBy,sep="")))))
 		
 		nGroups<-length(dataGroups)
 #			browser()
@@ -495,7 +495,8 @@ panel.bwplotEx <-
 			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
-			setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
+			if(!is.null(dest))
+				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
 			##lattice plot for outlier group
 			
 			if(plotAll!="none"&&!is.null(dest))

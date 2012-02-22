@@ -171,7 +171,7 @@ makeQaTask<-function(db,checkListFile)
 	qaTask.list
 }
 
-queryStats<-function(db,formula,subset=NULL,pop="Total")
+queryStats<-function(db,formula,subset=NULL,pop=character(0))
 {
 #	browser()
 	formuRes<-.formulaParser(formula)
@@ -179,27 +179,7 @@ queryStats<-function(db,formula,subset=NULL,pop="Total")
 	yTerm<-formuRes$yTerm
 	func<-formuRes$func
 	groupBy<-formuRes$groupBy
-#	yTerm<-formula[[2]]
-#	func<-NULL
-#	if(length(yTerm)>1)
-#	{
-#		func<-yTerm[[1]]
-#		yTerm<-yTerm[[2]]
-#	}
-	
-#	statInd<-which(unlist(lapply(yTerm,function(curTerm){
-##				browser()
-#											curTerm<-tolower(as.character(curTerm))
-#											if(curTerm=="percent")
-#												curTerm="proportion"
-#											curTerm%in%levels(db$statsOfGS$stats)
-#					
-#											}
-#								)
-#							)
-#					)
-	
-#	statsType<-as.character(yTerm[[statInd]])
+
 	
 	statsType<-as.character(yTerm)
 	
@@ -208,8 +188,12 @@ queryStats<-function(db,formula,subset=NULL,pop="Total")
 	ret_anno<-pData(db$G)
 	
 	ret_stats<-db$statsOfGS
-	
-	ret_stats<-subset(ret_stats,population%in%pop&stats%in%statsType)
+	#filter by subset 
+	if(length(pop)!=0)
+	{
+		ret_stats<-subset(ret_stats,population%in%pop)	
+	}
+	ret_stats<-subset(ret_stats,stats%in%statsType)
 	
 	ret<-merge(ret_stats,ret_anno,by.x="id",by.y="id")
 	

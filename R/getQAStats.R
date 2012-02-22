@@ -120,10 +120,17 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				{
 
 #					browser()
-					spikes<-unlist(lapply(params[-8],.timelineplot,x=getData(obj), binSize=50))
+					expr <- exprs(getData(obj))
 					
-					statsOfNode<-rbind(statsOfNode,data.frame(channel=params[-8],stats="spike",value=spikes))
-					chnls<-params[-8] #select channel at root level
+					time <- flowCore:::findTimeChannel(expr)
+					if(!(time %in% colnames(expr)))
+						stop("Invalid name of variable (", time, ") recording the ",
+								"\ntime domain specified as 'time' argument.", call.=FALSE)
+					
+					spikes<-unlist(lapply(params[!params%in%time],QUALIFIER:::.timelineplot,x=getData(obj), binSize=50))
+					
+					statsOfNode<-rbind(statsOfNode,data.frame(channel=params[!params%in%time],stats="spike",value=spikes))
+					chnls<-params[!params%in%time] #select channel at root level
 					
 				}
 #				else

@@ -420,11 +420,10 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 						,scales=list(x=c(cex=0.9
 										,rot=45	
 								),
-								y=c(relation="free"
+								y=c(relation=relation
 								)	
 						)
 						,subscripts=TRUE
-#						,groupBy=as.character(formula[[3]])
 						,groupBy=groupBy.Panel
 						,strip=TRUE
 						,par.strip.text=list(lines=2)
