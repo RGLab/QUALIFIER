@@ -839,8 +839,8 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 					xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
 					yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
 					
-					xleft<-xCenterPos-100
-					xright=xCenterPos+100
+					xleft<-xCenterPos-120
+					xright=xCenterPos+120
 					ybottom=yCenterPos-50
 					ytop=yCenterPos+50
 				}else

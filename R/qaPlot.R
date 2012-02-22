@@ -132,7 +132,8 @@ qa.GroupPlot<-function(db,yy)
 		fs1<-getData(db$G[sampleInds],parentNodeInd)
 		sampleNames(fs1)<-yy$name
 	
-
+		if(!"outlier"%in%colnames(yy))
+			yy$outlier<-FALSE
 		pData(fs1)$outlier<-yy$outlier
 		varMetadata(fs1)["outlier",]<-"outlier"
 		fres<-filter(fs1,curGate)
