@@ -109,6 +109,10 @@ We provide a function to create a list of \Rclass{qaTask} objects by reading ext
 containing descriptions of each QA task:
 <<loadData, echo=FALSE, results=hide>>=
 data("ITN029")
+@
+
+<<changePath,echo=FALSE,result=hide,eval=TRUE>>=
+ncFlowSet(db$G)@file<-file.path("/home/wjiang2/rglab/workspace/QUALIFIER/output/",ncFlowSet(db$G)@file)
 
 @
 <<makeQaTask, echo=true, results=verbatim>>=
@@ -158,6 +162,7 @@ the data by "Tube"(or staining panel). "RecdDt" is reserved for plotting purpose
 <<qaCheck-RBCLysis, results=verbatim>>=
 qaCheck(qaTask.list[["RBCLysis"]],outlierfunc=outlier.cutoff,lBound=0.8)
 @
+
 As we see,\Rfunction{qaCheck} reads all the necessary information about the gated data from \Rclass{qaTask} object.
 The only thing needs to be specified by end users is how the outliers are called. This is done by 
 providing an outlier detection function \Rfunction{outlierfunc} that takes a numeric vector as input and returns a logical vector as the output.
@@ -166,10 +171,16 @@ Here "outlier.cutoff" is used and threshold "lBound"("less than",using uBound fo
 <<plot-RBCLysis, fig=true, results=verbatim>>=
 plot(qaTask.list[["RBCLysis"]])
 @
+
 By default all the data are plotted,argument "subset" can be used to visualize a small subset.
  
 <<plot-RBCLysis-subset, fig=true, results=verbatim>>=
 plot(qaTask.list[["RBCLysis"]],subset="Tube=='CD8/CD25/CD4/CD3/CD62L'")
+@
+
+With \Robject{scatterPlot} flag set as true and  \Robject{subset} properly specified plot method can generate scatter plots for the selected FCS files,
+<<plot-RBCLysis-subset2, fig=true, results=verbatim>>=
+plot(qaTask.list[["RBCLysis"]],subset="name=='06087181_F01_I010.fcs'",scatterPlot=T)
 @
 
 x term in the formula is normally ignored in \Rfunction{qaCheck}.However,when "plotType" of the 
@@ -182,24 +193,36 @@ qaTask.list[["MNC"]]
 This qaTask detects the significant variance of MNC cell population percentage among aliquots,which have the same "coresampleid".
 Plot type of this object tells the method to group data by "coresampleid".   
 <<qaCheck-MNC,  results=verbatim>>=
-qaCheck(qaTask.list[["MNC"]],z.cutoff=2)
+qaCheck(qaTask.list[["MNC"]],z.cutoff=1.5)
 @
+
 Interquartile Range based outlier detection function is used to detect outliers
 
 <<plot-MNC, fig=true, results=verbatim>>=
 plot(qaTask.list[["MNC"]])
 @
+
 The red circles in the boxplot indicate the possible outlier samples and the box of red color indicates the entire sample group
 has significant variance and is marked as the group outlier. 
+
+Again,with \Robject{scatterPlot} and \Robject{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,
+<<plot-MNC-scatter, fig=true, results=verbatim>>=
+
+plot(qaTask.list[["MNC"]]
+		,scatterPlot=TRUE
+		,subset="coresampleid==11730")
+@
 			
 We can also apply simple aggregation to the statisics through the formula.
 <<qaTask-BoundaryEvents, results=verbatim>>=
 qaTask.list[["BoundaryEvents"]]
 @
+
 Here the default formula only extracts the "percent" from each individual channel.
 In order to check the total percentage of boundary events of all channels for each fcs file,
 we can write a new formula by applying aggregation function "sum" to "percent" and group the data
 by fcs file ("name" in this case).
+
 <<qaCheck-BoundaryEvents,  results=verbatim>>=
 qaCheck(qaTask.list[["BoundaryEvents"]]
 		,sum(percent) ~ RecdDt | name

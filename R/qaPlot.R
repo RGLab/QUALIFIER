@@ -9,7 +9,37 @@
 	paste(fileName,collapse="_")
 	
 }
-
+#TODO:to merge this single plot to groupplot since groupPlot is also able to produce the same xyplot
+#just need to add timeline plot to groupPlot routine.
+##single plot for each FCS
+qa.singlePlot<-function(db,yy)
+{
+#	browser()
+#	for(i in 1:nrow(yy))
+#	{
+#		curRow<-yy[i,]
+	curRow<-yy
+	ghInd<-which(getSamples(db$G)==curRow$name)
+	if(length(ghInd)>0)
+	{
+		curGh<-db$G[[ghInd]]
+		parentNode<-getParent(curGh,as.character(curRow$node))
+		if(length(parentNode)>0)
+		{
+			x<-getData(curGh,parentNode)
+		}else
+		{
+			x<-getData(curGh)
+		}
+		
+		curGate<-getGate(curGh,as.character(curRow$node))
+		
+		#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
+		#				browser()
+		individualPlot(x,curGate,curRow)
+	}
+#	}	
+}
 individualPlot<-function(x,curGate,curRow)
 {
 	cols <- colorRampPalette(IDPcolorRamp(21,
@@ -178,35 +208,7 @@ qa.GroupPlot<-function(db,yy)
 
 
 
-##single plot for each FCS
-qa.singlePlot<-function(db,yy)
-{
-#	browser()
-#	for(i in 1:nrow(yy))
-#	{
-#		curRow<-yy[i,]
-		curRow<-yy
-		ghInd<-which(getSamples(db$G)==curRow$name)
-		if(length(ghInd)>0)
-		{
-			curGh<-db$G[[ghInd]]
-			parentNode<-getParent(curGh,as.character(curRow$node))
-			if(length(parentNode)>0)
-			{
-				x<-getData(curGh,parentNode)
-			}else
-			{
-				x<-getData(curGh)
-			}
-				
-			curGate<-getGate(curGh,as.character(curRow$node))
-			
-	#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
-	#				browser()
-			individualPlot(x,curGate,curRow)
-		}
-#	}	
-}
+
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){

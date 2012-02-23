@@ -481,11 +481,9 @@ panel.bwplotEx <-
 		if(is.null(plotAll))
 			plotAll=FALSE
 		
-		dataGroups<-split(data,f=as.character(eval(parse(text=paste("data$",groupBy,sep="")))))
-		
+		dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))),drop=TRUE)
 		nGroups<-length(dataGroups)
 #			browser()
-#			toPlot<-vector("list",nGroups)
 		for(i in 1:nGroups)
 		{
 			curGroup<-dataGroups[[i]]
@@ -520,7 +518,7 @@ panel.bwplotEx <-
 					setSVGShapeURL(paths)
 				}
 			}
-			
+#			browser()
 			
 			panel.polygon(t(xs)[,i], t(ys)[,i],
 					lwd = box.rectangle$lwd,
@@ -607,6 +605,7 @@ panel.bwplotEx <-
 					setSVGShapeURL(paths)
 					
 				}
+#				browser()
 				panel.points(x = levels.fos[i],
 					y = curOut,
 					pch = plot.symbol$pch,

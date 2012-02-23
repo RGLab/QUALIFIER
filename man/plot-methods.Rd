@@ -30,9 +30,13 @@ plot(obj,formula=NULL,subset=NULL,width=10,height=10,...)}
 				dest: a character specifying the output path. It is NULL by default, which indicates using the regular R device as the output.
 						Otherwise it outputs to a svg file.
 				
-				plotAll: a logical scalar indicating whether to plot the 1D/2D density plot for all the individual FCS file.
-						It is only valid when \code{dest} is specified as non-null path.It is FALSE by default,only the FCS files that are marked 
-						as outliers by \code{qaCheck} are plotted.  
+				plotAll: a logical/character scalar indicating whether to plot the 1D/2D density plot for all the individual FCS files together with the summary plot(either xyplot or bwplot).
+						It is only valid when \code{dest} is specified as non-null path.
+						It is FALSE by default,indicating that only the FCS files that are marked as outliers by \code{qaCheck} are plotted. 
+						If TRUE, all FCS files are plotted ,which should be used cautously since it could be time consuming for a large dataset. 
+						When it is "none",no scatter plot will be generated.
+						
+				scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is plotted instead of the summary plot(xyplot/bwplot) 
 				
 				
 			}
@@ -45,7 +49,9 @@ Two kinds of lattice plots are currently supported:xyplot and bwplot(boxplot),de
 When the output path is provided by \code{dest}, the svg plot is generated. 
 In svg plot, each dot or box (or only the one marked as outliers) is annotated by the tooltip 
 or hyperlink.which further points to the individual density plot 
-of the gated population.        
+of the gated population.      
+
+with \code{scatterPlot} and \code{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,which allows users to investigate the individual outlier groups or files.  
 }
 
 \author{

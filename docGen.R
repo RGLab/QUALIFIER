@@ -6,6 +6,6 @@
 
 setwd("inst/doc")
 library(tools)
-Sweave("flowQA.Rnw")
-texi2dvi("flowQA.tex",pdf = TRUE)
+Sweave("QUALIFIER.Rnw")
+texi2dvi("QUALIFIER.tex",pdf = TRUE)
 

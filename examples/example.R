@@ -171,9 +171,8 @@ qaCheck(qaTask.list[["MNC"]]
 #		,outlierfunc=qoutlier
 #		,alpha=1.5
 		,z.cutoff=2)
-plot(qaTask.list[["MNC"]],percent ~ coresampleid
-#		,dest="image"
-)	
+plot(qaTask.list[["MNC"]],percent ~ coresampleid)
+
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
 		,subset="coresampleid==10874&id==401")
