@@ -8,7 +8,7 @@ library(Rmpi)
 library(multicore)
 
 library(ncdfFlow)
-#library(flowWorkspace)
+library(flowWorkspace)
 #unloadNamespace("flowWorkspace")
 #unloadNamespace("ncdfFlow")
 
@@ -136,8 +136,8 @@ plot(qaTask.list[["MFIOverTime"]]
 		,subset="channel%in%c('PE-Cy7-A')"
 		,rFunc=rlm
 		,relation="free"
-		,dest="image"
-		,plotAll="none"
+#		,dest="image"
+#		,plotAll="none"
 
 )
 
@@ -148,7 +148,7 @@ qaCheck(qaTask.list[["RBCLysis"]]
 		,lBound=0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #		,dest="image"
 #	,plotAll="none"
 )	
@@ -174,8 +174,8 @@ qaCheck(qaTask.list[["MNC"]]
 plot(qaTask.list[["MNC"]],percent ~ coresampleid)
 
 plot(qaTask.list[["MNC"]]
-		,scatterPlot=TRUE
-		,subset="coresampleid==10874&id==401")
+#		,scatterPlot=TRUE
+		,subset="coresampleid==8780&id==49")
 
 qaCheck(qaTask.list[["RedundantStain"]]
 #			,gOutlierfunc=qoutlier

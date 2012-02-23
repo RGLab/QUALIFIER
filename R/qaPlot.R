@@ -313,6 +313,12 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 	plotObjs=new.env()
 	
 	scatterPlot<-list(...)$scatterPlot
+	if(nrow(yy)==0)
+	{
+		message("no samples are matched!")
+		return()
+		
+	}
 	if(!is.null(scatterPlot)&&scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
@@ -320,6 +326,8 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
+		if(statsType=="percent")
+			yy$value<-yy$value*100
 		if(plotType(qaObj)=="xyplot")
 		{
 			print(xyplot(x=formula,data=yy
