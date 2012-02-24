@@ -5,7 +5,6 @@ importFrom(MASS,rlm,huber)
 importFrom(flowCore,colnames)
 import(flowViz)
 importFrom(zoo,as.yearmon)
-importFrom(DBI,dbDisconnect,dbDriver,dbConnect)
 	
 exportClasses(qaTask)
 

@@ -243,22 +243,6 @@ queryStats<-function(db,formula,subset=NULL,pop=character(0))
 
 
 
-openDB<-function()
-{
-#	dbFile<-system.file("data/qa.db",package="flowQ")
-	dbFile<-"~/rglab/workspace/flowQ/data/qa.db"
-	m <- dbDriver("SQLite")
-	cn<-dbConnect(m, dbname = dbFile)
-	cn
-}
-
-closeDB<-function(cn){
-	# clean up
-	dbDisconnect(cn)
-	
-}
-
-
 qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 {
 	if(missing(outDir))
@@ -282,12 +266,12 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 	
 	imageDir<-file.path(outDir,"image")
 	#init the image folder
-	
+#	browser()
 	dir.create(imageDir,recursive=TRUE,showWarnings=F)
 #	file.remove(list.files(imageDir,full=TRUE))
 	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full=T)
-	dir.create(imageDir)
- 	imageDir<-file.path(imageDir,basename(from))	
+#	dir.create(imageDir)
+# 	imageDir<-file.path(imageDir,basename(from))	
 	file.copy(from=from
 				,to=imageDir)
 	
@@ -436,7 +420,8 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 								castResult<-cast(m.outResult,f1
 										,fun.aggregate=length)
 								castResult<-as.data.frame(castResult)
-								castResult$subTotal<-rowSums(castResult[,-1])
+#								browser()
+								castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
 								castResult<-castResult[order(castResult$subTotal,decreasing=T),]
 								castResult$fcsFile<-as.character(castResult$fcsFile)
 								castResult<-rbind(castResult,c(fcsFile="Total",colSums(castResult[,-1])))
@@ -593,9 +578,27 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 										{
 											relation<-NULL										
 											rFunc<-NULL
-										}	
-										plotCallStr<-paste("plot(curQa,formula1,dest=imageDir,relation=relation,rFunc.=rFunc,plotAll=plotAll,subset=\""
-												,groupBy,"=='",curGroup,"'\")",sep="")
+										}
+										
+										if(getName(curQa)%in%c("RedundantStain","MNC"))
+										{
+											xaxis.draw<-FALSE
+										}else
+										{
+											xaxis.draw<-TRUE
+										}
+										if(getName(curQa)%in%c("spike"))
+										{
+											ylab<-"cumulative z-score"
+										}else
+										{
+											ylab<-NULL
+										}
+#										browser()
+										plotCallStr<-paste("plot(curQa,formula1,dest=imageDir"
+																,",ylab=ylab,scales=list(x=c(draw=xaxis.draw),y=(relation=relation))"
+																,",rFunc.=rFunc,plotAll=plotAll,subset=\""
+															,groupBy,"=='",curGroup,"'\")",sep="")
 #										browser()
 										imageName<-eval(parse(text=plotCallStr))
 										rownames(curOut)<-NULL#1:nrow(sub2)
@@ -771,10 +774,3 @@ qa.report<-function(db,outDir,splash=TRUE,plotAll=FALSE)
 }
 
 
-
-### wrap all the qa preprocessing steps into to on batch call 
-qa.batch<-function(db)
-{
-	qa.report(db)
-}
-	

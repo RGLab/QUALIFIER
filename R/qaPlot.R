@@ -73,66 +73,61 @@ individualPlot<-function(x,curGate,curRow)
 						,data=x,smooth=FALSE,colramp=cols)
 	}else
 	{
-#		if(statsType=="spike")
-#		{
-##			browser()
-##			timeLinePlot(x, chnls, binSize=50)
-#			
-#		}else
-#		{
-		
-			if(length(chnls)==1)
-			{
-				
-				
-				if(statsType=="spike")
-				{
-					t1<-paste("`",chnls[1],"`~`",params[grep("time",params,ignore.case=T)],"`",sep="")					
-				}else
-				{
-					t1<-paste("`",params[2],"`~`",chnls[1],"`",sep="")
-				}
-			}else
-			{
-				t1<-paste("`",chnls[2],"`~`",chnls[1],"`",sep="")	
-			}
-			
-			if(is.object(curGate))
-			{
-				gateName<-strsplit(curGate@filterId,split="\\.")[[1]][2]##remove prefix			
-				mainTitle<-paste(gateName,"Gate")	
-			}else
-			{
-				mainTitle<-""
-			}
-			
-#			browser()	browser()
 
-			xyplot(x=as.formula(t1)
-							,data=x
+		
+		if(length(chnls)==1)
+		{
+			
+			
+			if(statsType=="spike")
+			{
+				t1<-paste("`",chnls[1],"`~`",params[grep("time",params,ignore.case=T)],"`",sep="")					
+			}else
+			{
+				t1<-paste("`",params[2],"`~`",chnls[1],"`",sep="")
+			}
+		}else
+		{
+			t1<-paste("`",chnls[2],"`~`",chnls[1],"`",sep="")	
+		}
+		
+		if(is.object(curGate))
+		{
+			gateName<-strsplit(curGate@filterId,split="\\.")[[1]][2]##remove prefix			
+			mainTitle<-paste(gateName,"Gate")	
+		}else
+		{
+			mainTitle<-""
+		}
+		
+#			browser()	
+
+		xyplot(x=as.formula(t1)
+						,data=x
 #							xlim=range(exprs(x[[1]])[,parameters(curGate)[1]]),
 #							ylim=range(exprs(x[[1]])[,parameters(curGate)[2]]),
-							,smooth=FALSE
-							,colramp=cols
-							,filter=fres
-							,names=FALSE
+						,smooth=FALSE
+						,colramp=cols
+						,filter=fres
+						,names=FALSE
 #									pd=pData(x),
-							,main=mainTitle
-							,par.settings=list(gate.text=list(text=0.7
-													,alpha=1
-													,cex=1
-													,font=1)
-											,gate=list(
-													fill="transparent"
-													,lwd<-2
-													,lty="solid"
-													,alpha=1
-													,col="red"
+						,main=mainTitle
+						,par.settings=list(gate.text=list(text=0.7
+												,alpha=1
+												,cex=1
+												,font=1)
+										,gate=list(
+												fill="transparent"
+												,lwd<-2
+												,lty="solid"
+												,alpha=1
+												,col="red"
 											)
-									)
-							,panel=QUALIFIER:::panel.xyplot.flowframeEx
-					)
-#		}
+										,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
+								)
+						,panel=panel.xyplot.flowframeEx
+				)
+
 	}
 
 }
@@ -304,7 +299,6 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 	
 	rFunc<-list(...)$rFunc
 	plotAll<-list(...)$plotAll
-	relation<-list(...)$relation
 	if(is.null(plotAll))
 		plotAll<-FALSE
 	
@@ -322,39 +316,79 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 	if(!is.null(scatterPlot)&&scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
-		print(qa.GroupPlot(db,yy))
+		
+		if(statsType=="spike"||(statsType=="count"&&getPop(qaObj)=="Total"))
+		{
+#			browser()
+			for(i in 1:nrow(yy))
+			{
+#						browser()
+						print(qa.singlePlot(db,yy[i,,drop=FALSE]))
+			}
+			
+			
+		}else
+		{
+			print(qa.GroupPlot(db,yy))
+		}
+		
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 		if(statsType=="percent")
 			yy$value<-yy$value*100
+#		lattice.par<-list(...)$par
+		
+		xlab<-list(...)$xlab
+		ylab<-list(...)$ylab
+		main<-list(...)$main
+		pch<-list(...)$pch
+		layout<-list(...)$layout
+		cex<-list(...)$cex
+		par.strip.text<-list(...)$par.strip.text
+		scales<-list(...)$scales
+		xscale.components<-list(...)$xscale.components
+		
 		if(plotType(qaObj)=="xyplot")
 		{
+			##parse the viz par
+			
+			if(is.null(xlab))
+				xlab<-as.character(xTerm)
+			if(is.null(ylab))
+				ylab<-statsType
+			if(is.null(main))
+				main<-paste(description(qaObj),curGroup,sep=":")	
+			if(is.null(pch))
+				pch<-19		
+			if(is.null(par.strip.text))
+				par.strip.text<-list(lines=2)	
+			if(is.null(scales))
+				scales<-list(x=c(cex=0.7
+						#						,rot=45	
+											))
+			if(is.null(xscale.components))
+				xscale.components<-function(...) {
+					ans <- xscale.components.default(...)
+					ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+					ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+					ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
+					ans
+				}
 			print(xyplot(x=formula,data=yy
 							,groups=outlier
-							,xlab=as.character(xTerm),ylab=statsType
-							,main=paste(description(qaObj),curGroup,sep=":")
-							,pch=19,	
-#		,cex=0.5
+							,xlab=xlab
+							,ylab=ylab
+							,main=main
+							,pch=pch	
+							,cex=cex
+							,scales=scales
+							,par.strip.text=par.strip.text
+							,layout = layout
+							,xscale.components = xscale.components
 							,strip=TRUE
 							,subscripts=TRUE
-							,scales=list(x=c(cex=0.7
-#						,rot=45	
-									),
-									y=c(
-											relation=relation
-									)	
-							)
-							
-							,par.strip.text=list(lines=2)
-#		,layout = c(2,7)
-							,xscale.components = function(...) {
-								ans <- xscale.components.default(...)
-								ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-								ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-								ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
-								ans
-							}			
+			
 							,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
 #						browser()
 								panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
@@ -422,7 +456,7 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 			plot.symbol$col<-"red"
 			trellis.par.set("plot.symbol",plot.symbol)
 			
-#		lattice.options(print.function=plot.trellisEx)
+		lattice.options(print.function=plot.trellisEx)
 			
 			
 			groupBy.Panel<-as.character(xTerm)#formula[[3]][[2]])
@@ -437,21 +471,37 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 			
 #		browser()
 			
-			print(bwplot(x=formula,data=yy
-							,xlab=groupBy.Panel
-							,ylab=statsType,main=paste(description(qaObj),curGroup,sep=":")
-							,pch=".",cex=5
-							,scales=list(x=c(cex=0.9
+	
+			if(is.null(xlab))
+				xlab<-groupBy.Panel
+			if(is.null(ylab))
+				ylab<-statsType
+			if(is.null(main))
+				main<-paste(description(qaObj),curGroup,sep=":")	
+			if(is.null(pch))
+				pch<-"."	
+			if(is.null(cex))
+				cex<-5
+			if(is.null(par.strip.text))
+				par.strip.text<-list(lines=2)	
+			if(is.null(scales))
+				scales<-list(x=c(cex=0.9
 											,rot=45	
-									),
-									y=c(relation=relation
-									)	
-							)
+											)
+										)
+
+			print(bwplot(x=formula,data=yy
+							,xlab=xlab
+							,ylab=ylab
+							,main=main
+							,pch=pch
+							,cex=cex
+							,scales=scales					
+							,par.strip.text=par.strip.text
+							,layout = layout
 							,subscripts=TRUE
 							,groupBy=groupBy.Panel
 							,strip=TRUE
-							,par.strip.text=list(lines=2)
-							
 							,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
 #							browser()
 								panel.bwplotEx(data.=data,dest.=dest
@@ -478,8 +528,13 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 			for(dfile in fileNames)
 			{
 #				browser()
-				png(file.path(dest,"individual",dfile))
-				print(get(dfile,plotObjs))
+				curPlotObj<-get(dfile,plotObjs)
+				#determine the pic size by the number of pannels
+				nPanels<-length(curPlotObj$packet.sizes)
+				wRatio<-ceiling(sqrt(nPanels))
+				hRatio<-floor(sqrt(nPanels))
+				png(file.path(dest,"individual",dfile),width=300*wRatio,height=300*hRatio)
+				print(curPlotObj)
 				dev.off()
 				
 			}

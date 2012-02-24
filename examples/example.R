@@ -71,8 +71,9 @@ save(db,file="data/ITN029_all.rda")#save stats
 
 
 tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
-tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents)
 
+tubesEvents2009<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
+tubesEvents2007<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])
 
 
 
@@ -90,25 +91,31 @@ data("ITN029")#load stats from disk
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
 qaTask.list<-makeQaTask(db,checkListFile)
 
+CairoX11()#for faster rendering plot
 
 ###80% of the pre-defined the value for each pannel
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
-		,lBound=0.8*tubesEvents
-#		,lBound=0
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+		,lBound=0.8*tubesEvents2009
+		,subset="RecdDt>='2009-08-01'"
 )
-#isPass<-lapply(rownames(subset(pData(db$G),Tube=='CD8/CD25/CD4/CD3/CD62L')),function(curFile)
-#{
-##	browser()
-#	tid<-strsplit(strsplit(curFile,"_")[[1]][[3]],"\\.")[[1]][[1]]
-#	nrow(read.FCS(file.path("/loc/no-backup/mike/ITN029ST/",curFile)))>tubesEvents[tid,]
-#})
-#which(unlist(isPass))
+qaCheck(qaTask.list[["NumberOfEvents"]]
+		,formula=count ~ RecdDt | Tube
+		,outlierfunc=outlier.cutoff
+		,lBound=0.8*tubesEvents2007
+		,subset="RecdDt<'2009-08-01'"
+)
+
+
 plot(qaTask.list[["NumberOfEvents"]]
 #		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #,dest="image"
+)
+
+plot(qaTask.list[["NumberOfEvents"]]
+		,subset="id=='366'"
+		,scatterPlot=TRUE
 )
 
 
@@ -135,9 +142,7 @@ plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset="channel%in%c('PE-Cy7-A')"
 		,rFunc=rlm
-		,relation="free"
-#		,dest="image"
-#		,plotAll="none"
+		,scales=list(y=c(relation="free"))
 
 )
 
@@ -148,7 +153,7 @@ qaCheck(qaTask.list[["RBCLysis"]]
 		,lBound=0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
 #		,dest="image"
 #	,plotAll="none"
 )	
@@ -165,16 +170,28 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 #	,plotAll=T
 )
 
+plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
+		,subset="id=='366'&channel=='FITC-A'"
+		,scatterPlot=TRUE
+)
+
 
 qaCheck(qaTask.list[["MNC"]]
 		,formula=percent ~ coresampleid
 #		,outlierfunc=qoutlier
 #		,alpha=1.5
-		,z.cutoff=2)
-plot(qaTask.list[["MNC"]],percent ~ coresampleid)
+		,z.cutoff=3)
+plot(qaTask.list[["MNC"]],percent ~ coresampleid
+#	,dest="image"
+	)
 
+#scatter plot for a sample group	
 plot(qaTask.list[["MNC"]]
-#		,scatterPlot=TRUE
+		,scatterPlot=TRUE
+		,subset="coresampleid==11730")
+#scatter okit fore one sample
+plot(qaTask.list[["MNC"]]
+		,scatterPlot=TRUE
 		,subset="coresampleid==8780&id==49")
 
 qaCheck(qaTask.list[["RedundantStain"]]
@@ -183,18 +200,23 @@ qaCheck(qaTask.list[["RedundantStain"]]
 #			,alpha=1.5
 #			,z.cutoff=2
 		)
+		
+##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
-		,subset="stain%in%c('CD3')"
+		,subset="channel=='APC-A'&stain%in%c('CD123','Auto')"
 		,y=percent~coresampleid|channel:stain
-#		,dest="image"
-#		,plotAll="none"
+		,ylab="test",
+		,scales=list(x=c(draw=F)
+							)
+		,layout=c(1,2)
+				
 )
 ################################################################################  
 #4.qa report in html format 
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qa.report(db,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=FALSE)
 
 
 
