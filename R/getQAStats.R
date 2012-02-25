@@ -64,7 +64,14 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 			
 		})
 
-
+setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
+#			browser()
+				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
+				path_detail[1]<-".root"
+				paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
+					,collapse="/")
+			
+				})
 ##extract stats from a gating hierarchy\\
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 			
@@ -73,32 +80,37 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 			params<-parameters(getData(obj))$name
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
+			
 #			browser()
 			for(i in 1:length(nodes))
 			{
 				curNode<-nodes[i]
 #				print(curNode)
+				
 				curData<-getData(obj,curNode)
 				curGate<-getGate(obj,curNode)
 				
 				
 				##extract pop name
-				if(QUALIFIER:::.isRoot(obj,curNode))
-				{
-					curPopName<-"Total"
-				}else
-				{
-					curNodeName<-strsplit(curNode,"\\.")[[1]]
-					if(length(curNodeName)>1)
-						curNodeName<-curNodeName[2]
-					if(grepl("MFI",curNodeName)||grepl("margin",curNodeName))
-					{
-						curPopName<-strsplit(curNodeName," ")[[1]][2]
-					}else
-					{
-						curPopName<-curNodeName
-					}
-				}
+				curPopName<-getPath(obj,curNode)
+#				browser()
+				
+#				if(QUALIFIER:::.isRoot(obj,curNode))
+#				{
+#					curPopName<-"Total"
+#				}else
+#				{
+#					curNodeName<-strsplit(curNode,"\\.")[[1]]
+#					if(length(curNodeName)>1)
+#						curNodeName<-curNodeName[2]
+#					if(grepl("MFI",curNodeName)||grepl("margin",curNodeName))
+#					{
+#						curPopName<-strsplit(curNodeName," ")[[1]][2]
+#					}else
+#					{
+#						curPopName<-curNodeName
+#					}
+#				}
 				
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)

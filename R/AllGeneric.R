@@ -28,3 +28,5 @@ setGeneric("qaCheck", function(obj,...) standardGeneric("qaCheck"))
 setGeneric("formula",function (x, ...)standardGeneric("formula"))
 
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
+setGeneric("getPath",function (x, ...)standardGeneric("getPath"))
+
