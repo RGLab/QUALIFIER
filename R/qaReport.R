@@ -1,0 +1,590 @@
+# TODO: Add comment
+# 
+# Author: wjiang2
+###############################################################################
+#generate report by db
+setMethod("qaReport", signature=c(obj="environment"),
+		function(obj,...){
+			
+			
+			.writeHead(db=obj,...)
+			
+			hwrite(qaTask.list)
+			
+		})
+
+##generate report by qaTask list
+setMethod("qaReport", signature=c(obj="list"),
+		function(obj,plotAll=FALSE,...){
+			
+			p<-.writeHead(...)
+#			browser()
+			hwrite(obj,p,plotAll)
+			
+		})
+
+setMethod("qaReport", signature=c(obj="qaTask"),
+		function(obj,...){
+			
+#			browser()
+			qaReport(list(obj),...)
+			
+		})
+
+setMethod("hwrite", signature=c(x="list"),
+		function(x,page,plotAll){
+			
+			db<-getData(x[[1]])
+			db$objcount<-0
+#	browser()
+			
+			tasksBylevel<-split(x,unlist(lapply(x,qaLevel)))
+
+#			by(db$qaCheckList,db$qaCheckList$qaLevel,function(sub1,db){
+			lapply(tasksBylevel,function(curTaskGroup){			
+#				browser()
+						hwrite(paste(qaLevel(curTaskGroup[[1]]),"Level"),page,heading=1)
+						lapply(curTaskGroup,hwrite,page,plotALl)
+#						apply(sub1,1,function(curRow,db){
+##						browser()	
+#									curQa<-new("qaTask"
+#											,qaID=as.integer(curRow["qaID"])
+#											,qaName=as.character(curRow["qaName"])
+#											,description=as.character(curRow["description"])
+#											,qaLevel=as.character(curRow["qaLevel"])
+#											,pop=as.character(curRow["pop"])
+#											,formula=as.formula(as.character(curRow["formula"]))
+#											,plotType=as.character(curRow["plotType"])
+#											,db=db
+#									)
+#									qaReport(curQa,p,plotAll)
+#									
+#								})
+					})
+			
+			
+			closePage(p, splash=FALSE)
+		})
+
+setMethod("hwrite", signature=c(x="qaTask"),
+		function(x,p,plotAll){
+			db<-getData(x)
+			anno<-pData(db$G)
+			curQaID<-qaID(x)
+			browser()
+			outResult<-subset(db$outlierResult,qaID==curQaID)
+			outResult<-merge(outResult,db$statsOfGS[,c("sid","id","channel")])
+			outResult<-merge(outResult,db$qaCheckList)
+			outResult<-merge(outResult,anno)[,c("sid","id","name","qaName","channel","Tube")]
+			names(outResult)<-c("sid","id","fcsFile" ,"qaTask","channel","Tube")
+			
+			gOutResult<-subset(db$GroupOutlierResult,qaID==curQaID)
+			
+			gOutResult<-merge(db$GroupOutlierResult,db$statsOfGS[,c("sid","id","channel")])
+			gOutResult<-merge(gOutResult,db$qaCheckList)
+			gOutResult<-merge(gOutResult,anno)
+			names(gOutResult)[names(gOutResult)=="qaName"]<-"qaTask"
+			
+#			t1<-subset(outResult,qaTask==getName(curQa))
+#			g1<-subset(gOutResult,qaTask==getName(curQa))	
+			
+			hwrite(paste(description(x)
+#										,hwrite(nrow(t1),class='count')
+					)
+					,p
+					,heading=3)
+#					browser()
+			nFscFailed<-length(unique(t1$fcsFile))
+			nGroupFailed<-0
+			
+			formula1<-formula(x)
+			cond<-NULL
+			if(length(formula1[[3]])>1)
+			{
+				cond<-formula1[[3]][[3]]
+				xTerm<-formula1[[3]][[2]]
+			}else
+			{
+				xTerm<-formula1[[3]]
+			}
+			groupField<-NULL
+			if(plotType(x)=="bwplot")
+			{
+				groupField<-as.character(xTerm)
+				nGroupFailed<-length(unique(
+								eval(substitute(g1$v
+												,list(v=groupField)
+										)
+								)
+						)
+				)	
+			}
+			
+			if(nFscFailed>0||nGroupFailed>0)
+			{
+				db$objcount<-db$objcount+1
+				hwrite(paste(
+								hwrite("+",div=TRUE
+										,id=paste("detTriggerIn",db$objcount,sep="_") 
+										,class="QADetTrigger" 
+										,onclick=paste("toggleSxion(",db$objcount,")",sep="")
+										,style="display: block;")
+								
+								,hwrite("&ndash;",div=TRUE
+										,id=paste("detTriggerOut",db$objcount,sep="_") 
+										,class="QADetTrigger" 
+										,onclick=paste("toggleSection(",db$objcount,")",sep="")
+										,style="display: none;")
+								,ifelse(nFscFailed>0	
+										,paste(
+												hwrite(nFscFailed,class='count')					
+												," FCS files "
+										)
+										,"")
+								,ifelse(nGroupFailed>0	
+										,paste(
+												hwrite(nGroupFailed,class='count')					
+												,groupField
+										)
+										,"")
+								," failed the check"
+						)
+						,heading=4
+						,p
+				)
+				
+				
+				
+				
+				#the conditioning section may contain multiple variables
+				#the first one is only used for grouped outlier detection
+				#here is used to plot a subgroup
+				#the second conditioning variable is used for the plot
+#						browser()
+				
+				
+				if(length(cond)>1)
+				{
+					##individual outlier
+					groupBy<-as.character(cond[[2]])
+					groupByStr<-paste("t1$",groupBy,sep="")
+					
+					formula1[[3]][[3]]<-cond[[3]]
+					
+					
+					if(nFscFailed>0)
+					{
+						if(getName(x)=="spike")
+						{
+							f1<-as.formula(paste("fcsFile","channel",sep="~"))
+							
+							
+						}else
+						{
+							f1<-as.formula(paste("fcsFile",groupBy,sep="~"))
+							
+						}
+						m.outResult<-melt(t1,measure.vars="qaTask")
+						castResult<-cast(m.outResult,f1
+								,fun.aggregate=length)
+						castResult<-as.data.frame(castResult)
+#								browser()
+						castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
+						castResult<-castResult[order(castResult$subTotal,decreasing=T),]
+						castResult$fcsFile<-as.character(castResult$fcsFile)
+						castResult<-rbind(castResult,c(fcsFile="Total",colSums(castResult[,-1])))
+						rownames(castResult)<-NULL#1:nrow(castResult)
+						hwrite(
+								paste(hwrite("hide/show table"#add toggle word
+												,onclick=paste("toggleTable(",db$objcount,")",sep="")
+												,link="#"
+												,class="showtable"
+										)
+										,hwrite(#encapsulate into div in order to have an id
+												hwrite(castResult#output table
+														,row.class="firstline"
+														,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
+												)
+												,div=TRUE
+												,style="display: none;"
+												,id=paste("table",db$objcount,sep="_")
+										)
+										
+										,sep=""
+								)
+								,p
+								,div=TRUE
+								,style="display: none;"
+								,id=paste("section",db$objcount,sep="_")
+						
+						)
+#									browser()
+						
+					}
+					##group outlier
+					if(nGroupFailed>0)
+					{
+						if(getName(x)=="spike")
+						{
+							f1<-paste(groupField,"channel",sep="~")
+							
+						}else
+						{
+							f1<-paste(groupField,groupBy,sep="~")
+						}
+						f1<-as.formula(f1)
+						m.outResult<-melt(g1,measure.vars="qaTask")
+						castResult<-cast(m.outResult,f1
+								,fun.aggregate=length)
+						castResult<-as.data.frame(castResult)
+						castResult$subTotal<-rowSums(castResult[,-1])
+						castResult<-castResult[order(castResult$subTotal,decreasing=T),]
+						eval(substitute(
+										castResult$v<-as.character(castResult$v)
+										,list(v=groupField)
+								)
+						)
+						castResult<-rbind(castResult,c("Total",colSums(castResult[,-1])))
+						
+						
+						rownames(castResult)<-NULL#1:nrow(castResult)
+						
+						hwrite(
+								paste(hwrite("hide/show table"#add toggle word
+												,onclick=paste("toggleTable(",db$objcount,")",sep="")
+												,link="#"
+												,class="showtable"
+										)
+										,hwrite(#encapsulate into div in order to have an id
+												hwrite(castResult
+														,row.class="firstline"
+														,col.class=eval(parse(text=paste("list('"
+																				,groupField
+																				,"'='firstcolumn','subTotal'='lastcolumn')"
+																				,sep="")
+																)
+														)
+												)
+												,div=TRUE
+												,style="display: none;"
+												,id=paste("table",db$objcount,sep="_")
+										)
+										
+										,sep=""
+								)
+								
+								,p
+								,div=TRUE
+								,style="display: none;"
+								,id=paste("section",db$objcount,sep="_")
+						
+						)
+					}
+#							browser()
+					yy<-queryStats(db,formula1,pop=getPop(x))
+					factors<-lapply(groupBy,function(x){
+								eval(substitute(yy$v,list(v=x)))
+							})
+					by(yy,factors,function(sub2,x,groupBy){
+								
+#											browser()
+								#find the outliers of the current pannael
+								#matching sid 
+								curOut<-t1[t1$sid%in%sub2$sid,]
+								curgOut<-g1[g1$sid%in%sub2$sid,]
+								
+								curGroup<-unique(eval(parse(text=paste("sub2$",groupBy,sep=""))))
+#
+								db<-getData(x)
+								db$objcount<-db$objcount+1		
+#										browser()
+								##heading
+								hwrite(paste(
+												hwrite("+",div=TRUE
+														,id=paste("detTriggerIn",db$objcount,sep="_") 
+														,class="QADetTrigger" 
+														,onclick=paste("toggleSection(",db$objcount,")",sep="")
+														,style="display: block;")
+												
+												,hwrite("&ndash;",div=TRUE
+														,id=paste("detTriggerOut",db$objcount,sep="_") 
+														,class="QADetTrigger" 
+														,onclick=paste("toggleSection(",db$objcount,")",sep="")
+														,style="display: none;")
+												,curGroup
+#														,hwrite(length(unique(sub2$name)),class='count')
+												,ifelse(nrow(curOut)>0	
+														,paste(
+																hwrite(length(unique(curOut$id)),class='count')					
+																," FCS files "
+														)
+														,"")
+												,ifelse(nrow(curgOut)>0	
+														,paste(
+																hwrite(length(unique(eval(substitute(curgOut$v
+																										,list(v=groupField)
+																								))
+																				))
+																		,class='count')					
+																,groupField
+														)
+														,"")
+										)
+										,heading=4
+										,p
+								)
+								
+#										##table+image
+#
+								
+#										if(nrow(curOut)>0||nrow(curgOut)>0)
+								if(getName(x)=="MFIOverTime")
+								{
+									relation<-"free"										
+									rFunc<-rlm
+								}else
+								{
+									relation<-NULL										
+									rFunc<-NULL
+								}
+								
+								if(getName(x)%in%c("RedundantStain","MNC"))
+								{
+									xaxis.draw<-FALSE
+								}else
+								{
+									xaxis.draw<-TRUE
+								}
+								if(getName(x)%in%c("spike"))
+								{
+									ylab<-"cumulative z-score"
+								}else
+								{
+									ylab<-NULL
+								}
+#										browser()
+								plotCallStr<-paste("plot(x,formula1,dest=imageDir"
+										,",ylab=ylab,scales=list(x=c(draw=xaxis.draw),y=(relation=relation))"
+										,",rFunc.=rFunc,plotAll=plotAll,subset=\""
+										,groupBy,"=='",curGroup,"'\")",sep="")
+#										browser()
+								imageName<-eval(parse(text=plotCallStr))
+								rownames(curOut)<-NULL#1:nrow(sub2)
+								rownames(curgOut)<-NULL#1:nrow(sub2)
+								#section
+								hwrite(paste(
+												##tables+toggler	
+												paste(	#toggler
+														hwrite("hide/show table"
+																,onclick=paste("toggleTable(",db$objcount,")",sep="")
+																,link="#"
+																,class="showtable"
+														)
+														#encapsulate tables into div in order to have an id
+														,hwrite(
+																paste(
+																		ifelse(nrow(curOut)>0	
+																				,hwrite(curOut[,c("fcsFile","channel")]
+																						,row.class="firstline"
+																						,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
+																				)
+																				,"")
+																		,ifelse(nrow(curgOut)>0	
+																				,hwrite(unique(curgOut[,c(groupField,"channel")])
+																						,row.class="firstline"
+																						,col.class=eval(parse(text=paste("list('"
+																												,groupField
+																												,"'='firstcolumn','subTotal'='lastcolumn')"
+																												,sep="")
+																								)
+																						)
+																				
+																				)
+																				,"")
+																		,sep=""
+																)
+																,div=TRUE
+																,style="display: none;"
+																,id=paste("table",db$objcount,sep="_")
+														)
+														
+														
+														,sep=""
+												)
+												
+												##image								
+												,hwrite(paste("<embed src='"
+																,file.path(basename(imageDir),imageName)
+																,"' type='image/svg+xml' width=1000 height=800/>"
+																,sep=""
+														)
+														,div=TRUE
+												)
+										)
+										,p
+										,div=TRUE
+										,style="display: none;"
+										,id=paste("section",db$objcount,sep="_")
+								)
+							}
+							,x
+							,groupBy
+					)
+				}else
+				{
+					#if only one conditioning variable
+					#simply order by it and output the fcsfile list
+					if(length(cond)==0)
+					{
+#								groupBy<-as.character(formula1[[3]])
+						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
+										,list(u=as.symbol("t1"),w="fcsFile")
+								)
+						)
+						gcastResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
+										,list(u=as.symbol("g1"),w=groupField)
+								)
+						)
+						
+					}else
+					{
+						groupBy<-as.character(cond)
+#								groupByStr<-paste("t1$",groupBy,sep="")
+						castResult<-eval(substitute(u[order(u$v),c(w,v)]
+										,list(u=as.symbol("t1"),v=groupBy,w="fcsFile")
+								)
+						)
+						#t1[order(eval(parse(text=groupByStr))),c("fcsFile",groupBy)]
+						gcastResult<-eval(substitute(u[order(u$v),c(w,v)]
+										,list(u=as.symbol("g1"),v=groupBy,w=groupField)
+								)
+						)
+					}
+					
+					
+#							browser()
+					##make sure the w and h pass to plot and large enough to display strip text
+					imageName<-plot(x
+							,formula(x)
+#											,subset=paste("Tube%in%c('"
+#															,paste(unique(castResult$Tube),collapse="','")
+#															,"')"
+#															,sep="")
+							,plotAll.=plotAll
+							,dest=imageDir
+							,width=27,height=13)
+					
+#							browser()
+					rownames(castResult)<-NULL#1:nrow(castResult)
+					#section
+					hwrite(paste(
+									paste(
+											hwrite("hide/show table"#add toggle word
+													,onclick=paste("toggleTable(",db$objcount,")",sep="")
+													,link="#"
+													,class="showtable"
+											)
+											,hwrite(#encapsulate into div in order to have an id
+													paste(
+															ifelse(nrow(t1)>0	
+																	,hwrite(castResult
+																			,row.class="firstline"
+																			,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
+																	)
+																	,"")
+															,ifelse(nrow(g1)>0	
+																	,hwrite(gcastResult
+																			,row.class="firstline"
+																			,col.class=eval(parse(text=paste("list('"
+																									,groupField
+																									,"'='firstcolumn','subTotal'='lastcolumn')"
+																									,sep="")
+																					)
+																			)
+																	
+																	)
+																	,"")
+															,sep=""
+													)
+													,div=TRUE
+													,style="display: none;"
+													,id=paste("table",db$objcount,sep="_")
+											)
+											
+											,sep=""
+									)
+									
+									##table	
+									
+									##image								
+									,hwrite(paste("<embed src='"
+													,file.path(basename(imageDir),imageName)															,"' type='image/svg+xml' width=1000 height=800/>"
+													,sep=""
+											)
+											,div=TRUE
+									)
+									,sep=""
+							)
+							,p
+							,div=TRUE
+							,style="display: none;"
+							,id=paste("section",db$objcount,sep="_")
+					)
+					
+				}
+			}
+			
+		
+			
+		})
+
+
+.writeHead<-function(outDir,title="Flow Data Quality Accessment Report",subTitle="",splash=TRUE)
+{
+	if(missing(outDir))
+		stop("outDir has to be specified!")
+	options(warn=0)
+#	anno<-pData(db$G)
+#	browser()
+	##output outlier results to csv
+#	outResult<-merge(db$outlierResult,db$statsOfGS[,c("sid","id","channel")])
+#	outResult<-merge(outResult,db$qaCheckList)
+#	outResult<-merge(outResult,anno)[,c("sid","id","name","qaName","channel","Tube")]
+	
+#	names(outResult)<-c("sid","id","fcsFile" ,"qaTask","channel","Tube")
+	
+	
+#	gOutResult<-merge(db$GroupOutlierResult,db$statsOfGS[,c("sid","id","channel")])
+#	gOutResult<-merge(gOutResult,db$qaCheckList)
+#	gOutResult<-merge(gOutResult,anno)
+	
+#	names(gOutResult)[names(gOutResult)=="qaName"]<-"qaTask"
+	
+	imageDir<-file.path(outDir,"image")
+	#init the image folder
+#	browser()
+	dir.create(imageDir,recursive=TRUE,showWarnings=F)
+#	file.remove(list.files(imageDir,full=TRUE))
+	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full=T)
+
+	file.copy(from=from,to=imageDir)
+
+	p <- openPage(dirname=outDir
+			,filename="index.html"
+			,link.css=file.path(basename(imageDir),"qaReport.css")
+			,link.javascript=file.path(basename(imageDir),"qaReport.js")
+			,title = "qa report"
+	)
+	hwrite(title,p,class="ReportTitle",div=TRUE,br=TRUE)
+	hwrite(subTitle,p,class="ReportSubTitle",div=TRUE,br=TRUE)
+	if(splash)
+		hwrite(paste("Generated on"
+						,date()	
+						, "by QUALIFIER 0.99.1"
+				)
+				,div=TRUE
+				,class="splash"
+				,p
+		)
+	p
+}
