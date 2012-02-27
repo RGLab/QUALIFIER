@@ -4,7 +4,7 @@
 ###############################################################################
 .FileNameGen<-function(prefix=NA,ID=NA,population=NA,channel=NA,stain=NA,stats=NA,...)
 {
-	fileName<-c(prefix,ID,population,channel,stain,stats,...)
+	fileName<-c(prefix,ID,basename(population),channel,stain,stats,...)
 	fileName<-fileName[!is.na(fileName)]
 	paste(fileName,collapse="_")
 	
