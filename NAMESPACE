@@ -13,7 +13,6 @@ export(	"queryStats"
 		,"qa.GroupPlot"
 		,"saveToDB"
 		,"makeQaTask"
-		,"qa.report"
 		,"proportion.outliers.robust"
 		,"proportion.outliers.mle"
 		,"qoutlier"
@@ -24,4 +23,4 @@ export(	"queryStats"
 		)
 
 
-exportMethods("plot","qaCheck","getQAStats")              
+exportMethods("plot","qaCheck","getQAStats","qaReport")              

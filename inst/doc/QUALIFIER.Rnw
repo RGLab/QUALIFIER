@@ -111,10 +111,7 @@ containing descriptions of each QA task:
 data("ITN029")
 @
 
-<<changePath,echo=FALSE,result=hide,eval=TRUE>>=
-ncFlowSet(db$G)@file<-file.path("/home/wjiang2/rglab/workspace/QUALIFIER/output/",ncFlowSet(db$G)@file)
 
-@
 <<makeQaTask, echo=true, results=verbatim>>=
 
 
@@ -303,7 +300,7 @@ generate the summary tables and svg plots. Svg plots provide tooltips containing
 hyperlinks of densityplot for each individual FCS file.  
 
 <<qa.report,eval=FALSE, echo=true, results=verbatim>>=
-qa.report(db,outDir="~/output",plotAll=FALSE)
+qaReport(qaTask.list,outDir="~/output",plotAll=FALSE)
 @
 \Robject{plotAll} is the argument to control the plotting of the individual scatter plot for each FCS file. When TRUE, all the FCS files are plotted. If FALSE,only the FCSs marked as
 Outliers will be plotted. It can also be set to "none" meaning that no scatter plot will be generated, which provides the quick review of the html report. 

@@ -3,9 +3,9 @@
 # Author: mike
 ###############################################################################
 
-
-setwd("inst/doc")
+setwd("output")
+#setwd("inst/doc")
 library(tools)
-Sweave("QUALIFIER.Rnw")
+Sweave("../inst/doc/QUALIFIER.Rnw")
 texi2dvi("QUALIFIER.tex",pdf = TRUE)
 

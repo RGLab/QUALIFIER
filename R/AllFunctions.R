@@ -151,7 +151,7 @@ saveToDB<-function(db,G,annoData)
 
 makeQaTask<-function(db,checkListFile)
 {
-	db$qaCheckList<-read.csv(checkListFile)
+#	db$qaCheckList<-read.csv(checkListFile)
 	
 	qaTask.list<-apply(db$qaCheckList,1,function(curRow,db){
 #browser()			

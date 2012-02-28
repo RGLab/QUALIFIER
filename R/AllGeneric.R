@@ -9,9 +9,6 @@ setGeneric("getPop", function(x) standardGeneric("getPop"))
 setGeneric("plotType", function(x) standardGeneric("plotType"))
 setGeneric("qaCheck", function(obj,...) standardGeneric("qaCheck"))
 setGeneric("qaReport", function(obj,...) standardGeneric("qaReport"))
-
-#setGeneric("getData", function(obj) standardGeneric("getData")) #already defined in flowWorkspace
-#setGeneric("description",function (object, ...)standardGeneric("description"))#already defined in Biobase
 setGeneric("formula",function (x, ...)standardGeneric("formula"))
 
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))

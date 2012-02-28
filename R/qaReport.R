@@ -2,99 +2,71 @@
 # 
 # Author: wjiang2
 ###############################################################################
-#generate report by db
-setMethod("qaReport", signature=c(obj="environment"),
-		function(obj,...){
-			
-			
-			.writeHead(db=obj,...)
-			
-			hwrite(qaTask.list)
-			
-		})
-
-##generate report by qaTask list
+##generate report for qaTask list
 setMethod("qaReport", signature=c(obj="list"),
-		function(obj,plotAll=FALSE,...){
-			
-			p<-.writeHead(...)
+		function(obj,outDir,plotAll=FALSE,...){
+			if(missing(outDir))
+				stop("outDir has to be specified!")
+			p<-.writeHead(outDir,...)
 #			browser()
-			hwrite(obj,p,plotAll)
-			
+			qaWrite.list(obj,p,outDir,plotAll)
 		})
-
+##generate report for single qaTask 
 setMethod("qaReport", signature=c(obj="qaTask"),
 		function(obj,...){
 			
 #			browser()
 			qaReport(list(obj),...)
-			
 		})
 
-setMethod("hwrite", signature=c(x="list"),
-		function(x,page,plotAll){
+qaWrite.list<-function(x,page,...){
 			
 			db<-getData(x[[1]])
 			db$objcount<-0
-#	browser()
 			
 			tasksBylevel<-split(x,unlist(lapply(x,qaLevel)))
 
-#			by(db$qaCheckList,db$qaCheckList$qaLevel,function(sub1,db){
 			lapply(tasksBylevel,function(curTaskGroup){			
 #				browser()
 						hwrite(paste(qaLevel(curTaskGroup[[1]]),"Level"),page,heading=1)
-						lapply(curTaskGroup,hwrite,page,plotALl)
-#						apply(sub1,1,function(curRow,db){
-##						browser()	
-#									curQa<-new("qaTask"
-#											,qaID=as.integer(curRow["qaID"])
-#											,qaName=as.character(curRow["qaName"])
-#											,description=as.character(curRow["description"])
-#											,qaLevel=as.character(curRow["qaLevel"])
-#											,pop=as.character(curRow["pop"])
-#											,formula=as.formula(as.character(curRow["formula"]))
-#											,plotType=as.character(curRow["plotType"])
-#											,db=db
-#									)
-#									qaReport(curQa,p,plotAll)
-#									
-#								})
-					})
-			
-			
-			closePage(p, splash=FALSE)
-		})
+						lapply(curTaskGroup,qaWrite.task,page,...)
 
-setMethod("hwrite", signature=c(x="qaTask"),
-		function(x,p,plotAll){
+					})
+			message("report generated!")
+			
+			closePage(page, splash=FALSE)
+		}
+
+qaWrite.task<-function(x,p,outDir,plotAll){
+			
+			imageDir<-file.path(outDir,"image")
+			
 			db<-getData(x)
 			anno<-pData(db$G)
 			curQaID<-qaID(x)
-			browser()
+#			browser()
 			outResult<-subset(db$outlierResult,qaID==curQaID)
 			outResult<-merge(outResult,db$statsOfGS[,c("sid","id","channel")])
-			outResult<-merge(outResult,db$qaCheckList)
-			outResult<-merge(outResult,anno)[,c("sid","id","name","qaName","channel","Tube")]
-			names(outResult)<-c("sid","id","fcsFile" ,"qaTask","channel","Tube")
+			outResult<-merge(outResult,anno)[,c("sid","id","name","channel","Tube")]
+			names(outResult)<-c("sid","id","fcsFile" ,"channel","Tube")
+			if(nrow(outResult)>0)
+				outResult$qaTask<-getName(x)
 			
 			gOutResult<-subset(db$GroupOutlierResult,qaID==curQaID)
-			
-			gOutResult<-merge(db$GroupOutlierResult,db$statsOfGS[,c("sid","id","channel")])
-			gOutResult<-merge(gOutResult,db$qaCheckList)
+			gOutResult<-merge(gOutResult,db$statsOfGS[,c("sid","id","channel")])
 			gOutResult<-merge(gOutResult,anno)
-			names(gOutResult)[names(gOutResult)=="qaName"]<-"qaTask"
-			
-#			t1<-subset(outResult,qaTask==getName(curQa))
-#			g1<-subset(gOutResult,qaTask==getName(curQa))	
+			nFscFailed<-length(unique(outResult$fcsFile))
+			if(nrow(gOutResult)>0)
+				gOutResult$qaTask<-getName(x)			
+	
 			
 			hwrite(paste(description(x)
-#										,hwrite(nrow(t1),class='count')
+#										,hwrite(nrow(outResult),class='count')
 					)
 					,p
 					,heading=3)
 #					browser()
-			nFscFailed<-length(unique(t1$fcsFile))
+			nFscFailed<-length(unique(outResult$fcsFile))
 			nGroupFailed<-0
 			
 			formula1<-formula(x)
@@ -112,14 +84,14 @@ setMethod("hwrite", signature=c(x="qaTask"),
 			{
 				groupField<-as.character(xTerm)
 				nGroupFailed<-length(unique(
-								eval(substitute(g1$v
+								eval(substitute(gOutResult$v
 												,list(v=groupField)
 										)
 								)
 						)
 				)	
 			}
-			
+#			browser()
 			if(nFscFailed>0||nGroupFailed>0)
 			{
 				db$objcount<-db$objcount+1
@@ -127,7 +99,7 @@ setMethod("hwrite", signature=c(x="qaTask"),
 								hwrite("+",div=TRUE
 										,id=paste("detTriggerIn",db$objcount,sep="_") 
 										,class="QADetTrigger" 
-										,onclick=paste("toggleSxion(",db$objcount,")",sep="")
+										,onclick=paste("toggleSection(",db$objcount,")",sep="")
 										,style="display: block;")
 								
 								,hwrite("&ndash;",div=TRUE
@@ -167,7 +139,7 @@ setMethod("hwrite", signature=c(x="qaTask"),
 				{
 					##individual outlier
 					groupBy<-as.character(cond[[2]])
-					groupByStr<-paste("t1$",groupBy,sep="")
+					groupByStr<-paste("outResult$",groupBy,sep="")
 					
 					formula1[[3]][[3]]<-cond[[3]]
 					
@@ -184,7 +156,7 @@ setMethod("hwrite", signature=c(x="qaTask"),
 							f1<-as.formula(paste("fcsFile",groupBy,sep="~"))
 							
 						}
-						m.outResult<-melt(t1,measure.vars="qaTask")
+						m.outResult<-melt(outResult,measure.vars="qaTask")
 						castResult<-cast(m.outResult,f1
 								,fun.aggregate=length)
 						castResult<-as.data.frame(castResult)
@@ -233,7 +205,7 @@ setMethod("hwrite", signature=c(x="qaTask"),
 							f1<-paste(groupField,groupBy,sep="~")
 						}
 						f1<-as.formula(f1)
-						m.outResult<-melt(g1,measure.vars="qaTask")
+						m.outResult<-melt(gOutResult,measure.vars="qaTask")
 						castResult<-cast(m.outResult,f1
 								,fun.aggregate=length)
 						castResult<-as.data.frame(castResult)
@@ -290,8 +262,8 @@ setMethod("hwrite", signature=c(x="qaTask"),
 #											browser()
 								#find the outliers of the current pannael
 								#matching sid 
-								curOut<-t1[t1$sid%in%sub2$sid,]
-								curgOut<-g1[g1$sid%in%sub2$sid,]
+								curOut<-outResult[outResult$sid%in%sub2$sid,]
+								curgOut<-gOutResult[gOutResult$sid%in%sub2$sid,]
 								
 								curGroup<-unique(eval(parse(text=paste("sub2$",groupBy,sep=""))))
 #
@@ -438,27 +410,27 @@ setMethod("hwrite", signature=c(x="qaTask"),
 					{
 #								groupBy<-as.character(formula1[[3]])
 						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
-										,list(u=as.symbol("t1"),w="fcsFile")
+										,list(u=as.symbol("outResult"),w="fcsFile")
 								)
 						)
 						gcastResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
-										,list(u=as.symbol("g1"),w=groupField)
+										,list(u=as.symbol("gOutResult"),w=groupField)
 								)
 						)
 						
 					}else
 					{
 						groupBy<-as.character(cond)
-#								groupByStr<-paste("t1$",groupBy,sep="")
+#								groupByStr<-paste("outResult$",groupBy,sep="")
 						castResult<-eval(substitute(u[order(u$v),c(w,v)]
-										,list(u=as.symbol("t1"),v=groupBy,w="fcsFile")
-								)
-						)
-						#t1[order(eval(parse(text=groupByStr))),c("fcsFile",groupBy)]
+													,list(u=as.symbol("outResult"),v=groupBy,w="fcsFile")
+												)
+											)
+						#outResult[order(eval(parse(text=groupByStr))),c("fcsFile",groupBy)]
 						gcastResult<-eval(substitute(u[order(u$v),c(w,v)]
-										,list(u=as.symbol("g1"),v=groupBy,w=groupField)
-								)
-						)
+														,list(u=as.symbol("gOutResult"),v=groupBy,w=groupField)
+												)
+										)
 					}
 					
 					
@@ -466,10 +438,6 @@ setMethod("hwrite", signature=c(x="qaTask"),
 					##make sure the w and h pass to plot and large enough to display strip text
 					imageName<-plot(x
 							,formula(x)
-#											,subset=paste("Tube%in%c('"
-#															,paste(unique(castResult$Tube),collapse="','")
-#															,"')"
-#															,sep="")
 							,plotAll.=plotAll
 							,dest=imageDir
 							,width=27,height=13)
@@ -486,13 +454,13 @@ setMethod("hwrite", signature=c(x="qaTask"),
 											)
 											,hwrite(#encapsulate into div in order to have an id
 													paste(
-															ifelse(nrow(t1)>0	
+															ifelse(nrow(outResult)>0	
 																	,hwrite(castResult
 																			,row.class="firstline"
 																			,col.class=list("fcsFile"="firstcolumn",'subTotal'="lastcolumn")
 																	)
 																	,"")
-															,ifelse(nrow(g1)>0	
+															,ifelse(nrow(gOutResult)>0	
 																	,hwrite(gcastResult
 																			,row.class="firstline"
 																			,col.class=eval(parse(text=paste("list('"
@@ -536,33 +504,16 @@ setMethod("hwrite", signature=c(x="qaTask"),
 			
 		
 			
-		})
+}
 
 
 .writeHead<-function(outDir,title="Flow Data Quality Accessment Report",subTitle="",splash=TRUE)
 {
-	if(missing(outDir))
-		stop("outDir has to be specified!")
+	
 	options(warn=0)
-#	anno<-pData(db$G)
-#	browser()
-	##output outlier results to csv
-#	outResult<-merge(db$outlierResult,db$statsOfGS[,c("sid","id","channel")])
-#	outResult<-merge(outResult,db$qaCheckList)
-#	outResult<-merge(outResult,anno)[,c("sid","id","name","qaName","channel","Tube")]
-	
-#	names(outResult)<-c("sid","id","fcsFile" ,"qaTask","channel","Tube")
-	
-	
-#	gOutResult<-merge(db$GroupOutlierResult,db$statsOfGS[,c("sid","id","channel")])
-#	gOutResult<-merge(gOutResult,db$qaCheckList)
-#	gOutResult<-merge(gOutResult,anno)
-	
-#	names(gOutResult)[names(gOutResult)=="qaName"]<-"qaTask"
-	
+
 	imageDir<-file.path(outDir,"image")
 	#init the image folder
-#	browser()
 	dir.create(imageDir,recursive=TRUE,showWarnings=F)
 #	file.remove(list.files(imageDir,full=TRUE))
 	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full=T)
@@ -575,6 +526,8 @@ setMethod("hwrite", signature=c(x="qaTask"),
 			,link.javascript=file.path(basename(imageDir),"qaReport.js")
 			,title = "qa report"
 	)
+#		browser()
+	
 	hwrite(title,p,class="ReportTitle",div=TRUE,br=TRUE)
 	hwrite(subTitle,p,class="ReportSubTitle",div=TRUE,br=TRUE)
 	if(splash)

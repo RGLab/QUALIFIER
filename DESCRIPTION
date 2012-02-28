@@ -17,6 +17,7 @@ Collate: AllGeneric.R
 		qaTask-accessor-Methods.R 
 		getBoundary.R 
 		getQAStats.R
+		qaReport.R
 		utils.R 
 Description: Provides quality control and quality assessment tools for gated flow cytometry data. 
 License: Artistic-2.0
