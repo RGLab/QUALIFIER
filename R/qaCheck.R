@@ -4,7 +4,7 @@
 ###############################################################################
 
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset=NULL,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
+		function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
 			
 			call.f<-match.call(expand.dots = F)
 
@@ -47,9 +47,9 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 							cur.call.f$outlierfunc<-outlierfunc
 							cur.call.f$gOutlierfunc<-gOutlierfunc
 							cur.call.f$rFunc<-rFunc
-							cur.call.f$subset<-paste(formuRes$groupBy,"=='",curConVal,"'",sep="")
-							if(!is.null(subset))
-								cur.call.f$subset<-paste(cur.call.f$subset,subset,sep="&")
+							cur.call.f$Subset<-formuRes$groupBy==curConVal
+							if(!missing(Subset))
+								cur.call.f$Subset<-cur.call.f$Subset&Subset
 							cur.call.f$...<-NULL
 							#replace the cutoff value
 							eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
@@ -65,25 +65,17 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 				
 			}	
 				
-#				}else
-#				{
-#					#if single scalar, then call the qacheck function directly
-#					.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,rFunc=rFunc,...)
-#								
-#					
-#				}
-				
-#			}else
-#			{
-				#if single scalar, then call the qacheck function directly
-				.qaCheck(obj,formula=formula,subset=subset,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
-#								
-#				stop("threshold has to be provided for outlier detection!")
-#			}
+#			browser()
+			#if single scalar, then call the qacheck function directly
+			if(missing(Subset))
+				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+			else
+				.qaCheck(obj,formula=formula,Subset=substitute(Subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+			
 			
 		})
 
-.qaCheck<-function(obj,formula=NULL,subset=NULL,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
+.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
 #	browser()
 
 	qaID<-qaID(obj)
@@ -115,13 +107,21 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	
-
+#	browser()
 	##query db
-	yy<-queryStats(db,formula,subset,pop)
+	if(missing(Subset))
+	{		
+		yy<-queryStats(db,formula,pop=getPop(obj))
+		
+	}else
+	{
+		yy<-queryStats(db,formula,Subset,pop=getPop(obj))
+		
+	}
 #		browser()	
 	if(nrow(yy)==0)
 		{
-			warning("empty subsets:",subset)
+			warning("empty subsets!")
 			return()
 		}
 	factors<-lapply(groupBy,function(x){

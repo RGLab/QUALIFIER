@@ -171,9 +171,9 @@ makeQaTask<-function(db,checkListFile)
 	qaTask.list
 }
 
-queryStats<-function(db,formula,subset=NULL,pop=character(0))
+queryStats<-function(db,formula,Subset,pop=character(0))
 {
-#	browser()
+	
 	formuRes<-.formulaParser(formula)
 	
 	yTerm<-formuRes$yTerm
@@ -188,10 +188,12 @@ queryStats<-function(db,formula,subset=NULL,pop=character(0))
 	ret_anno<-pData(db$G)
 	
 	ret_stats<-db$statsOfGS
-	#filter by subset 
+	
+	
+	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		ret_stats<-subset(ret_stats,population%in%pop)	
+		ret_stats <-subset(ret_stats,grepl(pop,population))
 	}
 	ret_stats<-subset(ret_stats,stats%in%statsType)
 	
@@ -215,9 +217,15 @@ queryStats<-function(db,formula,subset=NULL,pop=character(0))
 
 #	browser()
 	#filter by subset 
-	if(!is.null(subset))
+#	if(!is.null(subset))
+#	{
+#		ret<-subset(ret,eval(parse(text=subset)))	
+#	}
+	if(!missing(Subset))
 	{
-		ret<-subset(ret,eval(parse(text=subset)))	
+		r <- eval(Subset, ret)
+		if(!is.logical(r)) stop("'Subset' must evaluate to logical")
+		ret <- ret[r,]
 	}
 	##apply the function to value in each group
 	if(!is.null(func))

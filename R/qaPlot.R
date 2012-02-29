@@ -231,8 +231,10 @@ setMethod("plot", signature=c(x="qaTask"),
 
 		})
 
-plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
+plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
 {
+#	browser()
+	
 	
 	lattice.options(print.function=QUALIFIER:::plot.trellisEx)
 #	formula1<-y
@@ -273,8 +275,15 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 	}
 
 #	browser()
-	
-	yy<-queryStats(db,formula,subset,pop=getPop(qaObj))
+	if(missing(Subset))
+	{		
+		yy<-queryStats(db,formula,pop=getPop(qaObj))
+		
+	}else
+	{
+		yy<-queryStats(db,formula,substitute(Subset),pop=getPop(qaObj))
+		
+	}
 	#check if the conditioning variable is of factor type
 	for(curGroupBy in groupBy)
 	{
@@ -463,7 +472,7 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 								)
 							)
 		}
-		
+#		browser()
 		
 		if(plotType(qaObj)=="bwplot")
 		{
@@ -555,7 +564,11 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 		.postProcessSVG(sfile)
 			
 		return(basename(sfile))
+	}else
+	{
+		thisCall
 	}
+	
 	
 	
 }
