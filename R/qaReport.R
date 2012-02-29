@@ -47,13 +47,14 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #			browser()
 			outResult<-subset(db$outlierResult,qaID==curQaID)
 			outResult<-merge(outResult,db$statsOfGS[,c("sid","id","channel")])
-			outResult<-merge(outResult,anno)[,c("sid","id","name","channel","Tube")]
-			names(outResult)<-c("sid","id","fcsFile" ,"channel","Tube")
+			outResult<-merge(outResult,anno)#[,c("sid","id","name","channel","Tube")]
+#			names(outResult)<-c("sid","id","fcsFile" ,"channel","Tube")
+			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
 			if(nrow(outResult)>0)
 				outResult$qaTask<-getName(x)
 			
 			gOutResult<-subset(db$GroupOutlierResult,qaID==curQaID)
-			gOutResult<-merge(gOutResult,db$statsOfGS[,c("sid","id","channel")])
+			gOutResult<-merge(gOutResult,db$statsOfGS)
 			gOutResult<-merge(gOutResult,anno)
 			nFscFailed<-length(unique(outResult$fcsFile))
 			if(nrow(gOutResult)>0)
@@ -66,7 +67,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 					,p
 					,heading=3)
 #					browser()
-			nFscFailed<-length(unique(outResult$fcsFile))
+#			nFscFailed<-length(unique(outResult$fcsFile))
 			nGroupFailed<-0
 			
 			formula1<-formula(x)
@@ -209,7 +210,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 						castResult<-cast(m.outResult,f1
 								,fun.aggregate=length)
 						castResult<-as.data.frame(castResult)
-						castResult$subTotal<-rowSums(castResult[,-1])
+						castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
 						castResult<-castResult[order(castResult$subTotal,decreasing=T),]
 						eval(substitute(
 										castResult$v<-as.character(castResult$v)

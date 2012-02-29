@@ -23,4 +23,4 @@ export(	"queryStats"
 		)
 
 
-exportMethods("plot","qaCheck","getQAStats","qaReport")              
+exportMethods("plot","qaCheck","getQAStats","qaReport","qpar","qpar<-")              

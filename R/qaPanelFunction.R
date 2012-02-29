@@ -513,9 +513,13 @@ panel.bwplotEx <-
 					##can't print right away since there is issue with embeded lattice plot
 					##some how it alter the viewport or leves of parent lattice object 
 #				browser()
-					assign(basename(paths),qa.GroupPlot(db,curGroup),envir=plotObjs)
+					curPlotObj<-qa.GroupPlot(db,curGroup)
+					if(!is.null(curPlotObj))
+					{
+						assign(basename(paths),curPlotObj,envir=plotObjs)
 					
-					setSVGShapeURL(paths)
+						setSVGShapeURL(paths)
+					}
 				}
 			}
 #			browser()
@@ -832,16 +836,36 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 				ycolname<-channel.y.name
 				xlim<-range(x)
 				ylim<-range(y)
+				
+				##fix the vertices outside of the x,y range
+				outInd<-bounds[[i]][,1]>max(x)
+				if(any(outInd))
+					bounds[[i]][outInd,1]<-max(x)
+				
+				outInd<-bounds[[i]][,2]>max(y)
+				if(any(outInd))
+					bounds[[i]][outInd,2]<-max(y)
+				
+				outInd<-bounds[[i]][,1]<min(x)
+				if(any(outInd))
+					bounds[[i]][outInd,1]<-min(x)
+				
+				outInd<-bounds[[i]][,2]<min(y)
+				if(any(outInd))
+					bounds[[i]][outInd,2]<-min(y)
+				
+				
 #				browser()
 				if(ncol(bounds[[i]])>1)
 				{
 					xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
 					yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
+#					yCenterPos<-eval(parse(text=paste("max(bounds[[i]][,'",ycolname,"'])",sep="")))
 					
-					xleft<-xCenterPos-120
-					xright=xCenterPos+120
-					ybottom=yCenterPos-50
-					ytop=yCenterPos+50
+#					xleft<-xCenterPos-diff(xlim)/6
+#					xright=xCenterPos+diff(xlim)/6
+#					ybottom=yCenterPos#-diff(ylim)/6
+#					ytop=max(ylim)
 				}else
 				{
 					xCenterPos<-mean(bounds[[i]])
@@ -853,23 +877,28 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 					ybottom=yCenterPos-diff(ylim)/30
 					ytop=yCenterPos+diff(ylim)/30
 				}
-#				browser()
-				panel.rect(xleft=xleft,xright=xright,
-						ybottom=ybottom,ytop=ytop
-#						,bg="black"						
-						,fill="white"
-						,border="white"
-				)
-				
+
+	
+				grid.rect(x=unit(xCenterPos,"native")
+						,y=unit(yCenterPos,"native")
+						,width=unit(1,'strwidth',p.stats[i])
+						,height=unit(1,'strheight',p.stats[i])
+						,draw=T, gp=gpar(font=gpar$gate.text$font
+										,fill="white"
+										,col="transparent"
+										,alpha=0.7
+										)
+								)
 				panel.text(
-						x=xCenterPos,
-						y=yCenterPos,
-						labels=p.stats[i], 
-						col=gpar$gate.text$col,
-						alpha=gpar$gate.text$alpha,
-						lineheight=gpar$gate.text$lineheight,
-						font=gpar$gate.text$font,
-						cex=gpar$gate.text$cex
+						x=xCenterPos
+						,y=yCenterPos
+						,labels=p.stats[i]
+						,col=gpar$gate.text$col
+						,alpha=gpar$gate.text$alpha
+#						,lineheight=gpar$gate.text$lineheight
+#						,font=gpar$gate.text$font
+#						,cex=gpar$gate.text$cex
+#						,adj=c(0.5,0.5)
 						,...
 						)
 			}

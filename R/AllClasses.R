@@ -9,7 +9,9 @@ setClass("qaTask",
 						,pop="character"
 						,formula="ANY"
 						,plotType="character"
+						,par="list"
 						,db="ANY"
+						
 						),
 		prototype=list(qaID=integer(0)
 						,qaName=character(0)
@@ -18,6 +20,7 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
 						,plotType="xyplot"
+						,par=list()
 						,db="ANY"
 						)
 		)

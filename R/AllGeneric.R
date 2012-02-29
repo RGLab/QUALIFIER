@@ -10,6 +10,9 @@ setGeneric("plotType", function(x) standardGeneric("plotType"))
 setGeneric("qaCheck", function(obj,...) standardGeneric("qaCheck"))
 setGeneric("qaReport", function(obj,...) standardGeneric("qaReport"))
 setGeneric("formula",function (x, ...)standardGeneric("formula"))
+setGeneric("qpar",function (x, ...)standardGeneric("qpar"))
+setGeneric("qpar<-",function(object,value) standardGeneric("qpar<-"))
+
 
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
 setGeneric("getPath",function (x, ...)standardGeneric("getPath"))

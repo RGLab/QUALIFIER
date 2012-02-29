@@ -149,49 +149,66 @@ qa.GroupPlot<-function(db,yy)
 	{
 		#get the parent population for the scatter plot
 		curRow<-yy[1,]
+		statsType<-curRow$stat
+		channel<-as.character(curRow$channel)
+		pop<-as.character(curRow$population)
+		
 		curSampleInd<-which(getSamples(db$G)%in%curRow[,"name"])
 		curGh<-db$G[[curSampleInd]]
 		curNode<-as.character(curRow[,"node"])
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
 		parentNodeInd<-which(getNodes(curGh)%in%parentNode)
-		fs1<-getData(db$G[sampleInds],parentNodeInd)
+		if(length(parentNodeInd)>0)
+		{
+			fs1<-getData(db$G[sampleInds],parentNodeInd)
+		}else
+		{
+			fs1<-getData(db$G[sampleInds])
+		}
 		sampleNames(fs1)<-yy$name#the subset of gating set is in diffferent order than the yy$name
 
 		if(!"outlier"%in%colnames(yy))
 			yy$outlier<-FALSE
 		pData(fs1)$outlier<-yy[,]$outlier
 		varMetadata(fs1)["outlier",]<-"outlier"
-		fres<-filter(fs1,curGate)
-		if(length(parameters(fres[[1]]))==2)
+		obj<-NULL
+		if(!pop%in%c("Total","root"))##total cell count
 		{
-			t1<-paste("`",parameters(curGate)[1],"`~`",parameters(curGate)[2],"`",sep="")
-		}else
-		{
-			t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
-		}
-
-		obj<-xyplot(x=as.formula(t1),
-						data=fs1,
-						smooth=FALSE,
-						colramp=cols,
-						filter=fres,
-						names=FALSE,
-						pd=pData(fs1),
-						par.settings=list(gate.text=list(text=0.7
+			
+		
+			fres<-filter(fs1,curGate)
+			if(length(parameters(fres[[1]]))==2)
+			{
+				t1<-paste("`",parameters(curGate)[1],"`~`",parameters(curGate)[2],"`",sep="")
+			}else
+			{
+				t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
+			}
+	
+			obj<-xyplot(x=as.formula(t1),
+							data=fs1,
+							smooth=FALSE,
+							colramp=cols,
+							filter=fres,
+							names=FALSE,
+							pd=pData(fs1),
+							par.settings=list(gate.text=list(text=0.7
+															,alpha=1
+															,cex=1
+															,lineheight=2
+															,font=1)
+												,gate=list(
+														fill="transparent"
+														,lwd<-2
+														,lty="solid"
 														,alpha=1
-														,cex=1
-														,font=1)
-											,gate=list(
-													fill="transparent"
-													,lwd<-2
-													,lty="solid"
-													,alpha=1
-													,col="red"
-													)
-											),
-						panel=panel.xyplot.flowsetEx
-				)
+														,col="red"
+														)
+												),
+							panel=panel.xyplot.flowsetEx
+					)
+			}
 	}
 			
 			
@@ -339,113 +356,112 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 			yy$value<-yy$value*100
 #		lattice.par<-list(...)$par
 		
-		xlab<-list(...)$xlab
-		ylab<-list(...)$ylab
-		main<-list(...)$main
-		pch<-list(...)$pch
-		layout<-list(...)$layout
-		cex<-list(...)$cex
-		par.strip.text<-list(...)$par.strip.text
-		scales<-list(...)$scales
-		xscale.components<-list(...)$xscale.components
+#		xlab<-list(...)$xlab
+#		ylab<-list(...)$ylab
+#		main<-list(...)$main
+#		pch<-list(...)$pch
+#		layout<-list(...)$layout
+#		cex<-list(...)$cex
+#		par.strip.text<-list(...)$par.strip.text
+#		scales<-list(...)$scales
+#		xscale.components<-list(...)$xscale.components
+		par<-qpar(qaObj)
+		par$subscripts<-TRUE
+		par$strip<-TRUE
 		
+		xlab<-par$xlab
+		ylab<-par$ylab
+		main<-par$main
+		pch<-par$pch
+		layout<-par$layout
+		cex<-par$cex
+		par.strip.text<-par$par.strip.text
+		scales<-par$scales
+		xscale.components<-par$xscale.components
 		if(plotType(qaObj)=="xyplot")
 		{
 			##parse the viz par
 			
 			if(is.null(xlab))
-				xlab<-as.character(xTerm)
+				par$xlab<-as.character(xTerm)
 			if(is.null(ylab))
-				ylab<-statsType
+				par$ylab<-statsType
 			if(is.null(main))
-				main<-paste(description(qaObj),curGroup,sep=":")	
+				par$main<-paste(description(qaObj),curGroup,sep=":")	
 			if(is.null(pch))
-				pch<-19		
+				par$pch<-19		
 			if(is.null(par.strip.text))
-				par.strip.text<-list(lines=2)	
+				par$par.strip.text<-list(lines=2)	
 			if(is.null(scales))
-				scales<-list(x=c(cex=0.7
+				par$scales<-list(x=c(cex=0.7
 						#						,rot=45	
 											))
 			if(is.null(xscale.components))
-				xscale.components<-function(...) {
+				par$xscale.components<-function(...) {
 					ans <- xscale.components.default(...)
 					ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
 					ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
 					ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
 					ans
 				}
-			print(xyplot(x=formula,data=yy
-							,groups=outlier
-							,xlab=xlab
-							,ylab=ylab
-							,main=main
-							,pch=pch	
-							,cex=cex
-							,scales=scales
-							,par.strip.text=par.strip.text
-							,layout = layout
-							,xscale.components = xscale.components
-							,strip=TRUE
-							,subscripts=TRUE
-			
-							,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
-#						browser()
-								panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
-								
+			thisCall<-quote(
+							xyplot(x=formula,data=yy
+									,groups=outlier
+									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+										panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
 								#if regression function is supplied, then plot the regression line
-								if(!is.null(rFunc))
-								{
-#							browser()
-									
-									reg.res<-try(rFunc(y~x),silent=TRUE)
-									if(all(class(reg.res)!="try-error"))
-									{
-										sumry<-summary(reg.res)
-										if(class(sumry)=="summary.rlm"){
-											coefs<-coef(sumry)
-											t.value<-coefs[,"t value"]
-											slope<-coefs[2,"Value"]
-											intercept<-coefs[1,"Value"]
-											df<-summary(reg.res)$df
-											pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
-											intercept.p<-pvalues[1]
-											slope.p<-pvalues[2]
-										}else if (class(sumry)=="summary.lm"){
-											pvalues<-coefficients(sumry)[,4]
-											slope<-coefficients(sumry)[2,1]
-											intercept.p<-pvalues[1]
-											slope.p<-pvalues[2]
-											
-										}	
-										if(any(pvalues<0.05))
+										if(!is.null(rFunc))
 										{
-											regLine.col<-"red"
-										}else
-										{
-											regLine.col<-"black"
-										}
-										curVp<-current.viewport()
+	#							browser()
 										
-										
-										#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
-										panel.text(x=mean(curVp$xscale)
-												,y=quantile(curVp$yscale)[4]
-												,labels=paste("s=",format(slope*30,digits=2)
-														#														," v=",format(var(y),digits=2)
-														,"\np=",paste(format(slope.p,digits=2),collapse=",")
+											reg.res<-try(rFunc(y~x),silent=TRUE)
+											if(all(class(reg.res)!="try-error"))
+											{
+												sumry<-summary(reg.res)
+												if(class(sumry)=="summary.rlm"){
+													coefs<-coef(sumry)
+													t.value<-coefs[,"t value"]
+													slope<-coefs[2,"Value"]
+													intercept<-coefs[1,"Value"]
+													df<-summary(reg.res)$df
+													pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+													intercept.p<-pvalues[1]
+													slope.p<-pvalues[2]
+												}else if (class(sumry)=="summary.lm"){
+													pvalues<-coefficients(sumry)[,4]
+													slope<-coefficients(sumry)[2,1]
+													intercept.p<-pvalues[1]
+													slope.p<-pvalues[2]
+													
+												}	
+												if(any(pvalues<0.05))
+												{
+													regLine.col<-"red"
+												}else
+												{
+													regLine.col<-"black"
+												}
+												curVp<-current.viewport()
+												
+												
+												#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
+												panel.text(x=mean(curVp$xscale)
+														,y=quantile(curVp$yscale)[4]
+														,labels=paste("s=",format(slope*30,digits=2)
+																#														," v=",format(var(y),digits=2)
+																,"\np=",paste(format(slope.p,digits=2),collapse=",")
+														)
+														,cex=0.5
+												#										,col="white"		
 												)
-												,cex=0.5
-										#										,col="white"		
-										)
-										
-										panel.abline(reg.res,col=regLine.col,lty="dashed")
-									}
-								}
-#						browser()
+												
+												panel.abline(reg.res,col=regLine.col,lty="dashed")
+												}
+										}
 								
-							}
-					))
+									}
+								)
+							)
 		}
 		
 		
@@ -469,47 +485,38 @@ plot.qaTask<-function(qaObj,formula,subset=NULL,width=10,height=10,...)#,channel
 				formula[[3]]<-xTerm
 			}
 			
-#		browser()
 			
 	
 			if(is.null(xlab))
-				xlab<-groupBy.Panel
+				par$xlab<-groupBy.Panel
 			if(is.null(ylab))
-				ylab<-statsType
+				par$ylab<-statsType
 			if(is.null(main))
-				main<-paste(description(qaObj),curGroup,sep=":")	
+				par$main<-paste(description(qaObj),curGroup,sep=":")	
 			if(is.null(pch))
-				pch<-"."	
+				par$pch<-"."	
 			if(is.null(cex))
-				cex<-5
+				par$cex<-5
 			if(is.null(par.strip.text))
-				par.strip.text<-list(lines=2)	
+				par$par.strip.text<-list(lines=2)	
 			if(is.null(scales))
-				scales<-list(x=c(cex=0.9
+				par$scales<-list(x=c(cex=0.9
 											,rot=45	
 											)
 										)
 
-			print(bwplot(x=formula,data=yy
-							,xlab=xlab
-							,ylab=ylab
-							,main=main
-							,pch=pch
-							,cex=cex
-							,scales=scales					
-							,par.strip.text=par.strip.text
-							,layout = layout
-							,subscripts=TRUE
-							,groupBy=groupBy.Panel
-							,strip=TRUE
-							,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
-#							browser()
-								panel.bwplotEx(data.=data,dest.=dest
-										,plotObjs.=plotObjs
-										,plotAll.=plotAll,db=db,...)
-							}
-					))
+			thisCall<-quote(bwplot(x=formula,data=yy
+									,groupBy=groupBy.Panel
+									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+												panel.bwplotEx(data.=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
+											}
+									)
+							)
+			
 		}
+		#append the par list
+		thisCall<-eval(as.call(c(as.list(thisCall),par)))
+		print(thisCall)
 	}
 	
 #	browser()

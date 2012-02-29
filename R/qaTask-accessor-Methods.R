@@ -7,7 +7,19 @@ setMethod("qaID", signature=c(x="qaTask"),
 		function(x){
 			x@qaID
 		})
+setMethod("qpar", signature=c(x="qaTask"),
+		function(x){
+			x@par
+		})
 
+setReplaceMethod("qpar",
+		signature=signature(object="qaTask",
+				value="list"),
+		definition=function(object, value)
+		{
+			object@par<-value
+			return(object)
+		})
 
 setMethod("getName", signature=c(x="qaTask"),
 		function(x){
@@ -53,12 +65,15 @@ setMethod("show",
 			cat("qaTask:", getName(object),"\n")
 			cat("Level :", qaLevel(object), "\n") 
 			cat("Description :", description(object), "\n")
-			cat("Plot type: ", plotType(object))
-			cat("\n")
+
 			cat("Gated node: ", getPop(object))
 			cat("\n")
 			cat("Default formula :")
 			print(formula(object))
+			cat("Plot type: ", plotType(object))
 			cat("\n")
+#			browser()
+			print(qpar(object))
+			
 			#checkParameters(object) 
 		})
