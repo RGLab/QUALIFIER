@@ -171,7 +171,7 @@ makeQaTask<-function(db,checkListFile)
 	qaTask.list
 }
 
-queryStats<-function(db,formula,Subset,pop=character(0),isReshape=F)
+queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
 {
 #	browser()
 	formuRes<-.formulaParser(formula)
@@ -195,6 +195,7 @@ queryStats<-function(db,formula,Subset,pop=character(0),isReshape=F)
 	{
 		ret_stats <-subset(ret_stats,grepl(pop,population))
 	}
+#	browser()
 	if(isReshape)
 		ret_stats<-cast(ret_stats,...~stats)
 	else
@@ -230,6 +231,8 @@ queryStats<-function(db,formula,Subset,pop=character(0),isReshape=F)
 		if(!is.logical(r)) stop("'Subset' must evaluate to logical")
 		ret <- ret[r,]
 	}
+#		browser()
+	
 	##apply the function to value in each group
 	if(!is.null(func))
 	{

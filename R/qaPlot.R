@@ -323,6 +323,7 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 		yy<-queryStats(db,formula,substitute(Subset),pop=getPop(qaObj),isReshape=T)
 		
 	}
+		
 	#check if the conditioning variable is of factor type
 	for(curGroupBy in groupBy)
 	{
@@ -567,6 +568,7 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 			thisCall<-quote(bwplot(x=formula,data=yy
 									,groupBy=groupBy.Panel
 									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+#										browser()
 												panel.bwplotEx(data.=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
 											}
 									)

@@ -295,7 +295,22 @@ panel.bwplotEx <-
 	
 	if (!notch) notch.frac <- 0
 #	browser()
+	dest<-list(...)$dest
+#		dest<-NULL
 	
+	gOutResult<-list(...)$gOutResult
+	rowIds<-list(...)$subscripts
+	data=list(...)$data[rowIds,]
+	groupBy<-list(...)$groupBy
+	plotObjs<-list(...)$plotObjs
+	plotAll<-list(...)$plotAll
+	db<-list(...)$db
+	if(is.null(plotAll))
+		plotAll=FALSE
+	
+	dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))),drop=TRUE)
+	nGroups<-length(dataGroups)	
+#	browser()
 	if (horizontal)
 	{
 		blist <-
@@ -305,6 +320,9 @@ panel.bwplotEx <-
 						do.out = do.out)
 		blist.stats <- t(sapply(blist, "[[", "stats"))
 		blist.out <- lapply(blist, "[[", "out")
+		blist.x <- lapply(blist, "[[", "x")
+#		browser()
+		
 		blist.height <- box.width # box.ratio / (1 + box.ratio)
 		if (varwidth)
 		{
@@ -344,78 +362,150 @@ panel.bwplotEx <-
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
 		
-		
-		panel.polygon(t(xs), t(ys),
-				lwd = box.rectangle$lwd,
-				lty = box.rectangle$lty,
-				col = fill,
-				alpha = box.rectangle$alpha,
-				border = box.rectangle$col,
-				identifier = paste(identifier, "box", sep="."))
-		## end of major changes to support notches
-		
-		
-		## whiskers
-		
-		panel.segments(c(blist.stats[, 2], blist.stats[, 4]),
-				rep(levels.fos, 2),
-				c(blist.stats[, 1], blist.stats[, 5]),
-				rep(levels.fos, 2),
-				col = box.umbrella$col,
-				alpha = box.umbrella$alpha,
-				lwd = box.umbrella$lwd,
-				lty = box.umbrella$lty,
-				identifier = paste(identifier, "whisker", sep="."))
-		panel.segments(c(blist.stats[, 1], blist.stats[, 5]),
-				levels.fos - blist.height / 2,
-				c(blist.stats[, 1], blist.stats[, 5]),
-				levels.fos + blist.height / 2,
-				col = box.umbrella$col,
-				alpha = box.umbrella$alpha,
-				lwd = box.umbrella$lwd,
-				lty = box.umbrella$lty,
-				identifier = paste(identifier, "cap", sep="."))
-		
-		## dot
-		
-		if (all(pch == "|"))
+		for(i in 1:nGroups)
 		{
-			mult <- if (notch) 1 - notch.frac else 1
-			panel.segments(blist.stats[, 3],
-					levels.fos - mult * blist.height / 2,
-					blist.stats[, 3],
-					levels.fos + mult * blist.height / 2,
+#			browser()
+			
+			curGroup<-dataGroups[[i]]
+			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
+			population<-as.character(curGroup$population[1])
+			stats<-as.character(curGroup$stats[1])
+			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
+					, " Tube=",curGroup$Tube[1],sep="")
+			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
+			if(!is.null(dest))
+				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
+			##lattice plot for outlier group
+			
+			if(plotAll!="none"&&!is.null(dest))
+			{
+				if(cur.btw.groups.outliers||plotAll==TRUE)
+				{
+#				browser()
+					paths<-QUALIFIER:::.FileNameGen(prefix="s"
+							,ID=curGroupID
+							,population=population
+							,stats.=stats)
+					
+					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
+					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+					
+					##can't print right away since there is issue with embeded lattice plot
+					##some how it alter the viewport or leves of parent lattice object 
+#				browser()
+					curPlotObj<-qa.GroupPlot(db,curGroup)
+					if(!is.null(curPlotObj))
+					{
+						assign(basename(paths),curPlotObj,envir=plotObjs)
+						
+						setSVGShapeURL(paths)
+					}
+				}
+			}
+#			browser()
+			panel.polygon(t(xs)[,i], t(ys)[,i],
 					lwd = box.rectangle$lwd,
 					lty = box.rectangle$lty,
-					col = box.rectangle$col,
-					alpha = alpha,
-					identifier = paste(identifier, "dot", sep="."))
+					col = fill,
+					alpha = box.rectangle$alpha,
+					border = ifelse(cur.btw.groups.outliers,"red",box.rectangle$col),
+					identifier = paste(identifier, "box", sep="."))
+			## end of major changes to support notches
+			
+			
+			## whiskers
+			
+			panel.segments(c(blist.stats[i, 2], blist.stats[i, 4]),
+					rep(levels.fos[i], 2),
+					c(blist.stats[i, 1], blist.stats[i, 5]),
+					rep(levels.fos[i], 2),
+					col = box.umbrella$col,
+					alpha = box.umbrella$alpha,
+					lwd = box.umbrella$lwd,
+					lty = box.umbrella$lty,
+					identifier = paste(identifier, "whisker", sep="."))
+			panel.segments(c(blist.stats[i, 1], blist.stats[i, 5]),
+					levels.fos[i] - blist.height / 2,
+					c(blist.stats[i, 1], blist.stats[i, 5]),
+					levels.fos[i] + blist.height / 2,
+					col = box.umbrella$col,
+					alpha = box.umbrella$alpha,
+					lwd = box.umbrella$lwd,
+					lty = box.umbrella$lty,
+					identifier = paste(identifier, "cap", sep="."))
+			
+			## dot
+			
+			if (all(pch == "|"))
+			{
+				mult <- if (notch) 1 - notch.frac else 1
+				panel.segments(blist.stats[i, 3],
+						levels.fos[i] - mult * blist.height / 2,
+						blist.stats[i, 3],
+						levels.fos + mult * blist.height / 2,
+						lwd = box.rectangle$lwd,
+						lty = box.rectangle$lty,
+						col = box.rectangle$col,
+						alpha = alpha,
+						identifier = paste(identifier, "dot", sep="."))
+			}
+			else
+			{
+				panel.points(x = blist.stats[i, 3],
+						y = levels.fos[i],
+						pch = pch,
+						col = col, alpha = alpha, cex = cex,
+						fontfamily = fontfamily,
+						fontface = lattice:::chooseFace(fontface, font),
+						fontsize = fontsize.points,
+						identifier = paste(identifier, "dot", sep="."))
+			}
+#			browser()
+			
+			## outliers
+			for(curOutInd in which(curGroup$outlier))
+			{
+				
+				curOut<-blist.x[[i]][curOutInd]
+				if(!is.na(curOut))##due to the reshape,the extra NA lines from other stats were added here need to be filtered out
+				{
+					curOutRow<-curGroup[curOutInd,,drop=FALSE]
+				
+					if(!is.null(dest))
+					{
+						FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
+						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
+						#				browser()
+						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+								,channel=as.character(curOutRow$channel)
+								,stats=as.character(curOutRow$stats))
+						if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
+						paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+						
+						##save the individual plot obj
+	#						browser()
+						assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
+						
+						
+						setSVGShapeURL(paths)
+						
+					}
+#					browser()
+					
+					panel.points(x = curOut,#unlist(blist.out),
+							y = rep(levels.fos[i], lapply(blist.out, length)[[i]]),
+							pch = plot.symbol$pch,
+							col = plot.symbol$col,
+							alpha = plot.symbol$alpha,
+							cex = plot.symbol$cex,
+							fontfamily = plot.symbol$fontfamily,
+							fontface = lattice:::chooseFace(plot.symbol$fontface, plot.symbol$font),
+							fontsize = fontsize.points,
+							identifier = paste(identifier, "outlier", sep="."))
+				}
+			}
+			
 		}
-		else
-		{
-			panel.points(x = blist.stats[, 3],
-					y = levels.fos,
-					pch = pch,
-					col = col, alpha = alpha, cex = cex,
-					fontfamily = fontfamily,
-					fontface = lattice:::chooseFace(fontface, font),
-					fontsize = fontsize.points,
-					identifier = paste(identifier, "dot", sep="."))
-		}
-		
-		## outliers
-		
-		panel.points(x = unlist(blist.out),
-				y = rep(levels.fos, sapply(blist.out, length)),
-				pch = plot.symbol$pch,
-				col = plot.symbol$col,
-				alpha = plot.symbol$alpha,
-				cex = plot.symbol$cex,
-				fontfamily = plot.symbol$fontfamily,
-				fontface = lattice:::chooseFace(plot.symbol$fontface, plot.symbol$font),
-				fontsize = fontsize.points,
-				identifier = paste(identifier, "outlier", sep="."))
-		
 	}
 	else
 	{
@@ -426,7 +516,8 @@ panel.bwplotEx <-
 						coef = coef,
 						do.out = do.out)
 		blist.stats <- t(sapply(blist, "[[", "stats"))
-		blist.x <- sapply(blist, "[[", "x")
+		blist.x <- lapply(blist, "[[", "x")
+#		browser()
 #		blist.out <- lapply(blist, "[[", "out")
 #		blist.outInd <- lapply(blist, "[[", "outInd")
 		blist.height <- box.width # box.ratio / (1 + box.ratio)
@@ -467,25 +558,10 @@ panel.bwplotEx <-
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
 		
-#		browser()
-		dest<-list(...)$dest
-#		dest<-NULL
-		
-		gOutResult<-list(...)$gOutResult
-		rowIds<-list(...)$subscripts
-		data=list(...)$data[rowIds,]
-		groupBy<-list(...)$groupBy
-		plotObjs<-list(...)$plotObjs
-		plotAll<-list(...)$plotAll
-		db<-list(...)$db
-		if(is.null(plotAll))
-			plotAll=FALSE
-		
-		dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))),drop=TRUE)
-		nGroups<-length(dataGroups)
+#		
 		for(i in 1:nGroups)
 		{
-			browser()
+#			browser()
 			
 			curGroup<-dataGroups[[i]]
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))

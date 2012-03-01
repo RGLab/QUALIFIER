@@ -143,7 +143,6 @@ plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,Subset=channel%in%c('PE-Cy7-A')
 		,rFunc=rlm
-		,scales=list(y=c(relation="free"))
 
 )
 
@@ -178,19 +177,25 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 )
 
 
-qaCheck(qaTask.list[["MNC"]],z.cutoff=0.1)
+qaCheck(qaTask.list[["MNC"]]
+		,Subset=coresampleid%in%c(11730,8780)
+		,z.cutoff=0.1
+		,alpha=0.5)
 
 plot(qaTask.list[["MNC"]]
 #		, coresampleid~proportion
 #		,par=list(horiz=TRUE)
+
 )
 
 #scatter plot for a sample group	
 plot(qaTask.list[["MNC"]]
-		, coresampleid ~proportion
-#		,scatterPlot=TRUE
-		,par=list(horiz=TRUE)
-		,Subset=coresampleid%in%c(11730,8780))
+#		, coresampleid ~proportion
+#		,par=list(horiz=TRUE)
+		,Subset=coresampleid%in%c(11730,8780)
+##		,scatterPlot=TRUE
+		,dest="image"
+	)
 #scatter okit fore one sample
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
