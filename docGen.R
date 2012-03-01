@@ -3,6 +3,12 @@
 # Author: mike
 ###############################################################################
 
+##debug mode:load routines into globla env
+removeMethod("plot",sig="qaTask")
+removeMethod("qaCheck",sig="qaTask")
+
+lapply(list.files("R",full=T),source)
+
 setwd("output")
 #setwd("inst/doc")
 library(tools)

@@ -1,8 +1,8 @@
-qaID,qaName,description,qaLevel,pop,formula,plotType
-1,MFIOverTime,Fluorescence stability over time,Assay,MFI,MFI~RecdDt|channel*stain,xyplot
-2,NumberOfEvents,Number of Events Collected,Tube,Total,count~RecdDt|Tube,xyplot
-3,MNC,Consistency of Lymphocyte/MNC Gate,Assay,MNC,percent~coresampleid,bwplot
-4,RedundantStain,Consistency of redundant Staining Across sample aliquots,Channel,MFI,percent~coresampleid|channel*stain,bwplot
-5,RBCLysis,Sufficient RBC lysis,Tube,WBC_perct,percent~RecdDt|Tube,xyplot
-6,spike,Measurement spikes/drifts during acquisition,Tube,Total,spike~RecdDt|Tube*channel,xyplot
-7,BoundaryEvents,Off-scale Boundary Events,Channel,margin,percent~RecdDt|channel,xyplot
+"qaID","qaName","description","qaLevel","pop","formula","plotType"
+1,"MFIOverTime","Fluorescence stability over time","Assay","MFI","MFI~RecdDt|channel*stain","xyplot"
+2,"NumberOfEvents","Number of Events Collected","Tube","Total","count~RecdDt|Tube","xyplot"
+3,"MNC","Consistency of Lymphocyte/MNC Gate","Assay","MNC","proportion~coresampleid","bwplot"
+4,"RedundantStain","Consistency of redundant Staining Across sample aliquots","Channel","MFI","proportion~coresampleid|channel*stain","bwplot"
+5,"RBCLysis","Sufficient RBC lysis","Tube","WBC_perct","proportion~RecdDt|Tube","xyplot"
+6,"spike","Measurement spikes/drifts during acquisition","Tube","Total","spike~RecdDt|Tube*channel","xyplot"
+7,"BoundaryEvents","Off-scale Boundary Events","Channel","margin","proportion~RecdDt|channel","xyplot"

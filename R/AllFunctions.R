@@ -151,9 +151,9 @@ saveToDB<-function(db,G,annoData)
 
 makeQaTask<-function(db,checkListFile)
 {
-#	db$qaCheckList<-read.csv(checkListFile)
+	qaCheckList<-read.csv(checkListFile)
 	
-	qaTask.list<-apply(db$qaCheckList,1,function(curRow,db){
+	qaTask.list<-apply(qaCheckList,1,function(curRow,db){
 #browser()			
 				curQa<-new("qaTask"
 						,qaID=as.integer(curRow["qaID"])
@@ -167,13 +167,13 @@ makeQaTask<-function(db,checkListFile)
 				)
 				curQa					
 			},db)
-	names(qaTask.list)<-db$qaCheckList$qaName
+	names(qaTask.list)<-qaCheckList$qaName
 	qaTask.list
 }
 
-queryStats<-function(db,formula,Subset,pop=character(0))
+queryStats<-function(db,formula,Subset,pop=character(0),isReshape=F)
 {
-	
+#	browser()
 	formuRes<-.formulaParser(formula)
 	
 	yTerm<-formuRes$yTerm
@@ -183,8 +183,8 @@ queryStats<-function(db,formula,Subset,pop=character(0))
 	
 	statsType<-as.character(yTerm)
 	
-	if(tolower(statsType)=="percent")##take percent as the same as proportion
-		statsType="proportion"
+#	if(tolower(statsType)=="percent")##take percent as the same as proportion
+#		statsType="proportion"
 	ret_anno<-pData(db$G)
 	
 	ret_stats<-db$statsOfGS
@@ -195,7 +195,10 @@ queryStats<-function(db,formula,Subset,pop=character(0))
 	{
 		ret_stats <-subset(ret_stats,grepl(pop,population))
 	}
-	ret_stats<-subset(ret_stats,stats%in%statsType)
+	if(isReshape)
+		ret_stats<-cast(ret_stats,...~stats)
+	else
+		ret_stats<-subset(ret_stats,stats%in%statsType)
 	
 	ret<-merge(ret_stats,ret_anno,by.x="id",by.y="id")
 	

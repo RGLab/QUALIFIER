@@ -98,24 +98,24 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents2009
-		,subset="RecdDt>='2009-08-01'"
+		,Subset=RecdDt>='2009-08-01'
 )
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents2007
-		,subset="RecdDt<'2009-08-01'"
+		,Subset=RecdDt<'2009-08-01'
 )
 
 
 plot(qaTask.list[["NumberOfEvents"]]
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
 )
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,subset="id=='366'"
-		,scatterPlot=TRUE
+		,Subset=id=='366'
+#		,scatterPlot=TRUE
 )
 
 
@@ -126,8 +126,9 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,uBound=0.0003
 )
 plot(qaTask.list[["BoundaryEvents"]]
-		,percent ~ RecdDt | channel
+		,proportion ~ RecdDt | channel
 #		,dest="image"
+		,par=list(ylab="percent")
 )
 
 
@@ -135,12 +136,12 @@ plot(qaTask.list[["BoundaryEvents"]]
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm
 		,rFunc=rlm
-#		,subset="channel%in%c('PE-Cy7-A')"
+#		,Subset=channel%in%c('PE-Cy7-A')
 		,z.cutoff=3
 )
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
-		,subset="channel%in%c('PE-Cy7-A')"
+		,Subset=channel%in%c('PE-Cy7-A')
 		,rFunc=rlm
 		,scales=list(y=c(relation="free"))
 
@@ -148,12 +149,12 @@ plot(qaTask.list[["MFIOverTime"]]
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
-		,formula=percent ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-#		,subset="Tube=='CD8/CD25/CD4/CD3/CD62L'"
+#		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,par=list(ylab="percent")
 #		,dest="image"
 #	,plotAll="none"
 )	
@@ -164,35 +165,36 @@ qaCheck(qaTask.list[["spike"]]
 		,z.cutoff=6
 #		,alpha=0.00001
 )
-plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,subset="Tube=='CD11c/CD80/DUMP/HLADr/CD123'"
+plot(qaTask.list[["spike"]]
+		,y=spike~RecdDt|channel
+#		,Subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
 #	,dest="image"
 #	,plotAll=T
 )
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,subset="id=='366'&channel=='FITC-A'"
+		,Subset=id=='366'&channel=='FITC-A'
 		,scatterPlot=TRUE
 )
 
 
-qaCheck(qaTask.list[["MNC"]]
-		,formula=percent ~ coresampleid
-#		,outlierfunc=qoutlier
-#		,alpha=1.5
-		,z.cutoff=3)
-plot(qaTask.list[["MNC"]],percent ~ coresampleid
-#	,dest="image"
-	)
+qaCheck(qaTask.list[["MNC"]],z.cutoff=0.1)
+
+plot(qaTask.list[["MNC"]]
+#		, coresampleid~proportion
+#		,par=list(horiz=TRUE)
+)
 
 #scatter plot for a sample group	
 plot(qaTask.list[["MNC"]]
-		,scatterPlot=TRUE
-		,subset="coresampleid==11730")
+		, coresampleid ~proportion
+#		,scatterPlot=TRUE
+		,par=list(horiz=TRUE)
+		,Subset=coresampleid%in%c(11730,8780))
 #scatter okit fore one sample
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
-		,subset="coresampleid==8780&id==49")
+		,Subset=coresampleid==8780&id==49)
 
 qaCheck(qaTask.list[["RedundantStain"]]
 #			,gOutlierfunc=qoutlier
@@ -203,13 +205,8 @@ qaCheck(qaTask.list[["RedundantStain"]]
 		
 ##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
-		,subset="channel=='APC-A'&stain%in%c('CD123','Auto')"
-		,y=percent~coresampleid|channel:stain
-		,ylab="test",
-		,scales=list(x=c(draw=F)
-							)
-		,layout=c(1,2)
-				
+		,Subset=channel=='APC-A'&stain%in%c('CD123','Auto')
+		,y=proportion~coresampleid|channel:stain
 )
 ################################################################################  
 #4.qa report in html format 

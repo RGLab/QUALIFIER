@@ -97,7 +97,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 		
 
-#browser()
+browser()
 	if(is.null(formula))
 	{
 		formula<-formula(obj)

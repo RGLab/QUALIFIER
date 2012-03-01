@@ -483,9 +483,10 @@ panel.bwplotEx <-
 		
 		dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))),drop=TRUE)
 		nGroups<-length(dataGroups)
-#			browser()
 		for(i in 1:nGroups)
 		{
+			browser()
+			
 			curGroup<-dataGroups[[i]]
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
 			population<-as.character(curGroup$population[1])

@@ -231,11 +231,17 @@ setMethod("plot", signature=c(x="qaTask"),
 
 		})
 
-plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,stain=NA,tube=NA
+plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=NA,stain=NA,tube=NA
 {
 #	browser()
-	
-	
+	par_old<-qpar(qaObj)
+	if(!missing(par))##overwrite the elements of par slot of qa object if provided by argument
+	{
+		for(x in names(par))
+			eval(substitute(par_old$v<-par$v,list(v=x)))
+				
+		qpar(qaObj)<-par_old
+	}
 	lattice.options(print.function=QUALIFIER:::plot.trellisEx)
 #	formula1<-y
 #	browser()
@@ -247,41 +253,74 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 	{
 		formula<-formula(qaObj)
 	}
-	
+	aTerm<-formula[[2]]
 	bTerm<-formula[[3]]
-	cond<-""
-	if(length(bTerm)>1)
-	{
-		xTerm<-bTerm[[2]]
-		cond<-bTerm[[3]]
-	}else
-	{
-		xTerm<-bTerm
-	}
 	
-	if(length(cond)>1)
+	if(is.null(qpar(qaObj)$horiz))
+		qpar(qaObj)$horiz<-FALSE
+	
+	cond<-""
+	if(qpar(qaObj)$horiz)
 	{
-		groupBy<-as.character(cond)[-1]
+		if(length(bTerm)>1)
+		{
+			xTerm<-bTerm[[2]]
+			cond<-bTerm[[3]]
+		}else
+		{
+			xTerm<-bTerm
+		}
+		
+		if(length(cond)>1)
+		{
+			groupBy<-as.character(cond)[-1]
+		}else
+		{
+			if(length(bTerm)>1)
+			{
+				groupBy<-as.character(cond)	
+			}else
+			{
+				groupBy<-NULL
+			}
+			
+		}
 	}else
 	{
 		if(length(bTerm)>1)
 		{
-			groupBy<-as.character(cond)	
+			xTerm<-bTerm[[2]]
+			cond<-bTerm[[3]]
 		}else
 		{
-			groupBy<-NULL
+			xTerm<-bTerm
 		}
 		
+		if(length(cond)>1)
+		{
+			groupBy<-as.character(cond)[-1]
+		}else
+		{
+			if(length(bTerm)>1)
+			{
+				groupBy<-as.character(cond)	
+			}else
+			{
+				groupBy<-NULL
+			}
+			
+		}
 	}
+	
 
 #	browser()
 	if(missing(Subset))
 	{		
-		yy<-queryStats(db,formula,pop=getPop(qaObj))
+		yy<-queryStats(db,formula,pop=getPop(qaObj),isReshape=T)
 		
 	}else
 	{
-		yy<-queryStats(db,formula,substitute(Subset),pop=getPop(qaObj))
+		yy<-queryStats(db,formula,substitute(Subset),pop=getPop(qaObj),isReshape=T)
 		
 	}
 	#check if the conditioning variable is of factor type
@@ -304,7 +343,8 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 	yy$gOutlier<-yy$sid%in%subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
 	
 	statsType<-as.character(formula[[2]])
-	formula[[2]]<-as.symbol("value")
+	
+#	formula[[2]]<-as.symbol("value")
 #	formula<-update(formula,value~.)
 
 #	browser()
@@ -355,14 +395,14 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 			
 		}else
 		{
-			print(qa.GroupPlot(db,yy))
+			qa.GroupPlot(db,yy)
 		}
 		
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
-		if(statsType=="percent")
-			yy$value<-yy$value*100
+#		if(statsType=="percent")
+#			yy$value<-yy$value*100
 #		lattice.par<-list(...)$par
 		
 #		xlab<-list(...)$xlab
@@ -391,10 +431,10 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 		{
 			##parse the viz par
 			
-			if(is.null(xlab))
-				par$xlab<-as.character(xTerm)
-			if(is.null(ylab))
-				par$ylab<-statsType
+#			if(is.null(xlab))
+#				par$xlab<-as.character(xTerm)
+#			if(is.null(ylab))
+#				par$ylab<-statsType
 			if(is.null(main))
 				par$main<-paste(description(qaObj),curGroup,sep=":")	
 			if(is.null(pch))
@@ -472,7 +512,6 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 								)
 							)
 		}
-#		browser()
 		
 		if(plotType(qaObj)=="bwplot")
 		{
@@ -482,24 +521,35 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 			trellis.par.set("plot.symbol",plot.symbol)
 			
 		lattice.options(print.function=plot.trellisEx)
-			
-			
-			groupBy.Panel<-as.character(xTerm)#formula[[3]][[2]])
-			xTerm<-substitute(factor(y),list(y=xTerm))
-			if(length(bTerm)>1)
+	
+			if(qpar(qaObj)$horiz)
 			{
-				formula[[3]][[2]]<-xTerm
+				groupBy.Panel<-as.character(aTerm)#formula[[3]][[2]])
+				aTerm<-substitute(factor(y),list(y=aTerm))
+				
+				formula[[2]]<-aTerm
+				
 			}else
 			{
-				formula[[3]]<-xTerm
+				groupBy.Panel<-as.character(xTerm)
+				xTerm<-substitute(factor(y),list(y=xTerm))
+				if(length(bTerm)>1)
+				{
+					formula[[3]][[2]]<-xTerm
+				}else
+				{
+					formula[[3]]<-xTerm
+				}
 			}
+
+			
 			
 			
 	
-			if(is.null(xlab))
-				par$xlab<-groupBy.Panel
-			if(is.null(ylab))
-				par$ylab<-statsType
+#			if(is.null(xlab))
+#				par$xlab<-groupBy.Panel
+#			if(is.null(ylab))
+#				par$ylab<-statsType
 			if(is.null(main))
 				par$main<-paste(description(qaObj),curGroup,sep=":")	
 			if(is.null(pch))
@@ -513,7 +563,7 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 											,rot=45	
 											)
 										)
-
+									
 			thisCall<-quote(bwplot(x=formula,data=yy
 									,groupBy=groupBy.Panel
 									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
@@ -524,13 +574,16 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,...)#,channel=NA,s
 			
 		}
 		#append the par list
-		thisCall<-eval(as.call(c(as.list(thisCall),par)))
-		print(thisCall)
+		thisCall<-as.call(c(as.list(thisCall),par))
+#		browser()
+		thisCall<-eval(thisCall)
+#		print(thisCall)
 	}
 	
 #	browser()
 	if(isSvg)
 	{
+		print(thisCall)
 		ret<-dev.off()
 		message("Saving to ",sfile)
 
