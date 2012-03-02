@@ -109,24 +109,24 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
 )
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,Subset=id=='366'
+		,Subset=id=='245'
 #		,scatterPlot=TRUE
 )
 
 
 
 qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(percent) ~ RecdDt | name
+		,sum(proportion) ~ RecdDt | name
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
 )
 plot(qaTask.list[["BoundaryEvents"]]
-		,proportion ~ RecdDt | channel
+		,proportion ~ RecdDt |channel
 #		,dest="image"
 		,par=list(ylab="percent")
 )
@@ -152,17 +152,19 @@ qaCheck(qaTask.list[["RBCLysis"]]
 		,lBound=0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-#		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
-		,par=list(ylab="percent")
+		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#		, RecdDt~proportion | Tube
+#		,par=list(ylab="percent")
+#		,horiz=T
 #		,dest="image"
 #	,plotAll="none"
 )	
 
 
 qaCheck(qaTask.list[["spike"]]
-		,outlierfunc=outlier.norm#outlier.t
-		,z.cutoff=6
-#		,alpha=0.00001
+#		,outlierfunc=outlier.t
+#		,z.cutoff=3
+#		,alpha=0.001
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
@@ -172,29 +174,32 @@ plot(qaTask.list[["spike"]]
 )
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,Subset=id=='366'&channel=='FITC-A'
+		,Subset=id%in%c(245,119)&channel=='FITC-A'
 		,scatterPlot=TRUE
 )
 
 
 qaCheck(qaTask.list[["MNC"]]
-		,Subset=coresampleid%in%c(11730,8780)
-		,z.cutoff=0.1
-		,alpha=0.5)
+#		,Subset=coresampleid%in%c(11730,8780)
+		,z.cutoff=2
+)
 
 plot(qaTask.list[["MNC"]]
-#		, coresampleid~proportion
-#		,par=list(horiz=TRUE)
+#		,proportion~coresampleid
+		, factor(coresampleid)~proportion
+		,par=list(horiz=TRUE)
 
 )
 
 #scatter plot for a sample group	
 plot(qaTask.list[["MNC"]]
+		,proportion~factor(coresampleid)
+		,par=list(xlab="coresampleid")
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
 		,Subset=coresampleid%in%c(11730,8780)
-##		,scatterPlot=TRUE
-		,dest="image"
+#		,scatterPlot=TRUE
+#		,dest="image"
 	)
 #scatter okit fore one sample
 plot(qaTask.list[["MNC"]]

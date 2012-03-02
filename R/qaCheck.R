@@ -107,15 +107,16 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	
+	statsType<-matchStatType(db,formuRes)
 #	browser()
 	##query db
 	if(missing(Subset))
 	{		
-		yy<-queryStats(db,formula,pop=getPop(obj))
+		yy<-queryStats(db,statsType=statsType,pop=getPop(obj))
 		
 	}else
 	{
-		yy<-queryStats(db,formula,Subset,pop=getPop(obj))
+		yy<-queryStats(db,statsType=statsType,Subset,pop=getPop(obj))
 		
 	}
 #		browser()	
@@ -124,6 +125,17 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			warning("empty subsets!")
 			return()
 		}
+		
+	yy<-cast(yy,...~stats)
+		
+#	browser()
+	##apply the function to xTerm and yTerm in each group
+	if(!is.null(formuRes$xfunc))
+		yy<-applyFunc(yy,as.character(formuRes$xTerm),formuRes$xfunc,formuRes$groupBy)
+	if(!is.null(formuRes$yfunc))
+		yy<-applyFunc(yy,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
+	
+	
 	factors<-lapply(groupBy,function(x){
 				eval(substitute(yy$v,list(v=x)))
 			})
@@ -145,11 +157,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		
 		groupOutSids<-by(yy,factors,function(x){
 											
+#					browser()								
 					
 					curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
 
-					IQRs<-tapply(x$value,curFactor,IQR)
-#					browser()								
+					IQRs<-tapply(x[,statsType],curFactor,IQR)
 					
 					#loop to detect outliers at each step by comparing the pvalue and the estimated variance (v>p)
 #					ttt<-cochran.test(value~coresampleid,yy)
@@ -188,13 +200,13 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 				
 				if(is.null(rFunc))
 				{
-					inputVec<-x$value
+					inputVec<-x[,statsType]
 					
 				}else
 				{
 					#using regression function to fit the data and 
 					#calculate the outliers based on the residuals if applicable
-					f1<-substitute(value~x,list(x=xTerm))
+					f1<-substitute(y~x,list(y=formuRes$yTerm,x=xTerm))
 #					browser()
 					regResult<-try(rFunc(as.formula(f1),x),silent=TRUE)
 					if(all(class(regResult)!="try-error"))
@@ -203,7 +215,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					}else
 					{
 #						browser()
-						inputVec<-x$value
+						inputVec<-x[,statsType]
 					}
 				}
 #				browser()

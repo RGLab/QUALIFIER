@@ -41,16 +41,33 @@
 	saveXML(top,sfile)
 	
 }
+
+matchStatType<-function(db,formuRes)
+{
+#	browser()
+	statsType<-NULL
+	for(CurTerm in c("xTerm","yTerm"))
+	{
+		strTerm<-as.character(formuRes[[CurTerm]])
+		if(!is.na(match(strTerm,levels(db$statsOfGS$stats))))
+		{
+			statsType=strTerm
+			break
+		}
+	}
+	
+	return(statsType)
+}
 #TODO:refere to latticeParseFormula for more generic parser
 
 .formulaParser<-function(formula)
 {
 #	browser()
 	
-	
+	#parse the b term
 	bTerm<-formula[[3]]
-	cond<-""
-	if(length(bTerm)>1)
+	cond<-NULL
+	if(length(bTerm)>2)
 	{
 		xTerm<-bTerm[[2]]
 		cond<-bTerm[[3]]
@@ -58,31 +75,47 @@
 	{
 		xTerm<-bTerm
 	}
-	
-	if(length(cond)>1)
+#	browser()
+	##parse the conditional variable
+	if(!is.null(cond))
 	{
-		groupBy<-as.character(cond)[-1]
+		if(length(cond)>1)
+			groupBy<-as.character(cond)[-1]
+		else
+			groupBy<-as.character(cond)	
+		
 	}else
 	{
-		if(length(bTerm)>1)
-		{
-			groupBy<-as.character(cond)	
-		}else
-		{
-			groupBy<-NULL
-		}
 		
+		groupBy<-NULL
 	}
+	
+	#parse the xterm
+	xfunc<-NULL
+	if(length(xTerm)==2)
+	{
+		xfunc<-xTerm[[1]]
+		xTerm<-xTerm[[2]]
+	}else
+	{
+		if(length(xTerm)>=3)
+			stop("not supported formula!")
+	}
+	
 	
 	yTerm<-formula[[2]]
-	func<-NULL
-	if(length(yTerm)>1)
+	yfunc<-NULL
+	if(length(yTerm)==2)
 	{
-		func<-yTerm[[1]]
+		yfunc<-yTerm[[1]]
 		yTerm<-yTerm[[2]]
+	}else
+	{
+		if(length(yTerm)>=3)
+			stop("not supported formula!")
 	}
 	
-	list(xTerm=xTerm,yTerm=yTerm,func=func,groupBy=groupBy)
+	list(xTerm=xTerm,yTerm=yTerm,xfunc=xfunc,yfunc=yfunc,groupBy=groupBy)
 }
 .isRoot<-function(gh,node)
 {
@@ -171,20 +204,19 @@ makeQaTask<-function(db,checkListFile)
 	qaTask.list
 }
 
-queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
+#queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
+queryStats<-function(db,Subset,statsType=NULL,pop=character(0))
 {
 #	browser()
-	formuRes<-.formulaParser(formula)
+#	formuRes<-.formulaParser(formula)
 	
-	yTerm<-formuRes$yTerm
-	func<-formuRes$func
-	groupBy<-formuRes$groupBy
+#	yTerm<-formuRes$yTerm
+#	func<-formuRes$func
+#	groupBy<-formuRes$groupBy
 
 	
-	statsType<-as.character(yTerm)
+#	statsType<-as.character(yTerm)
 	
-#	if(tolower(statsType)=="percent")##take percent as the same as proportion
-#		statsType="proportion"
 	ret_anno<-pData(db$G)
 	
 	ret_stats<-db$statsOfGS
@@ -196,9 +228,7 @@ queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
 		ret_stats <-subset(ret_stats,grepl(pop,population))
 	}
 #	browser()
-	if(isReshape)
-		ret_stats<-cast(ret_stats,...~stats)
-	else
+	if(!is.null(statsType))
 		ret_stats<-subset(ret_stats,stats%in%statsType)
 	
 	ret<-merge(ret_stats,ret_anno,by.x="id",by.y="id")
@@ -234,26 +264,40 @@ queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
 #		browser()
 	
 	##apply the function to value in each group
-	if(!is.null(func))
-	{
-		factors<-lapply(groupBy,function(x){
-
-					eval(substitute(ret$v,list(v=x)))
-				})
-#					browser()		
-		ret<-by(ret,factors,function(x){
-#							browser()
-					x$value<-eval(substitute(f(x$value),list(f=func)))
-					x
-				})
-		ret<-do.call("rbind",ret)
-	}
+#	if(!is.null(func))
+#	{
+#		factors<-lapply(groupBy,function(x){
+#
+#					eval(substitute(ret$v,list(v=x)))
+#				})
+##					browser()		
+#		ret<-by(ret,factors,function(x){
+##							browser()
+#					x$value<-eval(substitute(f(x$value),list(f=func)))
+#					x
+#				})
+#		ret<-do.call("rbind",ret)
+#	}
 	
 	ret
 	
 	
 }
 
+applyFunc<-function(data,term,func,groupBy)
+{
+#			browser()
+	factors<-lapply(groupBy,function(x){
+				
+				eval(substitute(data$v,list(v=x)))
+			})
+	#					browser()		
+	data<-by(data,factors,function(x){
+				x[,term]<-eval(substitute(f(x$stats),list(f=func,stats=term)))
+				x
+			})
+	do.call("rbind",data)
+}
 
 
 

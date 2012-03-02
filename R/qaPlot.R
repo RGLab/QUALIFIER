@@ -12,7 +12,7 @@
 #TODO:to merge this single plot to groupplot since groupPlot is also able to produce the same xyplot
 #just need to add timeline plot to groupPlot routine.
 ##single plot for each FCS
-qa.singlePlot<-function(db,yy)
+qa.singlePlot<-function(db,yy,statsType)
 {
 #	browser()
 #	for(i in 1:nrow(yy))
@@ -36,18 +36,18 @@ qa.singlePlot<-function(db,yy)
 		
 		#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
 		#				browser()
-		individualPlot(x,curGate,curRow)
+		individualPlot(x,curGate,curRow,statsType)
 	}
 #	}	
 }
-individualPlot<-function(x,curGate,curRow)
+individualPlot<-function(x,curGate,curRow,statsType)
 {
 	cols <- colorRampPalette(IDPcolorRamp(21,
 					t(col2hsv(c("blue","green","yellow","red"))),
 					fr=c(0.7,0)))
 	
 	#get gate
-	statsType<-curRow$stat
+#	statsType<-curRow$stat
 	channel<-as.character(curRow$channel)
 	pop<-as.character(curRow$population)
 
@@ -140,17 +140,18 @@ qa.GroupPlot<-function(db,yy)
 					fr=c(0.7,0)))
 
 #	browser()
+	fcsNames<-as.character(unique(yy$name))
 	##TODO:strange behavior happens again here :idexing G by sampleName failed
 	#make sure to extract gateing set by the order of yy$name
-	sampleInds<-match(yy$name,getSamples(db$G))
+	sampleInds<-match(fcsNames,getSamples(db$G))
 	
 	
 	if(length(sampleInds)>0)#check if the target exist in the gateing hierarchy 
 	{
 		#get the parent population for the scatter plot
 		curRow<-yy[1,]
-		statsType<-curRow$stat
-		channel<-as.character(curRow$channel)
+#		statsType<-curRow$stat
+#		channel<-as.character(curRow$channel)
 		pop<-as.character(curRow$population)
 		
 		curSampleInd<-which(getSamples(db$G)%in%curRow[,"name"])
@@ -166,7 +167,7 @@ qa.GroupPlot<-function(db,yy)
 		{
 			fs1<-getData(db$G[sampleInds])
 		}
-		sampleNames(fs1)<-yy$name#the subset of gating set is in diffferent order than the yy$name
+		sampleNames(fs1)<-fcsNames
 
 		if(!"outlier"%in%colnames(yy))
 			yy$outlier<-FALSE
@@ -243,7 +244,6 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 		qpar(qaObj)<-par_old
 	}
 	lattice.options(print.function=QUALIFIER:::plot.trellisEx)
-#	formula1<-y
 #	browser()
 	db<-getData(qaObj)
 	##query db
@@ -253,79 +253,34 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	{
 		formula<-formula(qaObj)
 	}
-	aTerm<-formula[[2]]
-	bTerm<-formula[[3]]
+
 	
 	if(is.null(qpar(qaObj)$horiz))
 		qpar(qaObj)$horiz<-FALSE
-	
-	cond<-""
-	if(qpar(qaObj)$horiz)
-	{
-		if(length(bTerm)>1)
-		{
-			xTerm<-bTerm[[2]]
-			cond<-bTerm[[3]]
-		}else
-		{
-			xTerm<-bTerm
-		}
-		
-		if(length(cond)>1)
-		{
-			groupBy<-as.character(cond)[-1]
-		}else
-		{
-			if(length(bTerm)>1)
-			{
-				groupBy<-as.character(cond)	
-			}else
-			{
-				groupBy<-NULL
-			}
-			
-		}
-	}else
-	{
-		if(length(bTerm)>1)
-		{
-			xTerm<-bTerm[[2]]
-			cond<-bTerm[[3]]
-		}else
-		{
-			xTerm<-bTerm
-		}
-		
-		if(length(cond)>1)
-		{
-			groupBy<-as.character(cond)[-1]
-		}else
-		{
-			if(length(bTerm)>1)
-			{
-				groupBy<-as.character(cond)	
-			}else
-			{
-				groupBy<-NULL
-			}
-			
-		}
-	}
-	
 
+
+	#parse the formula
+	formuRes<-.formulaParser(formula)
+	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
+	
+	statsType<-matchStatType(db,formuRes)
 #	browser()
+	
+	
 	if(missing(Subset))
-	{		
-		yy<-queryStats(db,formula,pop=getPop(qaObj),isReshape=T)
-		
-	}else
+		yy<-queryStats(db,statsType=statsType,pop=getPop(qaObj))
+	else
+		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=getPop(qaObj))
+	if(nrow(yy)==0)
 	{
-		yy<-queryStats(db,formula,substitute(Subset),pop=getPop(qaObj),isReshape=T)
+		message("no samples are matched!")
+		return()
 		
 	}
-		
+	
+#	browser()
 	#check if the conditioning variable is of factor type
-	for(curGroupBy in groupBy)
+	for(curGroupBy in formuRes$groupBy)
 	{
 
 		curCol<-substitute(yy$v,list(v=curGroupBy))
@@ -338,26 +293,21 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	if(getName(qaObj)=="BoundaryEvents")
 		yy<-subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
 
-
+	#append the outlier flag
 	yy$outlier<-yy$sid%in%subset(db$outlierResult,qaID==qaID(qaObj))$sid
-	
 	yy$gOutlier<-yy$sid%in%subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
 	
-	statsType<-as.character(formula[[2]])
-	
-#	formula[[2]]<-as.symbol("value")
-#	formula<-update(formula,value~.)
-
+	#reshape the data to include the column of the statType which can be passed to lattice	as it is
+	yy<-cast(yy,...~stats)
 #	browser()
+
 	dest=list(...)$dest
-	
-#	svgDevID<-NULL
+
 	if(!is.null(dest))
 	{	
 		sfile<-tempfile(pattern=getName(qaObj),tmpdir=dest,fileext=".svg")
 #		browser()
 		devSVGTips(sfile,width=width,height=height)
-#		svgDevID<-dev.cur()
 		isSvg<-TRUE
 	}else
 	{
@@ -372,14 +322,7 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	
 #	browser()
 	plotObjs=new.env()
-	
 	scatterPlot<-list(...)$scatterPlot
-	if(nrow(yy)==0)
-	{
-		message("no samples are matched!")
-		return()
-		
-	}
 	if(!is.null(scatterPlot)&&scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
@@ -387,34 +330,22 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 		if(statsType=="spike"||(statsType=="count"&&getPop(qaObj)=="Total"))
 		{
 #			browser()
-			for(i in 1:nrow(yy))
+			thisCall<-lapply(1:nrow(yy),function(i)
 			{
 #						browser()
-						print(qa.singlePlot(db,yy[i,,drop=FALSE]))
-			}
+						qa.singlePlot(db,yy[i,,drop=FALSE],statsType)
+			})
 			
 			
 		}else
 		{
-			qa.GroupPlot(db,yy)
+			thisCall<-qa.GroupPlot(db,yy)
 		}
 		
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
-#		if(statsType=="percent")
-#			yy$value<-yy$value*100
-#		lattice.par<-list(...)$par
-		
-#		xlab<-list(...)$xlab
-#		ylab<-list(...)$ylab
-#		main<-list(...)$main
-#		pch<-list(...)$pch
-#		layout<-list(...)$layout
-#		cex<-list(...)$cex
-#		par.strip.text<-list(...)$par.strip.text
-#		scales<-list(...)$scales
-#		xscale.components<-list(...)$xscale.components
+
 		par<-qpar(qaObj)
 		par$subscripts<-TRUE
 		par$strip<-TRUE
@@ -431,11 +362,6 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 		if(plotType(qaObj)=="xyplot")
 		{
 			##parse the viz par
-			
-#			if(is.null(xlab))
-#				par$xlab<-as.character(xTerm)
-#			if(is.null(ylab))
-#				par$ylab<-statsType
 			if(is.null(main))
 				par$main<-paste(description(qaObj),curGroup,sep=":")	
 			if(is.null(pch))
@@ -446,14 +372,14 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 				par$scales<-list(x=c(cex=0.7
 						#						,rot=45	
 											))
-			if(is.null(xscale.components))
-				par$xscale.components<-function(...) {
-					ans <- xscale.components.default(...)
-					ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-					ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-					ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
-					ans
-				}
+#			if(is.null(xscale.components))
+#				par$xscale.components<-function(...) {
+#					ans <- xscale.components.default(...)
+#					ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+#					ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
+#					ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
+#					ans
+#				}
 			thisCall<-quote(
 							xyplot(x=formula,data=yy
 									,groups=outlier
@@ -525,23 +451,12 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	
 			if(qpar(qaObj)$horiz)
 			{
-				groupBy.Panel<-as.character(aTerm)#formula[[3]][[2]])
-				aTerm<-substitute(factor(y),list(y=aTerm))
-				
-				formula[[2]]<-aTerm
+				groupBy.Panel<-as.character(formuRes$yTerm)#formula[[3]][[2]])
 				
 			}else
 			{
-				groupBy.Panel<-as.character(xTerm)
-				xTerm<-substitute(factor(y),list(y=xTerm))
-				if(length(bTerm)>1)
-				{
-					formula[[3]][[2]]<-xTerm
-				}else
-				{
-					formula[[3]]<-xTerm
-				}
-			}
+				groupBy.Panel<-as.character(formuRes$xTerm)
+		}
 
 			
 			
