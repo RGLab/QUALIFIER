@@ -225,11 +225,30 @@ qa.GroupPlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
-			
+			call.f<-match.call(expand.dots = T)
+#			substitute(call.f)
+			#replace subset with Subset
+			ind<-which(names(call.f)=="subset")
+			if(length(ind)>0)
+			{
+				names(call.f)[ind]<-"Subset"
+			}
+#			browser()
+#			
+#			if("Subset"%in%names(call.f))
+#				call.f$Subset<-as.call(list(quote(substitute),call.f$Subset))
+#			
+			#assign null to formula if it is missing
 			if(missing(y))
-				y<-NULL
-			plot.qaTask(qaObj=x,formula=y,...)
-
+				y<-formula(x)
+#			#reconstruct function call to plot.qaTask
+			call.f[[1]]<-plot.qaTask
+			ind<-which(names(call.f)=="x")
+			names(call.f)[ind]<-"qaObj"
+			call.f$formula<-y
+#			browser()
+ 			eval(call.f)
+#			plot.qaTask(qaObj=x,formula=y,...)
 		})
 
 plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,...)#,channel=NA,stain=NA,tube=NA
@@ -243,16 +262,16 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,isTerminal=TRU
 				
 		qpar(qaObj)<-par_old
 	}
-	lattice.options(print.function=QUALIFIER:::plot.trellisEx)
+	lattice.options(print.function=plot.trellisEx)
 #	browser()
 	db<-getData(qaObj)
 	##query db
 	curGroup<-NULL
 #	browser()
-	if(is.null(formula))
-	{
-		formula<-formula(qaObj)
-	}
+#	if(is.null(formula))
+#	{
+#		formula<-formula(qaObj)
+#	}
 
 	
 	if(is.null(qpar(qaObj)$horiz))

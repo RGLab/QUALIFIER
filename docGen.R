@@ -7,7 +7,7 @@
 removeMethod("plot",sig="qaTask")
 removeMethod("qaCheck",sig="qaTask")
 
-lapply(list.files("R",full=T),source)
+lapply(list.files("~/rglab/workspace/QUALIFIER/R",full=T),source)
 
 setwd("output")
 #setwd("inst/doc")

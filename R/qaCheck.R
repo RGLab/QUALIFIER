@@ -4,11 +4,16 @@
 ###############################################################################
 
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
+		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
 			
 			call.f<-match.call(expand.dots = F)
 
-			
+			#replace subset with Subset
+			ind<-which(names(call.f)=="subset")
+			if(length(ind)>0)
+			{
+				names(call.f)[ind]<-"Subset"
+			}
 
 			argname<-names(list(...))
 #			browser()		
@@ -50,8 +55,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #							browser()
 							cur.call.f$Subset<-substitute(x==y,list(x=formuRes$groupBy,y=curConVal))
 							cur.call.f$Subset[[2]]<-as.symbol(cur.call.f$Subset[[2]])
-							if(!missing(Subset))
-								cur.call.f$Subset<-as.call(list(as.symbol("&"),cur.call.f$Subset,substitute(Subset)))
+							if(!missing(subset))
+								cur.call.f$Subset<-as.call(list(as.symbol("&"),cur.call.f$Subset,substitute(subset)))
 							
 							cur.call.f$Subset<-as.call(list(quote(substitute),cur.call.f$Subset))
 							cur.call.f$...<-NULL
@@ -70,10 +75,10 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 				
 #			browser()
 			#if single scalar, then call the qacheck function directly
-			if(missing(Subset))
+			if(missing(subset))
 				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
 			else
-				.qaCheck(obj,formula=formula,Subset=substitute(Subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
 			
 			
 		})
