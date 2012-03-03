@@ -251,7 +251,7 @@ setMethod("plot", signature=c(x="qaTask"),
 #			plot.qaTask(qaObj=x,formula=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,...)#,channel=NA,stain=NA,tube=NA
+plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,...)#,channel=NA,stain=NA,tube=NA
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -284,12 +284,13 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,isTerminal=TRU
 	
 	statsType<-matchStatType(db,formuRes)
 #	browser()
-	
+	if(missing(pop))
+		pop<-getPop(qaObj)
 	
 	if(missing(Subset))
-		yy<-queryStats(db,statsType=statsType,pop=getPop(qaObj),isTerminal=isTerminal,fixed=fixed)
+		yy<-queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed)
 	else
-		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=getPop(qaObj),isTerminal=isTerminal,fixed=fixed)
+		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=pop,isTerminal=isTerminal,fixed=fixed)
 	if(nrow(yy)==0)
 	{
 		message("no samples are matched!")
