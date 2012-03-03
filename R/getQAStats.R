@@ -68,9 +68,9 @@ setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
 #			browser()
 				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
 				path_detail[1]<-".root"
-				paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
+				path<-paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
 					,collapse="/")
-			
+				paste("/",path,sep="")
 				})
 ##extract stats from a gating hierarchy\\
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
@@ -90,28 +90,10 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				curData<-getData(obj,curNode)
 				curGate<-getGate(obj,curNode)
 				
-				
 				##extract pop name
 				curPopName<-getPath(obj,curNode)
 #				browser()
-				
-#				if(QUALIFIER:::.isRoot(obj,curNode))
-#				{
-#					curPopName<-"Total"
-#				}else
-#				{
-#					curNodeName<-strsplit(curNode,"\\.")[[1]]
-#					if(length(curNodeName)>1)
-#						curNodeName<-curNodeName[2]
-#					if(grepl("MFI",curNodeName)||grepl("margin",curNodeName))
-#					{
-#						curPopName<-strsplit(curNodeName," ")[[1]][2]
-#					}else
-#					{
-#						curPopName<-curNodeName
-#					}
-#				}
-				
+		
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)
 #				if(curPopName%in%c("margin","MFI"))
@@ -145,11 +127,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 					chnls<-params[!params%in%time] #select channel at root level
 					
 				}
-#				else
-#				{
-#					#only select channels defined by the gate when colecct MFI from non-root node
-#					chnls<-parameters(curGate)
-#				}
+
 
 				#get MIF meatures
 				if(!is.na(chnl))

@@ -4,7 +4,7 @@
 ###############################################################################
 
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
+		function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
 			
 			call.f<-match.call(expand.dots = F)
 
@@ -47,14 +47,16 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 							cur.call.f$outlierfunc<-outlierfunc
 							cur.call.f$gOutlierfunc<-gOutlierfunc
 							cur.call.f$rFunc<-rFunc
-							cur.call.f$Subset<-formuRes$groupBy==curConVal
+							cur.call.f$Subset<-substitute(x==y,list(x=formuRes$groupBy,y=curConVal))
+							
 							if(!missing(Subset))
-								cur.call.f$Subset<-cur.call.f$Subset&Subset
+								cur.call.f$Subset<-as.call(list(as.symbol("&"),cur.call.f$Subset,substitute(Subset)))
+							
+							cur.call.f$Subset<-as.call(list(quote(substitute),cur.call.f$Subset))
 							cur.call.f$...<-NULL
 							#replace the cutoff value
 							eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
 #						browser()
-							
 							
 							eval(cur.call.f)
 							
@@ -75,7 +77,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			
 		})
 
-.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
+.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
 #	browser()
 
 	qaID<-qaID(obj)
@@ -112,11 +114,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	##query db
 	if(missing(Subset))
 	{		
-		yy<-queryStats(db,statsType=statsType,pop=getPop(obj))
+		yy<-queryStats(db,statsType=statsType,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed)
 		
 	}else
 	{
-		yy<-queryStats(db,statsType=statsType,Subset,pop=getPop(obj))
+		yy<-queryStats(db,statsType=statsType,Subset,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed)
 		
 	}
 #		browser()	

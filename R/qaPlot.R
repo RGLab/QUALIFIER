@@ -66,7 +66,7 @@ individualPlot<-function(x,curGate,curRow,statsType)
 	
 	
 
-	if(statsType=="count"&&pop=="Total")##total cell count
+	if(statsType=="count"&&pop=="/root")##total cell count
 	{
 		##individual xyplot without gate
 		xyplot(eval(parse(text=paste("`",params[2],"`~`",params[1],"`",sep="")))
@@ -174,7 +174,7 @@ qa.GroupPlot<-function(db,yy)
 		pData(fs1)$outlier<-yy[,]$outlier
 		varMetadata(fs1)["outlier",]<-"outlier"
 		obj<-NULL
-		if(!pop%in%c("Total","root"))##total cell count
+		if(!pop=="/root")##total cell count
 		{
 			
 		
@@ -232,7 +232,7 @@ setMethod("plot", signature=c(x="qaTask"),
 
 		})
 
-plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=NA,stain=NA,tube=NA
+plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,...)#,channel=NA,stain=NA,tube=NA
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -268,9 +268,9 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	
 	
 	if(missing(Subset))
-		yy<-queryStats(db,statsType=statsType,pop=getPop(qaObj))
+		yy<-queryStats(db,statsType=statsType,pop=getPop(qaObj),isTerminal=isTerminal,fixed=fixed)
 	else
-		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=getPop(qaObj))
+		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=getPop(qaObj),isTerminal=isTerminal,fixed=fixed)
 	if(nrow(yy)==0)
 	{
 		message("no samples are matched!")
@@ -327,7 +327,7 @@ plot.qaTask<-function(qaObj,formula,Subset,width=10,height=10,par,...)#,channel=
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
 		
-		if(statsType=="spike"||(statsType=="count"&&getPop(qaObj)=="Total"))
+		if(statsType=="spike"||(statsType=="count"&&yy$population[1]=="/root"))
 		{
 #			browser()
 			thisCall<-lapply(1:nrow(yy),function(i)

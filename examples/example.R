@@ -60,7 +60,7 @@ load(file="gatingHierarchy/GS.Rda")
 db<-new.env()##using environment to mimic a database connection
 saveToDB(db,G,anno)##append the annotation  and Gating set to db 
 time1<-Sys.time()
-getQAStats(db,nslaves=10)
+getQAStats(db)
 Sys.time()-time1
 #
 save(db,file="data/ITN029_all.rda")#save stats
@@ -113,6 +113,7 @@ plot(qaTask.list[["NumberOfEvents"]]
 #,dest="image"
 )
 
+qaTask.list[["NumberOfEvents"]]@pop<-"root"
 plot(qaTask.list[["NumberOfEvents"]]
 		,Subset=id=='245'
 #		,scatterPlot=TRUE
@@ -166,9 +167,10 @@ qaCheck(qaTask.list[["spike"]]
 #		,z.cutoff=3
 #		,alpha=0.001
 )
+qaTask.list[["spike"]]@pop<-"root"
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
-#		,Subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
+		,Subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
 #	,dest="image"
 #	,plotAll=T
 )
@@ -180,14 +182,14 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 
 qaCheck(qaTask.list[["MNC"]]
-#		,Subset=coresampleid%in%c(11730,8780)
-		,z.cutoff=2
+		,Subset=coresampleid%in%c(11730,8780)
+		,z.cutoff=1
 )
 
 plot(qaTask.list[["MNC"]]
 #		,proportion~coresampleid
-		, factor(coresampleid)~proportion
-		,par=list(horiz=TRUE)
+#		, factor(coresampleid)~proportion
+#		,par=list(horiz=TRUE)
 
 )
 

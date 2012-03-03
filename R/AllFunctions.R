@@ -204,28 +204,57 @@ makeQaTask<-function(db,checkListFile)
 	qaTask.list
 }
 
-#queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
-queryStats<-function(db,Subset,statsType=NULL,pop=character(0))
+matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 {
 #	browser()
-#	formuRes<-.formulaParser(formula)
+	#when pattern starts as slash, then assume it is a full path match instead of the substring match
+	if(substr(pattern,1,1)=="/")
+		return(pattern==nodePath)
+#get the positions of the parttern matched in the gate path
+	posList<-gregexpr(pattern,nodePath,fixed=fixed)
+	unlist(lapply(1:length(posList),function(i){
+				pos<-posList[[i]]
+				curNode<-as.character(nodePath[[i]])
+				if(length(pos)==1&&pos==-1)
+					return(FALSE)
+				else
+				{
+					if(isTerminal)#if matched as a terminal node,do the further check on the slash
+					{
+						res<-unlist(lapply(pos,function(x){
+											#check the existence of slash after the pattern
+											toMatch<-substring(curNode,x+1,nchar(curNode))
+											!grepl("/",toMatch)
+										}))
+						return(any(res))#return true if any matched instance satifsfy the terminal check
+					}else
+					{
+						return(TRUE) #if mathced as non-terminal node, then return true once it is matched anywhere in the path
+					}
+					
+				}
+			}))
 	
-#	yTerm<-formuRes$yTerm
-#	func<-formuRes$func
-#	groupBy<-formuRes$groupBy
+	
+	
+	
+}
 
-	
-#	statsType<-as.character(yTerm)
+#queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
+queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE)
+{
+#	browser()
+
 	
 	ret_anno<-pData(db$G)
 	
 	ret_stats<-db$statsOfGS
 	
-	
+#	browser()
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		ret_stats <-subset(ret_stats,grepl(pop,population))
+		ret_stats <-subset(ret_stats,matchNode(pop,population,isTerminal,fixed))
 	}
 #	browser()
 	if(!is.null(statsType))
@@ -251,10 +280,7 @@ queryStats<-function(db,Subset,statsType=NULL,pop=character(0))
 
 #	browser()
 	#filter by subset 
-#	if(!is.null(subset))
-#	{
-#		ret<-subset(ret,eval(parse(text=subset)))	
-#	}
+
 	if(!missing(Subset))
 	{
 		r <- eval(Subset, ret)
