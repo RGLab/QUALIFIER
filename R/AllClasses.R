@@ -20,7 +20,7 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
 						,plotType="xyplot"
-						,par=list()
+						,par=list(horiz=FALSE)
 						,db="ANY"
 						)
 		)

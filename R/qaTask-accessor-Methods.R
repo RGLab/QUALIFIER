@@ -66,7 +66,7 @@ setMethod("show",
 			cat("Level :", qaLevel(object), "\n") 
 			cat("Description :", description(object), "\n")
 
-			cat("Gated node: ", getPop(object))
+			cat("population: ", getPop(object))
 			cat("\n")
 			cat("Default formula :")
 			print(formula(object))

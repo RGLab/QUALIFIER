@@ -60,7 +60,7 @@ load(file="gatingHierarchy/GS.Rda")
 db<-new.env()##using environment to mimic a database connection
 saveToDB(db,G,anno)##append the annotation  and Gating set to db 
 time1<-Sys.time()
-getQAStats(db)
+getQAStats(db$G)
 Sys.time()-time1
 #
 save(db,file="data/ITN029_all.rda")#save stats
@@ -113,10 +113,9 @@ plot(qaTask.list[["NumberOfEvents"]]
 #,dest="image"
 )
 
-qaTask.list[["NumberOfEvents"]]@pop<-"root"
 plot(qaTask.list[["NumberOfEvents"]]
 		,Subset=id=='245'
-#		,scatterPlot=TRUE
+		,scatterPlot=TRUE
 )
 
 
@@ -167,7 +166,6 @@ qaCheck(qaTask.list[["spike"]]
 #		,z.cutoff=3
 #		,alpha=0.001
 )
-qaTask.list[["spike"]]@pop<-"root"
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
 		,Subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'

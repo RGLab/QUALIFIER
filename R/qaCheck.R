@@ -47,8 +47,9 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 							cur.call.f$outlierfunc<-outlierfunc
 							cur.call.f$gOutlierfunc<-gOutlierfunc
 							cur.call.f$rFunc<-rFunc
+#							browser()
 							cur.call.f$Subset<-substitute(x==y,list(x=formuRes$groupBy,y=curConVal))
-							
+							cur.call.f$Subset[[2]]<-as.symbol(cur.call.f$Subset[[2]])
 							if(!missing(Subset))
 								cur.call.f$Subset<-as.call(list(as.symbol("&"),cur.call.f$Subset,substitute(Subset)))
 							

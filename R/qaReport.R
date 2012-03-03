@@ -71,19 +71,30 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 			nGroupFailed<-0
 			
 			formula1<-formula(x)
-			cond<-NULL
-			if(length(formula1[[3]])>1)
-			{
-				cond<-formula1[[3]][[3]]
-				xTerm<-formula1[[3]][[2]]
-			}else
-			{
-				xTerm<-formula1[[3]]
-			}
+			
+			formuRes<-.formulaParser(formula1)
+			xTerm<-formuRes$xTerm
+#			groupBy<-formuRes$groupBy
+			
+			statsType<-matchStatType(db,formuRes)
+#			cond<-NULL
+#			if(length(formula1[[3]])>1)
+#			{
+#				cond<-formula1[[3]][[3]]
+#				xTerm<-formula1[[3]][[2]]
+#			}else
+#			{
+#				xTerm<-formula1[[3]]
+#			}
 			groupField<-NULL
 			if(plotType(x)=="bwplot")
 			{
-				groupField<-as.character(xTerm)
+				
+				if(qpar(x)$horiz)
+					groupField<-as.character(formuRes$yTerm)	
+				else
+					groupField<-as.character(formuRes$xTerm)
+								
 				nGroupFailed<-length(unique(
 								eval(substitute(gOutResult$v
 												,list(v=groupField)
@@ -136,13 +147,13 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #						browser()
 				
 				
-				if(length(cond)>1)
+				if(length(formuRes$groupBy)>1)
 				{
 					##individual outlier
-					groupBy<-as.character(cond[[2]])
+					groupBy<-as.character(formuRes$groupBy[1])
 					groupByStr<-paste("outResult$",groupBy,sep="")
 					
-					formula1[[3]][[3]]<-cond[[3]]
+					formula1[[3]][[3]]<-as.symbol(paste(formuRes$groupBy[-1],collapse="*"))
 					
 					
 					if(nFscFailed>0)
@@ -254,7 +265,9 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 						)
 					}
 #							browser()
-					yy<-queryStats(db,formula1,pop=getPop(x))
+#					yy<-queryStats(db,formula1,pop=getPop(x))
+					yy<-queryStats(db,statsType=statsType,pop=getPop(x),isTerminal=T,fixed=F)
+
 					factors<-lapply(groupBy,function(x){
 								eval(substitute(yy$v,list(v=x)))
 							})
