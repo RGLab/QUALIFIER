@@ -210,30 +210,36 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
 	if(substr(pattern,1,1)=="/")
 		return(pattern==nodePath)
+#	browser()
 #get the positions of the parttern matched in the gate path
-	posList<-gregexpr(pattern,nodePath,fixed=fixed)
-	unlist(lapply(1:length(posList),function(i){
-				pos<-posList[[i]]
-				curNode<-as.character(nodePath[[i]])
-				if(length(pos)==1&&pos==-1)
-					return(FALSE)
-				else
-				{
-					if(isTerminal)#if matched as a terminal node,do the further check on the slash
-					{
-						res<-unlist(lapply(pos,function(x){
-											#check the existence of slash after the pattern
-											toMatch<-substring(curNode,x+1,nchar(curNode))
-											!grepl("/",toMatch)
-										}))
-						return(any(res))#return true if any matched instance satifsfy the terminal check
-					}else
-					{
-						return(TRUE) #if mathced as non-terminal node, then return true once it is matched anywhere in the path
-					}
-					
-				}
-			}))
+	if(isTerminal)
+		grepl(pattern,basename(as.character(nodePath)),fixed=fixed)
+#		posList<-gregexpr(pattern,nodePath,fixed=fixed)
+	else
+		grepl(pattern,nodePath,fixed=fixed)
+	
+#	unlist(lapply(1:length(posList),function(i){
+#				pos<-posList[[i]]
+#				curNode<-as.character(nodePath[[i]])
+#				if(length(pos)==1&&pos==-1)
+#					return(FALSE)
+#				else
+#				{
+#					if(isTerminal)#if matched as a terminal node,do the further check on the slash
+#					{
+#						res<-unlist(lapply(pos,function(x){
+#											#check the existence of slash after the pattern
+#											toMatch<-substring(curNode,x+1,nchar(curNode))
+#											!grepl("/",toMatch)
+#										}))
+#						return(any(res))#return true if any matched instance satifsfy the terminal check
+#					}else
+#					{
+#						return(TRUE) #if mathced as non-terminal node, then return true once it is matched anywhere in the path
+#					}
+#					
+#				}
+#			}))
 	
 	
 	

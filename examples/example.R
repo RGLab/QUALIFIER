@@ -65,17 +65,6 @@ Sys.time()-time1
 #
 save(db,file="data/ITN029_all.rda")#save stats
 
-#read pre-determined events number for tubes from csv file
-##pannel name should be in place of tube name since the entire package is using pannel name 
-##to represent the tube
-
-
-tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
-
-tubesEvents2009<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
-tubesEvents2007<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])
-
-
 
 
 ################################################################################  
@@ -93,21 +82,34 @@ qaTask.list<-makeQaTask(db,checkListFile)
 
 CairoX11()#for faster rendering plot
 
+#read pre-determined events number for tubes from csv file
+##pannel name should be in place of tube name since the entire package is using pannel name 
+##to represent the tube
+
+
+tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
+
+tubesEvents2009<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
+tubesEvents2007<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])
+
+
+
 ###80% of the pre-defined the value for each pannel
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents2009
-		,Subset=RecdDt>='2009-08-01'
+		,subset=RecdDt>='2009-08-01'
 )
+#Rprof()
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8*tubesEvents2007
-		,Subset=RecdDt<'2009-08-01'
+		,subset=RecdDt<'2009-08-01'
 )
-
-
+#Rprof(NULL)
+#summaryRprof()
 plot(qaTask.list[["NumberOfEvents"]]
 #		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
@@ -180,8 +182,8 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 
 qaCheck(qaTask.list[["MNC"]]
-		,Subset=coresampleid%in%c(11730,8780)
-		,z.cutoff=1
+#		,Subset=coresampleid%in%c(11730,8780)
+#		,z.cutoff=1
 )
 
 plot(qaTask.list[["MNC"]]
@@ -193,10 +195,10 @@ plot(qaTask.list[["MNC"]]
 
 #scatter plot for a sample group	
 plot(qaTask.list[["MNC"]]
-		,proportion~factor(coresampleid)
-		,par=list(xlab="coresampleid")
-#		, coresampleid ~proportion
-#		,par=list(horiz=TRUE)
+#		,proportion~factor(coresampleid)
+#		,par=list(xlab="coresampleid")
+		, coresampleid ~proportion
+		,par=list(horiz=TRUE)
 		,Subset=coresampleid%in%c(11730,8780)
 #		,scatterPlot=TRUE
 #		,dest="image"

@@ -349,10 +349,10 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 									ylab<-NULL
 								}
 #										browser()
-								plotCallStr<-paste("plot(x,formula1,dest=imageDir"
+								plotCallStr<-paste("plot(x,y=formula1,dest=imageDir"
 										,",ylab=ylab,scales=list(x=c(draw=xaxis.draw),y=(relation=relation))"
-										,",rFunc.=rFunc,plotAll=plotAll,subset=\""
-										,groupBy,"=='",curGroup,"'\")",sep="")
+										,",rFunc.=rFunc,plotAll=plotAll,subset="
+										,groupBy,"=='",curGroup,"')",sep="")
 #										browser()
 								imageName<-eval(parse(text=plotCallStr))
 								rownames(curOut)<-NULL#1:nrow(sub2)
@@ -418,9 +418,10 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 					)
 				}else
 				{
+#					browser()
 					#if only one conditioning variable
 					#simply order by it and output the fcsfile list
-					if(length(cond)==0)
+					if(length(formuRes$groupBy)==0)
 					{
 #								groupBy<-as.character(formula1[[3]])
 						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
@@ -434,7 +435,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 						
 					}else
 					{
-						groupBy<-as.character(cond)
+						groupBy<-formuRes$groupBy
 #								groupByStr<-paste("outResult$",groupBy,sep="")
 						castResult<-eval(substitute(u[order(u$v),c(w,v)]
 													,list(u=as.symbol("outResult"),v=groupBy,w="fcsFile")

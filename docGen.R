@@ -8,6 +8,9 @@ removeMethod("plot",sig="qaTask")
 removeMethod("qaCheck",sig="qaTask")
 
 lapply(list.files("~/rglab/workspace/QUALIFIER/R",full=T),source)
+library(MASS)
+library(RSVGTipsDevice)
+library(hwriter)
 
 setwd("output")
 #setwd("inst/doc")

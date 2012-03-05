@@ -154,9 +154,6 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	{
 		##merge multipe conditioning variable to one to make a simply factor
 		
-#		factors<-as.factor(apply(yy[,groupBy],1,paste,collapse="_"))
-#		gOutlierfunc<-list(...)$gOutlierfunc
-#	browser()
 		if(is.null(gOutlierfunc))
 		{
 			gOutlierfunc<-outlier.norm
@@ -171,11 +168,6 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 
 					IQRs<-tapply(x[,statsType],curFactor,IQR)
 					
-					#loop to detect outliers at each step by comparing the pvalue and the estimated variance (v>p)
-#					ttt<-cochran.test(value~coresampleid,yy)
-#					ttt
-					
-#		groupOutlier<-toutlier(log(IQRs),isLower=FALSE)
 					#log transform for between groups outlier call
 #					browser()
 					curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
@@ -184,7 +176,6 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					curOutSids<-x[curFactor%in%curOutGroupID,]$sid
 					if(length(curOutSids)>0)
 						curOutSids
-#		groupOutlier<-groupOutlier[which(groupOutlier)]	
 					})
 		groupOutSids<-unlist(groupOutSids)
 	}
