@@ -21,7 +21,7 @@
 
 #	browser()
 	
-	srcFile<-list.files(system.file("javascript",package="QUALIFIER"),pattern="highlight.js",full=T)
+	srcFile<-list.files(system.file("javascript",package="QUALIFIER"),pattern="highlight.js",full.names=TRUE)
 	srcFile<-file(srcFile, "r")
 	srcCode<-readLines(srcFile)
 	
@@ -260,7 +260,8 @@ queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		ret_stats <-subset(ret_stats,matchNode(pop,population,isTerminal,fixed))
+		r<-matchNode(pop,ret_stats$population,isTerminal,fixed)
+		ret_stats <-ret_stats[r,]
 	}
 #	browser()
 	if(!is.null(statsType))

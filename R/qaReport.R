@@ -564,7 +564,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 	#init the image folder
 	dir.create(imageDir,recursive=TRUE,showWarnings=F)
 #	file.remove(list.files(imageDir,full=TRUE))
-	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full=T)
+	from<-list.files(system.file("htmlTemplates",package="QUALIFIER"),pattern="qaReport",full.names=TRUE)
 
 	file.copy(from=from,to=imageDir)
 

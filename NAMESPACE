@@ -2,15 +2,13 @@ import(ncdfFlow)
 importFrom(RSVGTipsDevice,devSVGTips,setSVGShapeToolTip,setSVGShapeURL)
 importFrom(hwriter,openPage,hwrite,closePage)
 importFrom(MASS,rlm,huber)
-importFrom(flowCore,colnames)
+importFrom(flowCore,colnames,plot)
 import(flowViz)
 importFrom(zoo,as.yearmon)
 	
 exportClasses(qaTask)
 
 export(	"queryStats"
-		,"qa.singlePlot"
-		,"qa.GroupPlot"
 		,"saveToDB"
 		,"makeQaTask"
 		,"proportion.outliers.robust"

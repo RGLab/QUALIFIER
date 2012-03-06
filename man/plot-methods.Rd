@@ -61,7 +61,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 }
 
 \seealso{
-\code{\link{qaCheck}},\code{\link[QUALIFIER:qa.report]{qa.report}}
+\code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
 }
 \examples{
 

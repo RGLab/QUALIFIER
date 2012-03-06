@@ -2,10 +2,10 @@
 # 
 # Author: mike
 ###############################################################################
-proportion.outliers.robust<-function (dat, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
+proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
-	outliers<-rep(FALSE,length(dat))
-	opt <- optim(par = c(1, 1), function(x, data = dat) {
+	outliers<-rep(FALSE,length(x))
+	opt <- optim(par = c(1, 1), function(x, data = x) {
 				a <- x[1]
 				b <- x[2]
 				#method of moments; numerical minimization of squared deviations
@@ -19,32 +19,32 @@ proportion.outliers.robust<-function (dat, alpha = 0.01,isUpper=TRUE,isLower=TRU
 	}else{
 		a<-opt$par[1]
 		b<-opt$par[2]
-		upper<-lower<-rep(FALSE,length(dat))
-		if(isUpper)	upper<-pbeta(dat,a,b)>(1-alpha/2)
-		if(isLower) lower<-pbeta(dat,a,b)<(alpha/2)
+		upper<-lower<-rep(FALSE,length(x))
+		if(isUpper)	upper<-pbeta(x,a,b)>(1-alpha/2)
+		if(isLower) lower<-pbeta(x,a,b)<(alpha/2)
 		outliers<-upper|lower
 	}
 	return(outliers)
 }
 
-proportion.outliers.mle<-function (dat, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
+proportion.outliers.mle<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
-	outliers<-rep(FALSE,length(dat))
-	opt <- optim(par = c(1, 1), function(x, data = dat) {
+	outliers<-rep(FALSE,length(x))
+	opt <- optim(par = c(1, 1), function(x, data = x) {
 				a <- x[1]
 				b <- x[2]
 				-sum(dbeta(data,a,b,log=T))
 			})
 	if (opt$convergence != 0) {
 		warning("MLE Outlier detection for proportions failed to converge. Trying robust method.")
-		return(proportion.outliers.robust(dat,alpha=alpha))
+		return(proportion.outliers.robust(x,alpha=alpha))
 	}
 	else{
 		a<-opt$par[1]
 		b<-opt$par[2]
-		upper<-lower<-rep(FALSE,length(dat))
-		if(isUpper)	upper<-pbeta(dat,a,b)>(1-alpha/2)
-		if(isLower) lower<-pbeta(dat,a,b)<(alpha/2)
+		upper<-lower<-rep(FALSE,length(x))
+		if(isUpper)	upper<-pbeta(x,a,b)>(1-alpha/2)
+		if(isLower) lower<-pbeta(x,a,b)<(alpha/2)
 		outliers<-upper|lower
 	}
 	return(outliers)
@@ -52,7 +52,7 @@ proportion.outliers.mle<-function (dat, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 
 
 ##based on boxplot ... is the argument passed from parent call which is ignored here
-qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...) 
+qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 {
 #	browser()
 	if (alpha < 0) 
@@ -88,7 +88,7 @@ qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...)
 
 
 ##outlier detection based on normal distribution robusted estimation of mu and sigma 
-outlier.norm <-function (x,plot=FALSE,...) 
+outlier.norm <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE) 
 {
 #	browser()
 	#estimate mu and sd
@@ -122,7 +122,7 @@ outlier.norm <-function (x,plot=FALSE,...)
 }
 
 
-outlier.t <-function (x,plot=FALSE,...) 
+outlier.t <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE) 
 {
 #	browser()
 	par <- optim(c(mu = 0, sigma = 1) 

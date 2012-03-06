@@ -1,5 +1,5 @@
 \name{getQAStats}
-
+\docType{methods}
 \alias{getQAStats}
 \title{
 Calculate and extract the statistics from the gating hierarchies.   
@@ -41,7 +41,6 @@ getQAStats(obj,isFlowCore=TRUE,nslaves=NULL,...)
 \author{
 Mike Jiang,Greg Finak
 
-
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 }
 
@@ -55,5 +54,5 @@ getQAStats(G)#from a gating set
 getQAStats(db,nslaves=10)#from an environment that contains a gating set
 }
 }
-\keyword{functions}
+\keyword{methods}
 

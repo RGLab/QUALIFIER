@@ -40,7 +40,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 }
 
 \seealso{
-\code{\link{qaTask}},\code{\link{qa.report}}
+\code{\link{qaTask}},\code{\link{qaReport}}
 }
 
 \examples{
