@@ -5,7 +5,8 @@ Version: 0.99.1
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends: R (>= 2.14.0),flowWorkspace,reshape
-Imports: MASS,ncdfFlow,hwriter,RSVGTipsDevice
+Imports: MASS,hwriter,RSVGTipsDevice
+Enhances:ncdfFlow
 Collate: AllGeneric.R 
 		AllClasses.R  
 		AllFunctions.R  
