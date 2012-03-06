@@ -1,5 +1,12 @@
 \name{outlierDetection}
 \alias{outlierDetection}
+\alias{proportion.outliers.robust}
+\alias{proportion.outliers.mle}
+\alias{qoutlier}
+\alias{outlier.norm}
+\alias{outlier.t}
+\alias{outlier.cutoff}
+
 \title{outliers detection functions}
 \description{
 Distribution based outlier detection functions.

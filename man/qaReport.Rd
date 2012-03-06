@@ -3,6 +3,7 @@
 \alias{qaReport}
 \alias{qaReport-methods}
 \alias{qaReport,qaTask-method}
+\alias{qaReport,list-method}
 \title{
 create quality assessment report 
 }

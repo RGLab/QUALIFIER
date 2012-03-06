@@ -1,5 +1,8 @@
 \name{makeQaTask}
 \alias{makeQaTask}
+\alias{qaCheckList}
+\alias{tubesevents}
+\alias{db}
 \title{
 Create a list of \code{qaTask} objects 
 }

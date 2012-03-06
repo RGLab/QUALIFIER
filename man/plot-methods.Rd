@@ -3,6 +3,8 @@
 \alias{plot}
 \alias{plot-methods}
 \alias{plot,qaTask-method}
+\alias{plot,qaTask,ANY-method}
+
 \title{plot the statistics for a particular cell population of a group of samples }
 \description{
 plot the statistics for a particular cell population of a group of samples,this method is usually called 
@@ -23,7 +25,13 @@ plot(x,y,...)}
 	
 	\item{...}{ arguments to control the output.
 	
-				subset:a character containing the logical expression as a filter. see \code{\link{qaCheck}} for more details.					
+				pop:a character scalar indicating the population name.If provided,it overwrites the pop slot in qaTask object.
+				
+				isTerminal:a logical scalar indicating whether the pop is at the terminal node of the gating path.
+					
+				fixed:a logical scalar indicating whether the pop name is matched as it is .By default it is FALSE,which matches the gating path as the regular expression
+				
+				subset:a logical expression as a filter. see \code{\link{qaCheck}} for more details.					
 
 				width,height:size specification for the svg output.
 				
@@ -38,6 +46,7 @@ plot(x,y,...)}
 						
 				scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is plotted instead of the summary plot(xyplot/bwplot) 
 				
+				par:A list storing all the lattice arguments.If provided,it overwrites the par slot of qaTask object.
 				
 			}
 }
