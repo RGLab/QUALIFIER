@@ -116,7 +116,7 @@ plot(qaTask.list[["NumberOfEvents"]]
 )
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,Subset=id=='245'
+		,subset=id=='245'
 		,scatterPlot=TRUE
 )
 
@@ -207,7 +207,7 @@ plot(qaTask.list[["MNC"]]
 #scatter okit fore one sample
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
-		,Subset=coresampleid==8780&id==49)
+		,subset=coresampleid==8780&id==49)
 
 qaCheck(qaTask.list[["RedundantStain"]]
 #			,gOutlierfunc=qoutlier
@@ -226,7 +226,7 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qaReport(qaTask.list[["MNC"]],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qaReport(qaTask.list,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
 
 
