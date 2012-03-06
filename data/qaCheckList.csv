@@ -1,8 +1,0 @@
-"qaID","qaName","description","qaLevel","pop","nodeType","formula","plotType"
-1,"MFIOverTime","Fluorescence stability over time","Assay","MFI","terminal","MFI~RecdDt|channel*stain","xyplot"
-2,"NumberOfEvents","Number of Events Collected","Tube","root","terminal","count~RecdDt|Tube","xyplot"
-3,"MNC","Consistency of Lymphocyte/MNC Gate","Assay","MNC","terminal","proportion~coresampleid","bwplot"
-4,"RedundantStain","Consistency of redundant Staining Across sample aliquots","Channel","MFI","terminal","proportion~coresampleid|channel*stain","bwplot"
-5,"RBCLysis","Sufficient RBC lysis","Tube","WBC_perct","terminal","proportion~RecdDt|Tube","xyplot"
-6,"spike","Measurement spikes/drifts during acquisition","Tube","root","terminal","spike~RecdDt|Tube*channel","xyplot"
-7,"BoundaryEvents","Off-scale Boundary Events","Channel","margin","terminal","proportion~RecdDt|channel","xyplot"

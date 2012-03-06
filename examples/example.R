@@ -77,7 +77,7 @@ save(db,file="data/ITN029_all.rda")#save stats
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
 data("ITN029")#load stats from disk
 #db$G<-G
-checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 CairoX11()#for faster rendering plot
@@ -87,7 +87,7 @@ CairoX11()#for faster rendering plot
 ##to represent the tube
 
 
-tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
+tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
 
 tubesEvents2009<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
 tubesEvents2007<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])

@@ -5,7 +5,10 @@ Version: 0.99.1
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends: R (>= 2.14.0),flowWorkspace,reshape
-Imports: MASS,hwriter,RSVGTipsDevice,lattice,flowCore,flowViz,methods
+Imports: BiocGenerics, IDPmisc, MASS, RBGL, RSVGTipsDevice, XML,
+         flowCore, flowViz, flowWorkspace, grDevices, graphics, grid,
+         hwriter, lattice, methods, reshape, stats, utils
+#Imports: MASS,hwriter,RSVGTipsDevice,lattice,flowCore,flowViz,methods
 Enhances:ncdfFlow
 Collate: AllGeneric.R 
 		AllClasses.R  

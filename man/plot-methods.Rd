@@ -77,7 +77,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 \dontrun{
 
 data("ITN029")
-checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 
 #using formula to summing up the percentage of boundary events of each channel

@@ -115,7 +115,7 @@ data("ITN029")
 <<makeQaTask, echo=true, results=verbatim>>=
 
 
-checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv")
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 qaTask.list[1:2]
 @
@@ -267,7 +267,7 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 When minitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
 <<tubesEvents, results=hide,echo=FALSE>>=
-tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv"),row.names=1)
+tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
 tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents)
 @
 
