@@ -3,12 +3,12 @@ importFrom(RSVGTipsDevice,devSVGTips,setSVGShapeToolTip,setSVGShapeURL)
 importFrom(hwriter,openPage,hwrite,closePage)
 importFrom(MASS,rlm,huber)
 importFrom(graphics,plot)
-importFrom(flowCore,colnames)
-importFrom(flowWorkspace,getData)
-
-#import(flowViz)
+importFrom(flowCore,colnames,pData)
+#importMethodsFrom(XML, xmlParse, xmlRoot, xmlNode,addChildren,xmlCDataNode,replaceNodes,saveXML)
+import(flowViz)
+#import(flowWorkspace)
 #importFrom(zoo,as.yearmon)
-
+importFrom(reshape,cast,melt)
 importFrom(Biobase,description)
 	
 exportClasses(qaTask)

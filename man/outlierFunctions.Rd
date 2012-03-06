@@ -24,7 +24,7 @@ outlier.cutoff(x,lBound=NULL,uBound=NULL)
 
 	\item{isUpper,isLower}{logical scalars indicating whether the outliers are checked at upper or lower side of the distribution.}
 	
-	\item{plot}{logical scalar indicating whether to visualize the outlier detection results.
+	\item{plot}{logical scalar indicating whether to visualize the outlier detection results.}
 	
 }
 \details{
@@ -34,6 +34,7 @@ outlier.t is based on t-distribution.
 outlier.cutoff is a simple cutoff-based outlier detection.
 These different outlier detection functions are used together with qaCheck method to perform outlier checks.
 }
+
 \value{
 a logical vector with the same length of input vector,indicating whether each entry of the input is a outlier.
 }

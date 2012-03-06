@@ -9,24 +9,24 @@ plot the statistics for a particular cell population of a group of samples,this 
 after \code{qaCheck} to visualize the QA results.  
 }
 \usage{
-plot(obj,formula=NULL,subset=NULL,width=10,height=10,...)}
+plot(x,y,...)}
 \arguments{
 
-	\item{obj}{a \code{qaTask} object}
+	\item{x}{a \code{qaTask} object}
 	
-	 \item{formula}{a \code{formula} describing the variables to be used for plotting. 
+	 \item{y}{a \code{formula} describing the variables to be used for plotting. 
 	 								see \code{\link{qaCheck}} for more details.
 		}
 	
-	\item{subset}{
-					a character containing the logical expression as a filter. see \code{\link{qaCheck}} for more details.					
-				}			
-
-	\item{width,height}{size specification for the svg output.
-			}
+	
+			
 	
 	\item{...}{ arguments to control the output.
 	
+				subset:a character containing the logical expression as a filter. see \code{\link{qaCheck}} for more details.					
+
+				width,height:size specification for the svg output.
+				
 				dest: a character specifying the output path. It is NULL by default, which indicates using the regular R device as the output.
 						Otherwise it outputs to a svg file.
 				

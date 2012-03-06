@@ -8,7 +8,7 @@
 Perform the quality assessment for a particular QA Task based on the information provided by \code{\link{qaTask}} object. 
 }
 \usage{
-qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
+qaCheck(obj,...)}
 \arguments{
 
 	\item{obj}{a \code{qaTask} object}
@@ -54,6 +54,8 @@ qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
 					
 			}
 	\item{...}{
+					isTerminal:a logical scalar indicating whether the pop is at terminal node of the gating path.
+					fixed:a logical scalar indicating whether the pop name is matched as it is .By default it is FALSE,which matches the gating path as the regular expression
 					arguments to be passed to \code{outlierfunc}.
 			}
 }

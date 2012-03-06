@@ -88,7 +88,7 @@ qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE)
 
 
 ##outlier detection based on normal distribution robusted estimation of mu and sigma 
-outlier.norm <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE) 
+outlier.norm <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 {
 #	browser()
 	#estimate mu and sd
@@ -101,7 +101,7 @@ outlier.norm <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,is
 	{
 		mu<-par[[1]]
 		sigma<-par[[2]]
-		if(is.null(list(...)$z.cutoff)){
+		if(is.null(z.cutoff)){
 			#stardarize x
 #	x1<-(x - mu)/sigma
 			#calculate the cumulative probability of each x value
@@ -110,7 +110,7 @@ outlier.norm <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,is
 			#standardize to z-score
 			cp<-(x-mu)/sigma
 		}
-		isOutlier<-outlierDetection(cp,...)
+		isOutlier<-outlierDetection(cp,alpha,z.cutoff,isUpper,isLower)
 	}
 	
 
@@ -122,7 +122,7 @@ outlier.norm <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,is
 }
 
 
-outlier.t <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE) 
+outlier.t <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 {
 #	browser()
 	par <- optim(c(mu = 0, sigma = 1) 
@@ -136,7 +136,7 @@ outlier.t <-function (x,plot=FALSE,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLow
 	#calculate the probability of each x value
 	cp<-pt(x1, df = 4)
 	
-	isOutlier<-outlierDetection(cp,...)
+	isOutlier<-outlierDetection(cp,alpha,z.cutoff,isUpper,isLower)
 	
 	if(plot)
 	{	

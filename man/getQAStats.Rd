@@ -1,6 +1,8 @@
 \name{getQAStats}
 \docType{methods}
 \alias{getQAStats}
+\alias{getQAStats-methods}
+\alias{getQAStats,qaTask-method}
 \title{
 Calculate and extract the statistics from the gating hierarchies.   
 }
