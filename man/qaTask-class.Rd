@@ -11,8 +11,9 @@
 \alias{getData,qaTask}
 \alias{formula,qaTask}
 \alias{plotType,qaTask}
-\alias{par,qaTask}
-\alias{par<-,qaTask}
+\alias{par,qaTask-method}
+\alias{par<-,qaTask,list-method}
+
 \alias{show,qaTask}
 
 \title{'qaTask': a class for storing important information of flow cytometry data quality assessment task}

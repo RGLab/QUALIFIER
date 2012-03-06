@@ -14,7 +14,7 @@ Distribution based outlier detection functions.
 \usage{
 proportion.outliers.robust(x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 proportion.outliers.mle(x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
-qoutlier(x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
+qoutlier(x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...) 
 outlier.norm(x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 outlier.t(x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 outlier.cutoff(x,lBound=NULL,uBound=NULL)

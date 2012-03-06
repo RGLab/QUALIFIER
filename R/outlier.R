@@ -52,7 +52,7 @@ proportion.outliers.mle<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 
 
 ##based on boxplot ... is the argument passed from parent call which is ignored here
-qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
+qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...) 
 {
 #	browser()
 	if (alpha < 0) 
