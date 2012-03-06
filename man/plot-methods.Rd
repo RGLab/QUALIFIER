@@ -1,6 +1,5 @@
 \name{plot-methods}
 \docType{methods}
-\alias{plot}
 \alias{plot,qaTask-method}
 \alias{plot,qaTask,ANY-method}
 
