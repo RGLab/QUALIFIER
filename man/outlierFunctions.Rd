@@ -1,5 +1,5 @@
-\name{outlierDetection}
-\alias{outlierDetection}
+\name{outlierFunctions}
+\alias{outlierFunctions}
 \alias{proportion.outliers.robust}
 \alias{proportion.outliers.mle}
 \alias{qoutlier}
@@ -33,7 +33,7 @@ outlier.cutoff(x,lBound=NULL,uBound=NULL)
 	
 	\item{plot}{logical scalar indicating whether to visualize the outlier detection results.}
 	
-	\item{...}{ other arguments to be passed to qoutlier function,currently it is ignored.
+	\item{...}{ other arguments to be passed to qoutlier function,currently it is ignored.}
 }
 \details{
 qoutlier is IQR based outlier detection.

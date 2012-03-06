@@ -13,7 +13,8 @@
 \alias{plotType,qaTask}
 \alias{qpar,qaTask-method}
 \alias{qpar<-,qaTask,list-method}
-
+\alias{qpar}
+\alias{qpar<-}
 \alias{show,qaTask}
 
 \title{'qaTask': a class for storing important information of flow cytometry data quality assessment task}
