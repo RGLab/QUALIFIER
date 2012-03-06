@@ -8,7 +8,7 @@ importFrom(flowCore,colnames,pData)
 import(flowViz)
 #import(flowWorkspace)
 #importFrom(zoo,as.yearmon)
-importFrom(reshape,cast,melt)
+#importFrom(reshape,cast,melt)
 importFrom(Biobase,description)
 	
 exportClasses(qaTask)
