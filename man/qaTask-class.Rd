@@ -36,6 +36,7 @@ Objects can be created by using:
     \item{\code{formula}:}{a formula describing how the QA task is performed. 
     						see \code{\link[=qaCheck,qaTask-method]{qaCheck}} for more details. } 
     \item{\code{plotType}:}{A character indicating how the QA result is plotted. Currently only "xyplot" and "bwplot" are supported.}
+    \item{\code{par}:}{A list storing all the lattice arguments to control the appearance of the plot. See \code{\link{xyplot}} for details.}
     \item{\code{db}:}{An environment containing the database connection, which stores the gating hierarchy,QA task list,sample information and outliers detection results. .}
   }
 }

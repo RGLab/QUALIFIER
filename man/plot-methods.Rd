@@ -77,12 +77,12 @@ qaTask.list<-makeQaTask(db,checkListFile)
 #Note that the percentages of all channels for each fcs file ("name" here indicates the fcs file name) 
 #are summed up through the formula  
 qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(percent) ~ RecdDt | name
+		,sum(proportion) ~ RecdDt | name
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
 		)
 
-plot(qaTask.list[["BoundaryEvents"]],percent ~ RecdDt | channel)
+plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel)
 
 
 

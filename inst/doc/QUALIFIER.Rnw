@@ -134,7 +134,7 @@ It must be one of the four types:
 				"MFI": 
 					Median Fluorescence Intensity of the cell population specified by \Rclass{qaTask},
 			
-				"percent": 
+				"proportion": 
 						the percentage of the cell population specified by \Rclass{qaTask} in the parent population, 
 			
 				"count": 
@@ -154,7 +154,7 @@ For example, RBC Lysis efficiency(percentage of WBC population) check is defined
 qaTask.list[["RBCLysis"]]
 @
 
-According to the formula stored in \Rclass{qaTask}, it uses the statistical property "percent" and groups 
+According to the formula stored in \Rclass{qaTask}, it uses the statistical property "proportion" and groups 
 the data by "Tube"(or staining panel). "RecdDt" is reserved for plotting purpose. Cell population is defined as "WBC\_perct"
 <<qaCheck-RBCLysis, results=verbatim>>=
 qaCheck(qaTask.list[["RBCLysis"]],outlierfunc=outlier.cutoff,lBound=0.8)
@@ -217,21 +217,21 @@ We can also apply simple aggregation to the statisics through the formula.
 qaTask.list[["BoundaryEvents"]]
 @
 
-Here the default formula only extracts the "percent" from each individual channel.
+Here the default formula only extracts the "proportion" from each individual channel.
 In order to check the total percentage of boundary events of all channels for each fcs file,
-we can write a new formula by applying aggregation function "sum" to "percent" and group the data
+we can write a new formula by applying aggregation function "sum" to "proportion" and group the data
 by fcs file ("name" in this case).
 
 <<qaCheck-BoundaryEvents,  results=verbatim>>=
 qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(percent) ~ RecdDt | name
+		,sum(proportion) ~ RecdDt | name
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
 		)
 @
 And we still can visualize the results chanel by chanel.
 <<plot-BoundaryEvents, fig=true, results=verbatim>>=		
-plot(qaTask.list[["BoundaryEvents"]],percent ~ RecdDt | channel)
+plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel)
 @
 
      
@@ -247,11 +247,12 @@ plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('FITC-A')
 		,rFunc=rlm
-		,relation="free"
+		,par=list(scales=list(y=c(relation="free")))
 	)
 @
-Note that the linear regression is applied in each group in order to capture the significant MFI change over time.
+Note that the robust linear regression is applied in each group in order to capture the significant MFI change over time.
 The individual outliers within each group is detected based on the residue.
+\Robject{par} can be used to pass any lattice arguments to control the apparance of the plot.
 
 <<plot-spike, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["spike"]]
@@ -290,7 +291,7 @@ tubesEvents
 <<plot-RedundantStain, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["RedundantStain"]],z.cutoff=1)
 plot(qaTask.list[["RedundantStain"]]
-		,y=percent~coresampleid|channel:stain
+		,y=proportion~coresampleid|channel:stain
 		,subset=stain%in%c('CD8')
 	)
 @

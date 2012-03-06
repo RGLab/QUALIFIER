@@ -20,7 +20,7 @@ qaCheck(obj,formula=NULL,subset=NULL,outlierfunc,rFunc=NULL,...)}
 				"MFI": 
 					Median Fluorescence Intensity of the cell population specified by \code{\link{qaTask}},
 			
-				"percent": 
+				"proportion": 
 						the percentage of the cell population specified by \code{qaTask} in the parent population, 
 			
 				"count": 
@@ -97,7 +97,7 @@ plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
 
 #detect the outliers that has lower percentage of RBC Lysis than the threshold provided by lBound
 qaCheck(qaTask.list[["RBCLysis"]]
-		,formula=percent ~ RecdDt | Tube
+		,formula=proportion ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
 		,lBound=0.8
 		)
