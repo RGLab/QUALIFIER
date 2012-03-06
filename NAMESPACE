@@ -5,8 +5,9 @@ importFrom(MASS,rlm,huber)
 importFrom(graphics,plot)
 importFrom(flowCore,colnames)
 #import(flowViz)
-importFrom(zoo,as.yearmon)
+#importFrom(zoo,as.yearmon)
 
+importFrom(Biobase,description)
 	
 exportClasses(qaTask)
 
