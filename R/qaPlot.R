@@ -225,33 +225,36 @@ qa.GroupPlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
-			call.f<-match.call(expand.dots = T)
-#			substitute(call.f)
-			#replace subset with Subset
-			ind<-which(names(call.f)=="subset")
-			if(length(ind)>0)
-			{
-				names(call.f)[ind]<-"Subset"
-			}
 #			browser()
-#			
-#			if("Subset"%in%names(call.f))
-#				call.f$Subset<-as.call(list(quote(substitute),call.f$Subset))
-#			
+			
+#			plot.qaTask(x,y,Subset=substitute(subset),pop,width
+#							,height,par,isTerminal,fixed,dest,rFunc,plotAll,scatterPlot)
+#				
+#			call.f<-match.call(expand.dots = F)
+#			#replace subset with Subset
+#			ind<-which(names(call.f)=="subset")
+#			if(length(ind)>0)
+#			{
+#				names(call.f)[ind]<-"Subset"
+#			}
+
+#			browser()
 			#assign null to formula if it is missing
 			if(missing(y))
 				y<-formula(x)
 #			#reconstruct function call to plot.qaTask
-			call.f[[1]]<-plot.qaTask
-			ind<-which(names(call.f)=="x")
-			names(call.f)[ind]<-"qaObj"
-			call.f$formula<-y
-#			browser()
- 			eval(call.f)
-#			plot.qaTask(qaObj=x,formula=y,...)
+#			call.f[[1]]<-quote(plot.qaTask)
+#			ind<-which(names(call.f)=="x")
+#			names(call.f)[ind]<-"qaObj"
+#			call.f$formula<-y
+#			call.f$y<-NULL
+#			
+#			eval(call.f)
+#			eval(call.f,sys.parent(1))
+			plot.qaTask(qaObj=x,formula=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,...)#,channel=NA,stain=NA,tube=NA
+plot.qaTask<-function(qaObj,formula,subset,pop,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -283,14 +286,14 @@ plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 	
 	statsType<-matchStatType(db,formuRes)
-#	browser()
 	if(missing(pop))
 		pop<-getPop(qaObj)
+#		browser()
 	
-	if(missing(Subset))
+	if(missing(subset))
 		yy<-queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed)
 	else
-		yy<-queryStats(db,statsType=statsType,substitute(Subset),pop=pop,isTerminal=isTerminal,fixed=fixed)
+		yy<-queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed)
 	if(nrow(yy)==0)
 	{
 		message("no samples are matched!")
@@ -309,19 +312,19 @@ plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal
 			eval(substitute(v<-as.factor(v),list(v=curCol)))
 		}
 	}
-#			browser()
+#	browser()
 	if(getName(qaObj)=="BoundaryEvents")
-		yy<-subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
+		yy<-base::subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
+			
 
 	#append the outlier flag
-	yy$outlier<-yy$sid%in%subset(db$outlierResult,qaID==qaID(qaObj))$sid
-	yy$gOutlier<-yy$sid%in%subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
+	yy$outlier<-yy$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
+	yy$gOutlier<-yy$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
 	
 	#reshape the data to include the column of the statType which can be passed to lattice	as it is
 	yy<-cast(yy,...~stats)
-#	browser()
 
-	dest=list(...)$dest
+#	dest=list(...)$dest
 
 	if(!is.null(dest))
 	{	
@@ -334,16 +337,18 @@ plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal
 		isSvg<-FALSE
 	}
 	
-	rFunc<-list(...)$rFunc
-	plotAll<-list(...)$plotAll
-	if(is.null(plotAll))
-		plotAll<-FALSE
+#	rFunc<-list(...)$rFunc
+#		browser()
+	
+#	plotAll<-list(...)$plotAll
+#	if(is.null(plotAll))
+#		plotAll<-FALSE
 	
 	
 #	browser()
 	plotObjs=new.env()
-	scatterPlot<-list(...)$scatterPlot
-	if(!is.null(scatterPlot)&&scatterPlot)
+#	scatterPlot<-list(...)$scatterPlot
+	if(scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
 		
@@ -403,8 +408,8 @@ plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal
 			thisCall<-quote(
 							xyplot(x=formula,data=yy
 									,groups=outlier
-									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
-										panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
+									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,...){
+										panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,db=db,...)
 								#if regression function is supplied, then plot the regression line
 										if(!is.null(rFunc))
 										{
@@ -502,9 +507,15 @@ plot.qaTask<-function(qaObj,formula,Subset,pop,width=10,height=10,par,isTerminal
 									
 			thisCall<-quote(bwplot(x=formula,data=yy
 									,groupBy=groupBy.Panel
-									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,...){
+									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs
+														,plotAll.=plotAll
+														,statsType.=statsType
+														,...){
 #										browser()
-												panel.bwplotEx(data.=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,db=db,...)
+											panel.bwplotEx(data.=data,dest.=dest
+															,plotObjs.=plotObjs,plotAll.=plotAll
+															,statsType.=statsType
+															,db=db,...)
 											}
 									)
 							)

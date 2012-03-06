@@ -349,12 +349,45 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 									ylab<-NULL
 								}
 #										browser()
-								plotCallStr<-paste("plot(x,y=formula1,dest=imageDir"
-										,",ylab=ylab,scales=list(x=c(draw=xaxis.draw),y=(relation=relation))"
-										,",rFunc.=rFunc,plotAll=plotAll,subset="
-										,groupBy,"=='",curGroup,"')",sep="")
+										
+							
+								plotCallStr<-quote(plot(x
+														,formula1
+														,dest=imageDir
+														,par=list(ylab=ylab
+																	,scales=list(x=c(draw=xaxis.draw)
+																				,y=c(relation=relation)
+																				)
+																	)
+														,rFunc=rFunc
+														,plotAll=plotAll
+														,subset=groupBy==curGroup
+														)
+														)
+								plotCallStr$subset[[2]]<-as.symbol(eval(plotCallStr$subset[[2]]))
+								plotCallStr$subset[[3]]<-as.character(eval(plotCallStr$subset[[3]]))
+#	
+#								for(curName in names(plotCallStr)[-c(1:3)])
+#								{
+#									if(curName=="subset")
+#									{
+#										plotCallStr[[curName]][[2]]<-as.symbol(eval(plotCallStr[[curName]][[2]]))
+#										plotCallStr[[curName]][[3]]<-as.character(eval(plotCallStr[[curName]][[3]]))
+#										
+#									}else
+#										plotCallStr[[curName]]<-eval(plotCallStr[[curName]])
+#									
+#									
+#								}
+								
+					#								plotCallStr<-paste("plot(",x,",y=",formula1,",dest='",imageDir
+#										,"',par=list(ylab='",ylab,"',scales=list(x=c(draw=",xaxis.draw,"),y=(relation='",relation,"')))"
+#										,",rFunc.=",rFunc,",plotAll='",plotAll,"',subset="
+#										,groupBy,"=='",curGroup,"')",sep="")
 #										browser()
-								imageName<-eval(parse(text=plotCallStr))
+								imageName<-eval(plotCallStr)
+
+#								imageName<-eval(parse(text=plotCallStr))
 								rownames(curOut)<-NULL#1:nrow(sub2)
 								rownames(curgOut)<-NULL#1:nrow(sub2)
 								#section
@@ -452,8 +485,8 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #							browser()
 					##make sure the w and h pass to plot and large enough to display strip text
 					imageName<-plot(x
-							,formula(x)
-							,plotAll.=plotAll
+							,y=formula(x)
+							,plotAll=plotAll
 							,dest=imageDir
 							,width=27,height=13)
 					

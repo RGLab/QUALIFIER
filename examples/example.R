@@ -143,7 +143,7 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 )
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
-		,Subset=channel%in%c('PE-Cy7-A')
+		,subset=channel%in%c('PE-Cy7-A')
 		,rFunc=rlm
 
 )
@@ -154,7 +154,7 @@ qaCheck(qaTask.list[["RBCLysis"]]
 		,lBound=0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #		, RecdDt~proportion | Tube
 #		,par=list(ylab="percent")
 #		,horiz=T
@@ -170,13 +170,13 @@ qaCheck(qaTask.list[["spike"]]
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
-		,Subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
+		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
 #	,dest="image"
 #	,plotAll=T
 )
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,Subset=id%in%c(245,119)&channel=='FITC-A'
+		,subset=id%in%c(245,119)&channel=='FITC-A'
 		,scatterPlot=TRUE
 )
 
@@ -197,11 +197,12 @@ plot(qaTask.list[["MNC"]]
 plot(qaTask.list[["MNC"]]
 #		,proportion~factor(coresampleid)
 #		,par=list(xlab="coresampleid")
-		, coresampleid ~proportion
-		,par=list(horiz=TRUE)
-		,Subset=coresampleid%in%c(11730,8780)
+#		, coresampleid ~proportion
+#		,par=list(horiz=TRUE)
+		,subset=coresampleid%in%c(11730,8780)
 #		,scatterPlot=TRUE
 #		,dest="image"
+#		,plotAll="none"
 	)
 #scatter okit fore one sample
 plot(qaTask.list[["MNC"]]
@@ -217,7 +218,7 @@ qaCheck(qaTask.list[["RedundantStain"]]
 		
 ##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
-		,Subset=channel=='APC-A'&stain%in%c('CD123','Auto')
+		,subset=channel=='APC-A'&stain%in%c('CD123','Auto')
 		,y=proportion~coresampleid|channel:stain
 )
 ################################################################################  
@@ -225,10 +226,7 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qaReport(qaTask.list,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
-
-
-
+qaReport(qaTask.list[["MNC"]],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
 
 

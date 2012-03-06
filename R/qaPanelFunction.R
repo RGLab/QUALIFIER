@@ -123,6 +123,7 @@ panel.xyplotEx <-
 		id <- identifier
 #		browser()
 		dest<-list(...)$dest
+		
 #		dest<-NULL
 		if(!is.null(dest))
 		{
@@ -131,6 +132,7 @@ panel.xyplotEx <-
 			data<-list(...)$data
 			plotObjs<-list(...)$plotObjs
 			plotAll<-list(...)$plotAll
+			statsType<-list(...)$statsType
 			db<-list(...)$db
 #			browser()
 			if(is.null(plotAll))
@@ -147,7 +149,7 @@ panel.xyplotEx <-
 					#				browser()
 					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
 							,channel=as.character(curOutRow$channel)
-							,stats=as.character(curOutRow$stats))
+							,stats=statsType)
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -157,7 +159,7 @@ panel.xyplotEx <-
 						{
 							##save the individual plot obj
 #						browser()
-							assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
+							assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
 							
 #						png(file.path(dest,paths))
 #						qa.singlePlot(db,curOutRow)
@@ -304,6 +306,7 @@ panel.bwplotEx <-
 	groupBy<-list(...)$groupBy
 	plotObjs<-list(...)$plotObjs
 	plotAll<-list(...)$plotAll
+	statsType<-list(...)$statsType
 	db<-list(...)$db
 	if(is.null(plotAll))
 		plotAll=FALSE
@@ -369,7 +372,7 @@ panel.bwplotEx <-
 			curGroup<-dataGroups[[i]]
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
 			population<-as.character(curGroup$population[1])
-			stats<-as.character(curGroup$stats[1])
+#			stats<-as.character(curGroup$stats[1])
 			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
@@ -385,7 +388,7 @@ panel.bwplotEx <-
 					paths<-QUALIFIER:::.FileNameGen(prefix="s"
 							,ID=curGroupID
 							,population=population
-							,stats.=stats)
+							,stats.=statsType)
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -471,20 +474,22 @@ panel.bwplotEx <-
 				{
 					curOutRow<-curGroup[curOutInd,,drop=FALSE]
 				
-					if(!is.null(dest))
+					if(!is.null(dest)&&plotAll!="none")
 					{
 						FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
 						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 						#				browser()
 						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
 								,channel=as.character(curOutRow$channel)
-								,stats=as.character(curOutRow$stats))
+#								,stats=as.character(curOutRow$stats)
+								,stats=statsType
+									)
 						if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 						paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
 						
 						##save the individual plot obj
 	#						browser()
-						assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
+						assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
 						
 						
 						setSVGShapeURL(paths)
@@ -566,7 +571,7 @@ panel.bwplotEx <-
 			curGroup<-dataGroups[[i]]
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
 			population<-as.character(curGroup$population[1])
-			stats<-as.character(curGroup$stats[1])
+#			stats<-as.character(curGroup$stats[1])
 			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
@@ -582,7 +587,7 @@ panel.bwplotEx <-
 					paths<-QUALIFIER:::.FileNameGen(prefix="s"
 							,ID=curGroupID
 							,population=population
-							,stats.=stats)
+							,stats.=statsType)
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -667,20 +672,22 @@ panel.bwplotEx <-
 				curOut<-blist.x[[i]][curOutInd]
 				curOutRow<-curGroup[curOutInd,,drop=FALSE]
 				
-				if(!is.null(dest))
+				if(!is.null(dest)&&plotAll!="none")
 				{
 					FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 	#				browser()
 					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
 						,channel=as.character(curOutRow$channel)
-						,stats=as.character(curOutRow$stats))
+#						,stats=as.character(curOutRow$stats)
+						,stats=statsType
+						)
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
 
 					##save the individual plot obj
 #						browser()
-					assign(basename(paths),qa.singlePlot(db,curOutRow),envir=plotObjs)
+					assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
 					
 					
 					setSVGShapeURL(paths)
