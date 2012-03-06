@@ -1,0 +1,15 @@
+1.0.0
+
+FEATURES:
+	- outlier detection for different population stats(counts,proportion,MFI,Spike) of gated/ungated flow data
+	- xyplot and boxplot on different dimensions
+	- scatter plot for gated population
+	- HTML report with svg support
+	- fuzzy match of population name to select the same population from the different gating path
+	
+KNOWN ISSUES:
+	
+	- extracting populations stats needs further optimization on speed 
+	- extend the formula parser to allow more functions to be applied by formula
+	 
+		 
