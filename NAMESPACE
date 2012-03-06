@@ -13,8 +13,7 @@ importFrom(Biobase,description)
 	
 exportClasses(qaTask)
 
-export(	"queryStats"
-		,"saveToDB"
+export(	"saveToDB"
 		,"makeQaTask"
 		,"proportion.outliers.robust"
 		,"proportion.outliers.mle"

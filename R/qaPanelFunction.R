@@ -3,43 +3,43 @@
 # Author: mike
 ###############################################################################
 
-prepanel.default.xyplot <-
-		function(x, y, type, subscripts, groups = NULL, ...)
-{
-	## Note: shingles satisfy is.numeric()
-	if (any(!is.na(x)) && any(!is.na(y)))
-	{
-		ord <- order(as.numeric(x))
-		if (!is.null(groups))
-		{
-			gg <- groups[subscripts]
-			dx <- unlist(lapply(split(as.numeric(x)[ord], gg[ord]), diff))
-			dy <- unlist(lapply(split(as.numeric(y)[ord], gg[ord]), diff))
-			## ok <- !is.na(gg)
-			
-			## One may argue that points with is.na(gg) should be
-			## excluded from the data rectangle since they are not
-			## plotted.  For now I'm going to take the other view,
-			## namely that the points are there, they just happen to
-			## be invisible because the value of the variable defining
-			## their graphical parameters is unknown.
-		}
-		else
-		{
-			dx <- diff(as.numeric(x[ord]))
-			dy <- diff(as.numeric(y[ord]))
-			## ok <- TRUE
-		}
-		list(xlim = lattice:::scale.limits(x), ylim = lattice:::scale.limits(y), dx = dx, dy = dy,
-				xat = if (is.factor(x)) sort(unique(as.numeric(x))) else NULL,
-				yat = if (is.factor(y)) sort(unique(as.numeric(y))) else NULL)
-		
-		
-	}
-	else prepanel.null()
-		
-	
-}
+#prepanel.default.xyplot <-
+#		function(x, y, type, subscripts, groups = NULL, ...)
+#{
+#	## Note: shingles satisfy is.numeric()
+#	if (any(!is.na(x)) && any(!is.na(y)))
+#	{
+#		ord <- order(as.numeric(x))
+#		if (!is.null(groups))
+#		{
+#			gg <- groups[subscripts]
+#			dx <- unlist(lapply(split(as.numeric(x)[ord], gg[ord]), diff))
+#			dy <- unlist(lapply(split(as.numeric(y)[ord], gg[ord]), diff))
+#			## ok <- !is.na(gg)
+#			
+#			## One may argue that points with is.na(gg) should be
+#			## excluded from the data rectangle since they are not
+#			## plotted.  For now I'm going to take the other view,
+#			## namely that the points are there, they just happen to
+#			## be invisible because the value of the variable defining
+#			## their graphical parameters is unknown.
+#		}
+#		else
+#		{
+#			dx <- diff(as.numeric(x[ord]))
+#			dy <- diff(as.numeric(y[ord]))
+#			## ok <- TRUE
+#		}
+#		list(xlim = lattice:::scale.limits(x), ylim = lattice:::scale.limits(y), dx = dx, dy = dy,
+#				xat = if (is.factor(x)) sort(unique(as.numeric(x))) else NULL,
+#				yat = if (is.factor(y)) sort(unique(as.numeric(y))) else NULL)
+#		
+#		
+#	}
+#	else prepanel.null()
+#		
+#	
+#}
 
 
 ##add svg anno to the original panel function for xyplot of lattice package

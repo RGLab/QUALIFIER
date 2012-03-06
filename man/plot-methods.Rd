@@ -11,7 +11,8 @@ plot the statistics for a particular cell population of a group of samples,this 
 after \code{qaCheck} to visualize the QA results.  
 }
 \usage{
-plot(x,y,...)}
+	plot(x,y,...)
+}
 \arguments{
 
 	\item{x}{a \code{qaTask} object}

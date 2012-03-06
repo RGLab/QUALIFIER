@@ -20,8 +20,8 @@ getQAStats(obj,...)
 \arguments{
   
   \item{obj}{
-  			A \code{\link[flowWorkspace:GatingHierarchy]{gating hierarchy}} that stores the gated cell populations for one FCS file; 
-  			or a \code{\link[flowWorkspace:GatingSet]{GatingSet}} containing multiple \code{gating hierarchies} 
+  			A \code{\link[=flowWorkspace:GatingHierarchy]{gating hierarchy}} that stores the gated cell populations for one FCS file; 
+  			or a \code{\link[=flowWorkspace:GatingSet]{GatingSet}} containing multiple \code{gating hierarchies} 
   			or an \code{environment} that stores the \code{GatingSet} and all other information.
   			}
   

@@ -11,8 +11,8 @@
 \alias{getData,qaTask}
 \alias{formula,qaTask}
 \alias{plotType,qaTask}
-\alias{par,qaTask-method}
-\alias{par<-,qaTask,list-method}
+\alias{qpar,qaTask-method}
+\alias{qpar<-,qaTask,list-method}
 
 \alias{show,qaTask}
 
