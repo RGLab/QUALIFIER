@@ -4,6 +4,8 @@ importFrom(hwriter,openPage,hwrite,closePage)
 importFrom(MASS,rlm,huber)
 importFrom(graphics,plot)
 importFrom(flowCore,colnames)
+importFrom(flowWorkspace,getData)
+
 #import(flowViz)
 #importFrom(zoo,as.yearmon)
 
