@@ -225,32 +225,10 @@ qa.GroupPlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
-#			browser()
-			
-#			plot.qaTask(x,y,Subset=substitute(subset),pop,width
-#							,height,par,isTerminal,fixed,dest,rFunc,plotAll,scatterPlot)
-#				
-#			call.f<-match.call(expand.dots = F)
-#			#replace subset with Subset
-#			ind<-which(names(call.f)=="subset")
-#			if(length(ind)>0)
-#			{
-#				names(call.f)[ind]<-"Subset"
-#			}
 
-#			browser()
 			#assign null to formula if it is missing
 			if(missing(y))
 				y<-formula(x)
-#			#reconstruct function call to plot.qaTask
-#			call.f[[1]]<-quote(plot.qaTask)
-#			ind<-which(names(call.f)=="x")
-#			names(call.f)[ind]<-"qaObj"
-#			call.f$formula<-y
-#			call.f$y<-NULL
-#			
-#			eval(call.f)
-#			eval(call.f,sys.parent(1))
 			plot.qaTask(qaObj=x,formula=y,...)
 		})
 

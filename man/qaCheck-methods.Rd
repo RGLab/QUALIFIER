@@ -52,10 +52,10 @@ qaCheck(obj,...)}
 							
 
 				outlierfunc:a \code{function} to be used for outlier detection.
-					see \code{\link{outlierDetection}} for more details.
+					see \code{\link{outlierFunctions}} for more details.
 			
 				gOutlierfunc:a \code{function} to be used for group outlier detection.
-			
+							see \code{\link{outlierFunctions}} for more details.
 				rFunc:a \code{function} for fitting regression model within each individual subgroup.
 					
 				isTerminal:a logical scalar indicating whether the pop is at terminal node of the gating path.

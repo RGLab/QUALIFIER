@@ -1,7 +1,6 @@
 \name{plot-methods}
 \docType{methods}
 \alias{plot}
-\alias{plot-methods}
 \alias{plot,qaTask-method}
 \alias{plot,qaTask,ANY-method}
 
@@ -19,7 +18,7 @@ after \code{qaCheck} to visualize the QA results.
 	
 	 \item{y}{a \code{formula} describing the variables to be used for plotting. 
 	 								see \code{\link{qaCheck}} for more details.
-		}
+				}
 	
 	
 			
