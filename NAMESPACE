@@ -2,10 +2,11 @@ import(ncdfFlow)
 importFrom(RSVGTipsDevice,devSVGTips,setSVGShapeToolTip,setSVGShapeURL)
 importFrom(hwriter,openPage,hwrite,closePage)
 importFrom(MASS,rlm,huber)
-importFrom(flowCore,colnames)
-import(flowViz)
-importFrom(zoo,as.yearmon)
 importFrom(graphics,plot)
+importFrom(flowCore,colnames)
+#import(flowViz)
+importFrom(zoo,as.yearmon)
+
 	
 exportClasses(qaTask)
 
