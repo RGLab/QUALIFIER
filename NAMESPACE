@@ -15,7 +15,7 @@ importClassesFrom(methods, ANY, character, environment, integer, list)
 
 importMethodsFrom(XML, saveXML)
 
-importMethodsFrom(flowCore, "%in%", assign,  "colnames<-",
+importMethodsFrom(flowCore, "%in%", assign, colnames, "colnames<-",
                   description, exprs, filter, filterDetails, get,
                   ls, ncol, nrow, pData, "pData<-", parameters, print,
                   "sampleNames<-", sort, split, varMetadata,
@@ -45,28 +45,34 @@ importFrom(grDevices, colorRampPalette, densCols, dev.list, dev.off,
 
 importFrom(graphics, abline, par)
 
-importFrom(grid, downViewport, gpar, grid.layout, grid.newpage,
-           grid.rect, grid.text, pushViewport, unit, upViewport,
-           viewport)
+#importFrom(grid, downViewport, gpar, grid.layout, grid.newpage,
+#           grid.rect, grid.text, pushViewport, unit, upViewport,
+#           viewport)
+import(grid)
 
 importFrom(hwriter, closePage, hwrite, openPage)
 
-importFrom(lattice, current.panel.limits, lattice.getOption,
-           lattice.options, packet.panel.default, panel.abline,
-           panel.fill, panel.grid, panel.linejoin, panel.lines,
-           panel.lmline, panel.loess, panel.points, panel.polygon,
-           panel.segments, panel.smoothScatter, panel.superpose,
-           panel.text, panel.xyplot, trellis.device, trellis.grobname,
-           trellis.par.get, trellis.par.set, trellis.vpname)
+#importFrom(lattice, current.panel.limits, lattice.getOption,
+#           lattice.options, packet.panel.default, panel.abline,
+#           panel.fill, panel.grid, panel.linejoin, panel.lines,
+#           panel.lmline, panel.loess, panel.points, panel.polygon,
+#           panel.segments, panel.smoothScatter, panel.superpose,
+#           panel.text, panel.xyplot, trellis.device, trellis.grobname,
+#           trellis.par.get, trellis.par.set, trellis.vpname,which.packet,packet.number,
+#           panel.number)
+
+import(lattice)
 
 importFrom(methods, "@<-", as, is, new)
 
-importFrom(reshape, cast, melt)
+#importFrom(reshape, cast, melt)
 
 importFrom(stats, IQR, as.formula, dbeta, dt, mad, median, optim,
            pbeta, pnorm, pt)
 
 importFrom(utils, read.csv)
+
+importFrom(plyr, is.formula)
 
 exportClasses(qaTask)
 
