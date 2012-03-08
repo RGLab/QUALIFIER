@@ -359,7 +359,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #																				,y=c(relation=relation)
 #																				)
 #																	)
-														,rFunc=rFunc
+#														,rFunc=rFunc
 														,plotAll=plotAll
 														,subset=groupBy==curGroup
 														)

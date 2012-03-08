@@ -231,8 +231,10 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #	browser()
 	
 	##clean the old results
-	db$outlierResult<-db$outlierResult[!db$outlierResult$sid%in%yy$sid,]
-	db$GroupOutlierResult<-db$GroupOutlierResult[!db$GroupOutlierResult$sid%in%yy$sid,]
+	ind<-db$outlierResult$sid%in%yy$sid&qaID==db$outlierResult$qaID
+	db$outlierResult<-db$outlierResult[!ind,]
+	ind<-db$GroupOutlierResult$sid%in%yy$sid&qaID==db$GroupOutlierResult$qaID
+	db$GroupOutlierResult<-db$GroupOutlierResult[!ind,]
 	
 	#append the new one
 	if(length(stats_list)>0)
