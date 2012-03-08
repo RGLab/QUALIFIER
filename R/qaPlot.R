@@ -248,9 +248,9 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 	}
 #	browser()
 	if(missing(width))
-		width<-width(qaObj)
+		width<-QUALIFIER:::width(qaObj)
 	if(missing(height))
-		height<-height(qaObj)
+		height<-QUALIFIER:::height(qaObj)
 	lattice.options(print.function=plot.trellisEx)
 #	browser()
 	db<-getData(qaObj)
