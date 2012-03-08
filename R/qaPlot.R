@@ -235,7 +235,7 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula,subset,pop,width=10,height=10,par,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
+plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -246,17 +246,17 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width=10,height=10,par,isTerminal
 				
 		qpar(qaObj)<-par_old
 	}
+#	browser()
+	if(missing(width))
+		width<-width(qaObj)
+	if(missing(height))
+		height<-height(qaObj)
 	lattice.options(print.function=plot.trellisEx)
 #	browser()
 	db<-getData(qaObj)
 	##query db
 	curGroup<-NULL
 #	browser()
-#	if(is.null(formula))
-#	{
-#		formula<-formula(qaObj)
-#	}
-
 	
 	if(is.null(qpar(qaObj)$horiz))
 		qpar(qaObj)$horiz<-FALSE
@@ -318,17 +318,9 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width=10,height=10,par,isTerminal
 		isSvg<-FALSE
 	}
 	
-#	rFunc<-list(...)$rFunc
-#		browser()
-	
-#	plotAll<-list(...)$plotAll
-#	if(is.null(plotAll))
-#		plotAll<-FALSE
-	
 	
 #	browser()
 	plotObjs=new.env()
-#	scatterPlot<-list(...)$scatterPlot
 	if(scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot

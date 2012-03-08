@@ -9,6 +9,8 @@ setClass("qaTask",
 						,pop="character"
 						,formula="ANY"
 						,plotType="character"
+						,width="numeric"
+						,height="numeric"
 						,par="list"
 						,db="ANY"
 						
@@ -20,6 +22,8 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
 						,plotType="xyplot"
+						,width=numeric(10)
+						,height=numeric(10)
 						,par=list(horiz=FALSE)
 						,db="ANY"
 						)

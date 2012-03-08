@@ -26,6 +26,15 @@ setMethod("getName", signature=c(x="qaTask"),
 			x@qaName
 		})
 
+setMethod("width", signature=c(x="qaTask"),
+		function(x){
+			x@width
+		})
+
+setMethod("height", signature=c(x="qaTask"),
+		function(x){
+			x@height
+		})
 
 setMethod("description", signature=c(object="qaTask"),
 		function(object){
