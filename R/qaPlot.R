@@ -139,78 +139,81 @@ qa.GroupPlot<-function(db,yy)
 					t(col2hsv(c("blue","green","yellow","red"))),
 					fr=c(0.7,0)))
 
+	pop<-unique(as.character(yy$population))
+	if(length(pop)>1)
+		stop("not the same population in lattice group plot!")
 #	browser()
-	fcsNames<-as.character(unique(yy$name))
-	##TODO:strange behavior happens again here :idexing G by sampleName failed
-	#make sure to extract gateing set by the order of yy$name
-	sampleInds<-match(fcsNames,getSamples(db$G))
-	
-	
-	if(length(sampleInds)>0)#check if the target exist in the gateing hierarchy 
-	{
+	#extract flowFrame and gate from each gating hierarchy
+	frlist<-apply(yy,1,function(curRow){
+#		browser()
 		#get the parent population for the scatter plot
-		curRow<-yy[1,]
-#		statsType<-curRow$stat
-#		channel<-as.character(curRow$channel)
-		pop<-as.character(curRow$population)
 		
-		curSampleInd<-which(getSamples(db$G)%in%curRow[,"name"])
+		curSampleInd<-which(getSamples(db$G)%in%curRow["name"])
 		curGh<-db$G[[curSampleInd]]
-		curNode<-as.character(curRow[,"node"])
+		curNode<-as.character(curRow["node"])
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
 		parentNodeInd<-which(getNodes(curGh)%in%parentNode)
 		if(length(parentNodeInd)>0)
 		{
-			fs1<-getData(db$G[sampleInds],parentNodeInd)
+			fr<-getData(curGh,parentNodeInd)
 		}else
 		{
-			fs1<-getData(db$G[sampleInds])
+			fr<-getData(curGh)
 		}
-		sampleNames(fs1)<-fcsNames
-
-		if(!"outlier"%in%colnames(yy))
-			yy$outlier<-FALSE
-		pData(fs1)$outlier<-yy[,]$outlier
-		varMetadata(fs1)["outlier",]<-"outlier"
-		obj<-NULL
-		if(!pop=="/root")##total cell count
-		{
-			
-		
-			fres<-filter(fs1,curGate)
-			if(length(parameters(fres[[1]]))==2)
-			{
-				t1<-paste("`",parameters(curGate)[1],"`~`",parameters(curGate)[2],"`",sep="")
-			}else
-			{
-				t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
-			}
+		list(frame=fr,gate=curGate)
+	})
+	names(frlist)<-yy[,"name"]
 	
-			obj<-xyplot(x=as.formula(t1),
-							data=fs1,
-							smooth=FALSE,
-							colramp=cols,
-							filter=fres,
-							names=FALSE,
-							pd=pData(fs1),
-							par.settings=list(gate.text=list(text=0.7
-															,alpha=1
-															,cex=1
-															,lineheight=2
-															,font=1)
-												,gate=list(
-														fill="transparent"
-														,lwd<-2
-														,lty="solid"
+	#merge frames into flowSet for flowViz plot
+	fs1<-flowSet(lapply(frlist,"[[","frame"))
+	#append outlier flags
+	if(!"outlier"%in%colnames(yy))
+		yy$outlier<-FALSE
+	pData(fs1)$outlier<-yy$outlier
+	varMetadata(fs1)["outlier",]<-"outlier"
+
+	#extract gates from the list
+	gates<-lapply(frlist,"[[","gate")
+	
+	obj<-NULL
+	if(!pop=="/root")##total cell count
+	{
+		
+	
+		fres<-filter(fs1,gates)
+		if(length(parameters(fres[[1]]))==2)
+		{
+			t1<-paste("`",parameters(gates[[1]])[1],"`~`",parameters(gates[[1]])[2],"`",sep="")
+		}else
+		{
+			t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
+		}
+
+		obj<-xyplot(x=as.formula(t1),
+						data=fs1,
+						smooth=FALSE,
+						colramp=cols,
+						filter=fres,
+						names=FALSE,
+						pd=pData(fs1),
+						par.settings=list(gate.text=list(text=0.7
 														,alpha=1
-														,col="red"
-														)
-												),
-							panel=panel.xyplot.flowsetEx
-					)
-			}
+														,cex=1
+														,lineheight=2
+														,font=1)
+											,gate=list(
+													fill="transparent"
+													,lwd<-2
+													,lty="solid"
+													,alpha=1
+													,col="red"
+													)
+											),
+						panel=panel.xyplot.flowsetEx
+				)
 	}
+	
 			
 			
 	
@@ -300,7 +303,7 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width=10,height=10,par,isTerminal
 	yy$gOutlier<-yy$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
 	
 	#reshape the data to include the column of the statType which can be passed to lattice	as it is
-	yy<-cast(yy,...~stats)
+	yy<-as.data.frame(cast(yy,...~stats))
 
 #	dest=list(...)$dest
 
