@@ -116,7 +116,7 @@ outlier.norm <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,
 
 	if(plot)
 	{	
-		QUALIFIER:::outlier.plot(x,mu,isOutlier)
+		outlier.plot(x,mu,isOutlier)
 	}
 	isOutlier
 }

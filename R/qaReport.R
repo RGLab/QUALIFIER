@@ -324,41 +324,41 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #
 								
 #										if(nrow(curOut)>0||nrow(curgOut)>0)
-								if(getName(x)=="MFIOverTime")
-								{
-									relation<-"free"										
-									rFunc<-rlm
-								}else
-								{
-									relation<-NULL										
-									rFunc<-NULL
-								}
+#								if(getName(x)=="MFIOverTime")
+#								{
+#									relation<-"free"										
+#									rFunc<-rlm
+#								}else
+#								{
+#									relation<-NULL										
+#									rFunc<-NULL
+#								}
 								
-								if(getName(x)%in%c("RedundantStain","MNC"))
-								{
-									xaxis.draw<-FALSE
-								}else
-								{
-									xaxis.draw<-TRUE
-								}
-								if(getName(x)%in%c("spike"))
-								{
-									ylab<-"cumulative z-score"
-								}else
-								{
-									ylab<-NULL
-								}
+#								if(getName(x)%in%c("RedundantStain","MNC"))
+#								{
+#									xaxis.draw<-FALSE
+#								}else
+#								{
+#									xaxis.draw<-TRUE
+#								}
+#								if(getName(x)%in%c("spike"))
+#								{
+#									ylab<-"cumulative z-score"
+#								}else
+#								{
+#									ylab<-NULL
+#								}
 #										browser()
 										
 							
 								plotCallStr<-quote(plot(x
 														,formula1
 														,dest=imageDir
-														,par=list(ylab=ylab
-																	,scales=list(x=c(draw=xaxis.draw)
-																				,y=c(relation=relation)
-																				)
-																	)
+#														,par=list(ylab=ylab
+#																	,scales=list(x=c(draw=xaxis.draw)
+#																				,y=c(relation=relation)
+#																				)
+#																	)
 														,rFunc=rFunc
 														,plotAll=plotAll
 														,subset=groupBy==curGroup
@@ -367,24 +367,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 								plotCallStr$subset[[2]]<-as.symbol(eval(plotCallStr$subset[[2]]))
 								plotCallStr$subset[[3]]<-as.character(eval(plotCallStr$subset[[3]]))
 #	
-#								for(curName in names(plotCallStr)[-c(1:3)])
-#								{
-#									if(curName=="subset")
-#									{
-#										plotCallStr[[curName]][[2]]<-as.symbol(eval(plotCallStr[[curName]][[2]]))
-#										plotCallStr[[curName]][[3]]<-as.character(eval(plotCallStr[[curName]][[3]]))
-#										
-#									}else
-#										plotCallStr[[curName]]<-eval(plotCallStr[[curName]])
-#									
-#									
-#								}
-								
-					#								plotCallStr<-paste("plot(",x,",y=",formula1,",dest='",imageDir
-#										,"',par=list(ylab='",ylab,"',scales=list(x=c(draw=",xaxis.draw,"),y=(relation='",relation,"')))"
-#										,",rFunc.=",rFunc,",plotAll='",plotAll,"',subset="
-#										,groupBy,"=='",curGroup,"')",sep="")
-#										browser()
+#						
 								imageName<-eval(plotCallStr)
 
 #								imageName<-eval(parse(text=plotCallStr))
