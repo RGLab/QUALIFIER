@@ -29,3 +29,47 @@ setClass("qaTask",
 						)
 		)
 
+		
+
+#TODO:to make constructor that record the qaTask into the db table
+makeQaTask<-function(db,qaName,description,qaLevel,pop,formula,plotType)
+{
+	qa<-new("qaTask"
+						,qaID=max(db$qaChecklist)
+						,qaName=curRow["qaName"]
+						,description=curRow["description"]
+						,qaLevel=curRow["qaLevel"]
+						,pop=curRow["pop"]
+						,formula=as.formula(curRow["formula"])
+						,plotType=curRow["plotType"]
+						,db=db
+				)
+									
+			
+	print(paste("one qaTask created ahd saved in db!"))
+	qa
+}
+
+read.qaTask<-function(db,checkListFile)
+{
+	qaCheckList<-read.csv(checkListFile)
+	
+	qaTask.list<-apply(qaCheckList,1,function(curRow,db){
+#browser()			
+				curQa<-new("qaTask"
+						,qaID=as.integer(curRow["qaID"])
+						,qaName=curRow["qaName"]
+						,description=curRow["description"]
+						,qaLevel=curRow["qaLevel"]
+						,pop=curRow["pop"]
+						,formula=as.formula(curRow["formula"])
+						,plotType=curRow["plotType"]
+						,db=db
+				)
+				curQa					
+			},db)
+	names(qaTask.list)<-qaCheckList$qaName
+	db$qaCheckList<-qaTask.list
+	print(paste(nrow(qaChecklist),"qaTask created ahd saved in db!"))
+	qaTask.list
+}

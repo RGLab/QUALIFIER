@@ -2,7 +2,7 @@
 # 
 # Author: wjiang2
 ###############################################################################
-
+##TODO:to append the stats to the current table
 setMethod("getQAStats",signature("environment"),function(obj,isFlowCore=TRUE,nslaves=NULL,...){
 			
 			statsOfGS<-getQAStats(obj$G,isFlowCore,nslaves)

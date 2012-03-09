@@ -126,33 +126,21 @@ matchStatType<-function(db,formuRes)
 
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
-
-saveToDB<-function(db,G,annoData)
+#TODO:to save multipe gating set and try to associate them to the stats table
+saveToDB<-function(G,annoData)
 {
 	#####load sample info from xls
-#	annoData<-read.csv(metaFile, as.is=TRUE)
-	
-	###import global ID for each fcs from labkey
-#	ncfs<-ncFlowSet(G)
-#	objID.table<-ncfs@phenoData@data
-#	objID.table$id<-1:nrow(objID.table)
-#	annoData<-merge(annoData,objID.table,by.x="FCS_Files",by.y="name")
+
 	
 	annoData$id<-1:nrow(annoData)
 	if(!"name"%in%colnames(annoData))
 		stop("'name' column that stores FCS file names is missing in annotation data!")
 #	browser()
 	#do some filtering for annoData
-#	annoData<-subset(annoData,!annoData$Tube%in%c("EMA/EMA/EMA/EMA/EMA","VD1/VD2/GD/BLK/CD3"))
 	annoData<-subset(annoData,name%in%getSamples(G))
 	
-	#do some format converting
-#	annoData$RecdDt<-as.Date(annoData$RecdDt,"%m/%d/%y")
-#	annoData$AnalysisDt<-as.Date(annoData$AnalysisDt,"%m/%d/%y")
-
 		
 	##fit it into GatingSet(or flowSet)
-#	colnames(annoData)[which(colnames(annoData)=="FCS_Files")]<-"name"
 	rownames(annoData)<-annoData$name
 	
 	G<-G[which(getSamples(G)%in%annoData$name)]
@@ -176,33 +164,13 @@ saveToDB<-function(db,G,annoData)
 
 	db$params<-colnames(getData(G[[1]]))
 	db$G<-G
-	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
+#	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
 	db
 }
 
 
 
-makeQaTask<-function(db,checkListFile)
-{
-	qaCheckList<-read.csv(checkListFile)
-	
-	qaTask.list<-apply(qaCheckList,1,function(curRow,db){
-#browser()			
-				curQa<-new("qaTask"
-						,qaID=as.integer(curRow["qaID"])
-						,qaName=curRow["qaName"]
-						,description=curRow["description"]
-						,qaLevel=curRow["qaLevel"]
-						,pop=curRow["pop"]
-						,formula=as.formula(curRow["formula"])
-						,plotType=curRow["plotType"]
-						,db=db
-				)
-				curQa					
-			},db)
-	names(qaTask.list)<-qaCheckList$qaName
-	qaTask.list
-}
+
 
 matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 {

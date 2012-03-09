@@ -7,7 +7,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends: R (>= 2.14.0),reshape
 Imports: BiocGenerics, IDPmisc, MASS, RBGL, RSVGTipsDevice, XML,
          flowCore, flowViz, flowWorkspace, grDevices, graphics, grid,
-         hwriter, lattice, methods, stats, utils,plyr
+         hwriter, lattice, methods, stats, utils,plyr,stats4
 #Imports: MASS,hwriter,RSVGTipsDevice,lattice,flowCore,flowViz,methods
 Enhances:ncdfFlow
 Collate: AllGeneric.R 

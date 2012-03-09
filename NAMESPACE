@@ -30,6 +30,8 @@ importFrom(IDPmisc, IDPcolorRamp, col2hsv)
 
 importFrom(MASS, huber, rlm)
 
+importFrom(stats4, plot)
+
 importFrom(RBGL, sp.between)
 
 importFrom(RSVGTipsDevice, devSVGTips, setSVGShapeToolTip,
