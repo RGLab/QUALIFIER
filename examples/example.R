@@ -75,7 +75,7 @@ save(db,file="data/ITN029_all.rda")#save stats
 #character indicating the path to save the svg plot
 ###############################################################################
 #load("gatingHierarchy/GS.Rda")#load gatinghierarchy from disk
-data("ITN029")#load stats from disk
+data("ITNQASTUDY")#load stats from disk
 #db$G<-G
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)

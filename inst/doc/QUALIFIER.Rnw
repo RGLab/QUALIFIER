@@ -99,7 +99,7 @@ db$statsOfGS[1:5,]
 @
 It is recommened to save all the preprocessed data to avoid the efforts of recomputing from the beginning:
 <<save-all, eval=FALSE ,echo=true, results=verbatim>>=
-save(db,file="ITN029.rda")#save stats
+save(db,file="ITNQASTUDY.rda")#save stats
 @
 Once this is done,the more interactive quality assessment task can be performed based on the statistics extracted for each gated population.
 
@@ -108,7 +108,7 @@ Once this is done,the more interactive quality assessment task can be performed 
 We provide a function to create a list of \Rclass{qaTask} objects by reading external csv spreadsheet
 containing descriptions of each QA task:
 <<loadData, echo=FALSE, results=hide>>=
-data("ITN029")
+data("ITNQASTUDY")
 @
 
 

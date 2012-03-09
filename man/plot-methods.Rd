@@ -76,7 +76,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 \dontrun{
 
-data("ITN029")
+data("ITNQASTUDY")
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 

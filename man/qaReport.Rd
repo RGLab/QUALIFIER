@@ -52,7 +52,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 \examples{
 
-data("ITN029")#load stats from disk
+data("ITNQASTUDY")#load stats from disk
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 qaReport(qaTask.list[[1]],outDir="~/output")
