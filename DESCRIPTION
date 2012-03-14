@@ -4,13 +4,10 @@ Title: Qualitiy Control of Gated Flow Cytometry Experiments
 Version: 0.99.1
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
-Depends: R (>= 2.14.0),reshape
-Imports: BiocGenerics, IDPmisc, MASS, RBGL, RSVGTipsDevice, XML,
-         flowCore, flowViz, flowWorkspace, grDevices, graphics, grid,
-         hwriter, lattice, methods, stats, utils,plyr,stats4
-#Imports: MASS,hwriter,RSVGTipsDevice,lattice,flowCore,flowViz,methods
+Depends: R (>= 2.14.0),reshape,flowWorkspace,
+Imports: MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods
 Enhances:ncdfFlow
-Collate: AllGeneric.R 
+Collate: AllGenerics.R 
 		AllClasses.R  
 		AllFunctions.R  
 		outlier.R  
@@ -26,4 +23,5 @@ Collate: AllGeneric.R
 Description: Provides quality control and quality assessment tools for gated flow cytometry data. 
 License: Artistic-2.0
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays
+
 

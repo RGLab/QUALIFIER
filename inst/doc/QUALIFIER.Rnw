@@ -59,7 +59,7 @@ library(QUALIFIER)
 Optionally, parsing xml workspace can be done in parallel mode. It can speed up the process for large datasets.
 <<loadPackage-parallel, echo=TRUE,results=hide,eval=FALSE>>=
 library(Rmpi)
-library(multicore)
+library(snowfall)
 library(ncdfFlow)
 @
 
@@ -67,7 +67,7 @@ library(ncdfFlow)
 
 
 \Rfunction{parseWorkspace} function from \Rpackage{flowWorkspace} package is used to parse the flowJo workspace.
-If Rmpi and multicore package are loaded and it will automatically switch to the parallel mode and \Robject{nslaves} arugment is used to
+If Rmpi and snowfall package are loaded and it will automatically switch to the parallel mode and \Robject{nslaves} arugment is used to
 specify the number of computing nodes used.
 <<parseWorkspace, eval=FALSE, echo=TRUE,results=verbatim>>=
 ws<-openWorkspace("~/QA_MFI_RBC_bounary_eventsV3.xml")
