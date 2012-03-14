@@ -63,7 +63,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 			statsOfGS
 			
 		})
-
+#TODO:GateingHierarchy already has fjName slot, this is method should directly get this slot
 setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
 #			browser()
 				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
