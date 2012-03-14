@@ -10,7 +10,7 @@ Imports: BiocGenerics, IDPmisc, MASS, RBGL, RSVGTipsDevice, XML,
          hwriter, lattice, methods, stats, utils,plyr,stats4
 #Imports: MASS,hwriter,RSVGTipsDevice,lattice,flowCore,flowViz,methods
 Enhances:ncdfFlow
-Collate: AllGeneric.R 
+Collate: AllGenerics.R 
 		AllClasses.R  
 		AllFunctions.R  
 		outlier.R  

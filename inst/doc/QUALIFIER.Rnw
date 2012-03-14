@@ -59,7 +59,7 @@ library(QUALIFIER)
 Optionally, parsing xml workspace can be done in parallel mode. It can speed up the process for large datasets.
 <<loadPackage-parallel, echo=TRUE,results=hide,eval=FALSE>>=
 library(Rmpi)
-library(multicore)
+library(snowfall)
 library(ncdfFlow)
 @
 
