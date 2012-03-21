@@ -226,7 +226,9 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
-qaReport(qaTask.list,outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
+
+qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
 
 

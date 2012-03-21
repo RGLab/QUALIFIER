@@ -21,6 +21,20 @@ setReplaceMethod("qpar",
 			return(object)
 		})
 
+setMethod("htmlReport", signature=c(x="qaTask"),
+		function(x){
+			x@htmlReport
+		})
+
+setReplaceMethod("htmlReport",
+		signature=signature(x="qaTask",
+				value="logical"),
+		definition=function(x, value)
+		{
+			x@htmlReport<-value
+			return(x)
+		})
+
 setMethod("getName", signature=c(x="qaTask"),
 		function(x){
 			x@qaName

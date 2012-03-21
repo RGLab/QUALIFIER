@@ -12,6 +12,7 @@ setClass("qaTask",
 						,width="numeric"
 						,height="numeric"
 						,par="list"
+						,htmlReport="logical"
 						,db="ANY"
 						
 						),
@@ -25,6 +26,7 @@ setClass("qaTask",
 						,width=numeric(10)
 						,height=numeric(10)
 						,par=list(horiz=FALSE)
+						,htmlReport=FALSE
 						,db="ANY"
 						)
 		)

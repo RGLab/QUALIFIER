@@ -14,6 +14,8 @@ setGeneric("qpar",function (x, ...)standardGeneric("qpar"))
 setGeneric("qpar<-",function(object,value) standardGeneric("qpar<-"))
 setGeneric("width",function (x)standardGeneric("width"))
 setGeneric("height",function (x)standardGeneric("height"))
+setGeneric("htmlReport",function (x)standardGeneric("htmlReport"))
+setGeneric("htmlReport<-",function (x,value)standardGeneric("htmlReport<-"))
 
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
 setGeneric("getPath",function (x, ...)standardGeneric("getPath"))

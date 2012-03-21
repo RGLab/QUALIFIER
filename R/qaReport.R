@@ -104,7 +104,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 				)	
 			}
 #			browser()
-			if(nFscFailed>0||nGroupFailed>0)
+			if(nFscFailed>0||nGroupFailed>0||htmlReport(x))
 			{
 				db$objcount<-db$objcount+1
 				hwrite(paste(
@@ -323,43 +323,10 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #										##table+image
 #
 								
-#										if(nrow(curOut)>0||nrow(curgOut)>0)
-#								if(getName(x)=="MFIOverTime")
-#								{
-#									relation<-"free"										
-#									rFunc<-rlm
-#								}else
-#								{
-#									relation<-NULL										
-#									rFunc<-NULL
-#								}
-								
-#								if(getName(x)%in%c("RedundantStain","MNC"))
-#								{
-#									xaxis.draw<-FALSE
-#								}else
-#								{
-#									xaxis.draw<-TRUE
-#								}
-#								if(getName(x)%in%c("spike"))
-#								{
-#									ylab<-"cumulative z-score"
-#								}else
-#								{
-#									ylab<-NULL
-#								}
-#										browser()
-										
-							
+		
 								plotCallStr<-quote(plot(x
 														,formula1
 														,dest=imageDir
-#														,par=list(ylab=ylab
-#																	,scales=list(x=c(draw=xaxis.draw)
-#																				,y=c(relation=relation)
-#																				)
-#																	)
-#														,rFunc=rFunc
 														,plotAll=plotAll
 														,subset=groupBy==curGroup
 														)
