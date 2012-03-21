@@ -19,4 +19,4 @@ setGeneric("htmlReport<-",function (x,value)standardGeneric("htmlReport<-"))
 
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
 setGeneric("getPath",function (x, ...)standardGeneric("getPath"))
-
+setGeneric("addStats",function (x,definition, ...)standardGeneric("addStats"))

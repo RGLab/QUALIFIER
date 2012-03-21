@@ -121,7 +121,12 @@ plot(qaTask.list[["NumberOfEvents"]]
 )
 
 
-
+addStats(db,definition=sum(proportion)~RecdDt|name
+			,statName="sum.prop"
+			,pop="margin"
+#			,subset=population=="margin"
+			)
+	
 qaCheck(qaTask.list[["BoundaryEvents"]]
 		,sum(proportion) ~ RecdDt | name
 		,outlierfunc=outlier.cutoff
