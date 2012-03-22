@@ -20,6 +20,20 @@ setReplaceMethod("qpar",
 			object@par<-value
 			return(object)
 		})
+setMethod("scatterPar", signature=c(x="qaTask"),
+		function(x){
+			x@scatterPar
+		})
+
+setReplaceMethod("scatterPar",
+		signature=signature(object="qaTask",
+				value="list"),
+		definition=function(object, value)
+		{
+			object@scatterPar<-value
+			return(object)
+		})
+
 
 setMethod("htmlReport", signature=c(x="qaTask"),
 		function(x){

@@ -135,10 +135,13 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
 #		,dest="image"
-		,par=list(ylab="percent")
+#		,subset=id==245
+#		,scatter=T
+#		,par=list(ylab="percent")
+#		,scatterPar=list(type="densityplot")
 )
 
-
+scatterPar(qaTask.list[["BoundaryEvents"]])
 
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm

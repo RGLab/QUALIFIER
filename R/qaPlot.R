@@ -133,7 +133,7 @@ individualPlot<-function(x,curGate,curRow,statsType)
 }
 #TODO:check why colnames from flowCore is not dispatched correctly without namespace explicitly specified
 ##group plot for each sampleID or other aggregation ID
-qa.GroupPlot<-function(db,yy)
+qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 {
 	cols <- colorRampPalette(IDPcolorRamp(21,
 					t(col2hsv(c("blue","green","yellow","red"))),
@@ -182,15 +182,30 @@ qa.GroupPlot<-function(db,yy)
 		
 	
 		fres<-filter(fs1,gates)
-		if(length(parameters(fres[[1]]))==2)
+#		browser()
+		if(is.null(par$formula))#automatically decide the formula when no formula is provided explicitly
 		{
-			t1<-paste("`",parameters(gates[[1]])[1],"`~`",parameters(gates[[1]])[2],"`",sep="")
+			if(par$type=="xyplot")
+			{
+				if(length(parameters(fres[[1]]))==2)
+				{
+					t1<-paste("`",parameters(gates[[1]])[1],"`~`",parameters(gates[[1]])[2],"`",sep="")
+				}else
+				{
+					t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
+				}
+			}else
+			{
+				t1<-paste(".~`",parameters(fres[[1]])[1],"`",sep="")
+				
+			}
 		}else
 		{
-			t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
+			t1<-par$formula
 		}
-
-		obj<-xyplot(x=as.formula(t1),
+#		browser()
+		if(par$type=="xyplot")
+			obj<-xyplot(x=as.formula(t1),
 						data=fs1,
 						smooth=FALSE,
 						colramp=cols,
@@ -211,7 +226,18 @@ qa.GroupPlot<-function(db,yy)
 													)
 											),
 						panel=panel.xyplot.flowsetEx
-				)
+					)
+		else
+			obj<-densityplot(x=as.formula(t1),
+					data=fs1,
+					smooth=FALSE,
+					colramp=cols,
+					filter=fres,
+					names=FALSE,
+					pd=pData(fs1)
+					
+					,panel=qa.panel.densityplot
+			)
 	}
 	
 			
@@ -228,14 +254,14 @@ qa.GroupPlot<-function(db,yy)
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
-
+#browser()
 			#assign null to formula if it is missing
 			if(missing(y))
 				y<-formula(x)
-			plot.qaTask(qaObj=x,formula=y,...)
+			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -246,6 +272,17 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 				
 		qpar(qaObj)<-par_old
 	}
+	
+#	browser()
+	par_old<-scatterPar(qaObj)
+	if(!missing(scatterPar1))##overwrite the elements of par slot of qa object if provided by argument
+	{
+		for(x in names(scatterPar1))
+			eval(substitute(par_old$v<-scatterPar1$v,list(v=x)))
+		
+		scatterPar(qaObj)<-par_old
+	}
+	
 #	browser()
 	if(missing(width))
 		width<-QUALIFIER:::width(qaObj)
@@ -263,7 +300,7 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 
 
 	#parse the formula
-	formuRes<-.formulaParser(formula)
+	formuRes<-.formulaParser(formula1)
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 	
 	statsType<-matchStatType(db,formuRes)
@@ -294,9 +331,9 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 		}
 	}
 #	browser()
-	if(getName(qaObj)=="BoundaryEvents")
-		yy<-base::subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
-			
+#	if(getName(qaObj)=="BoundaryEvents")
+#		yy<-base::subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
+#			
 
 	#append the outlier flag
 	yy$outlier<-yy$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
@@ -337,7 +374,7 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 			
 		}else
 		{
-			thisCall<-qa.GroupPlot(db,yy)
+			thisCall<-qa.GroupPlot(db,yy,scatterPar(qaObj))
 		}
 		
 		
@@ -445,7 +482,7 @@ plot.qaTask<-function(qaObj,formula,subset,pop,width,height,par,isTerminal=TRUE,
 			plot.symbol$col<-"red"
 			trellis.par.set("plot.symbol",plot.symbol)
 			
-		lattice.options(print.function=plot.trellisEx)
+#		lattice.options(print.function=plot.trellisEx)
 	
 			if(qpar(qaObj)$horiz)
 			{
