@@ -134,7 +134,7 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 )
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-		,dest="image"
+#		,dest="image"
 		,subset=id==245&channel=="PE-A"
 		,scatterPlot=T
 #		,par=list(ylab="percent")
@@ -240,6 +240,7 @@ plot(qaTask.list[["RedundantStain"]]
 ##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
+
 
 qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
