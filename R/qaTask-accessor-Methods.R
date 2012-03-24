@@ -84,7 +84,7 @@ setMethod("getData", signature=c(obj="qaTask"),
 			obj@db
 		})
 
-setMethod("formula", signature=c(x="qaTask"),
+setMethod("getFormula", signature=c(x="qaTask"),
 		function(x){
 			x@formula
 		})
@@ -106,7 +106,7 @@ setMethod("show",
 			cat("population: ", getPop(object))
 			cat("\n")
 			cat("Default formula :")
-			print(formula(object))
+			print(getFormula(object))
 			cat("Plot type: ", plotType(object))
 			cat("\n")
 #			browser()

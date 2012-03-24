@@ -70,7 +70,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #			nFscFailed<-length(unique(outResult$fcsFile))
 			nGroupFailed<-0
 			
-			formula1<-formula(x)
+			formula1<-getFormula(x)
 			
 			formuRes<-.formulaParser(formula1)
 			xTerm<-formuRes$xTerm
@@ -435,7 +435,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 #							browser()
 					##make sure the w and h pass to plot and large enough to display strip text
 					imageName<-plot(x
-							,y=formula(x)
+							,y=getFormula(x)
 							,plotAll=plotAll
 							,dest=imageDir
 							,width=27,height=13)

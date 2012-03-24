@@ -182,30 +182,44 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 		
 	
 		fres<-filter(fs1,gates)
-#		browser()
-		if(is.null(par$formula))#automatically decide the formula when no formula is provided explicitly
+		if(par$type=="xyplot")
 		{
-			if(par$type=="xyplot")
+			
+			if(length(parameters(fres[[1]]))==2)
 			{
-				if(length(parameters(fres[[1]]))==2)
-				{
-					t1<-paste("`",parameters(gates[[1]])[1],"`~`",parameters(gates[[1]])[2],"`",sep="")
-				}else
-				{
-					t1<-paste("`",flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))],"`~`",parameters(fres[[1]])[1],"`",sep="")
-				}
+				xterm<-parameters(gates[[1]])[2]
+				yterm<-parameters(gates[[1]])[1]
 			}else
 			{
-				t1<-paste(".~`",parameters(fres[[1]])[1],"`",sep="")
-				
+				xterm<-parameters(gates[[1]])[1]
+				yterm<-flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))]
 			}
+			t1<-paste("`",yterm,"`~`",xterm,"`",sep="")
+			
 		}else
 		{
-			t1<-par$formula
+			t1<-paste("~`",parameters(fres[[1]])[1],"`",sep="")
+			
+		}
+		t1<-as.formula(t1)
+#				browser()
+		
+		#unfortunately		
+		if(!is.null(par$xscale))
+		{
+			
+			#			t1<-eval(substitute(update(t1,.~f(.)),list(f=par$xscale))) 		
+
+			
+		}
+		if(!is.null(par$yscale))
+		{
+			#			t1<-eval(substitute(update(t1,f(.)~.),list(f=par$yscale)))
+			
 		}
 #		browser()
 		if(par$type=="xyplot")
-			obj<-xyplot(x=as.formula(t1),
+			obj<-xyplot(x=t1,
 						data=fs1,
 						smooth=FALSE,
 						colramp=cols,
@@ -228,16 +242,15 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 						panel=panel.xyplot.flowsetEx
 					)
 		else
-			obj<-densityplot(x=as.formula(t1),
-					data=fs1,
-					smooth=FALSE,
-					colramp=cols,
-					filter=fres,
-					names=FALSE,
-					pd=pData(fs1)
-					
-					,panel=qa.panel.densityplot
-			)
+			obj<-densityplot(data=fs1
+								,x=t1
+								,smooth=FALSE
+								,filter=fres
+								,names=FALSE
+								,pd=pData(fs1)
+#								,scales=list(x=list(log=TRUE))
+								,panel=qa.panel.densityplot
+							)
 	}
 	
 			
@@ -257,7 +270,7 @@ setMethod("plot", signature=c(x="qaTask"),
 #browser()
 			#assign null to formula if it is missing
 			if(missing(y))
-				y<-formula(x)
+				y<-getFormula(x)
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
@@ -416,7 +429,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 #					ans
 #				}
 			thisCall<-quote(
-							xyplot(x=formula,data=yy
+							xyplot(x=formula1,data=yy
 									,groups=outlier
 									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,...){
 										panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,db=db,...)
@@ -515,7 +528,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 											)
 										)
 									
-			thisCall<-quote(bwplot(x=formula,data=yy
+			thisCall<-quote(bwplot(x=formula1,data=yy
 									,groupBy=groupBy.Panel
 									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs
 														,plotAll.=plotAll
@@ -538,7 +551,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 #		print(thisCall)
 	}
 	
-#	browser()
+	browser()
 	if(isSvg)
 	{
 		print(thisCall)

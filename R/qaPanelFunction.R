@@ -753,25 +753,13 @@ qa.panel.densityplot<-function(...)
 	
 	
 
-
-				
-	panel.densityplot.flowset(
-#			x=x, y=y, 
-#			frames=frames, 
-#			channel=channel,
-#			overlap = overlap, 
-#			channel.name=channel.name, 
-#			filter=filter,
-			
-#			fill="red",#superpose.polygon$col,
-#					lty=superpose.polygon$lty,
-#					lwd=superpose.polygon$lwd,
-#					alpha=superpose.polygon$alpha,
-#					col=superpose.polygon$border,
-#					gpar, 
-#			col="red",
-			...)
-	
+#browser()
+#try to manipulate ... before pass it to the call
+#	call.f<-match.call(expand.dots = F)
+#	args<-call.f$...
+#	ls(args$frames)
+#	do.call("panel.densityplot.flowset",as.list(args))
+	panel.densityplot.flowset(...)
 	#add gate label
 	ny <- nlevels(y)
 	for (i in rev(seq_len(ny))){

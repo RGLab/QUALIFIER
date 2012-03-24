@@ -134,11 +134,11 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 )
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-#		,dest="image"
-#		,subset=id==245
-#		,scatter=T
+		,dest="image"
+		,subset=id==245&channel=="PE-A"
+		,scatterPlot=T
 #		,par=list(ylab="percent")
-#		,scatterPar=list(type="densityplot")
+		,scatterPar=list(type="densityplot")
 )
 
 scatterPar(qaTask.list[["BoundaryEvents"]])
@@ -207,8 +207,10 @@ plot(qaTask.list[["MNC"]]
 #		,par=list(xlab="coresampleid")
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
-		,subset=coresampleid%in%c(11730,8780)
-#		,scatterPlot=TRUE
+		,subset=coresampleid%in%c(11730
+#									,8780
+									)
+		,scatterPlot=TRUE
 #		,dest="image"
 #		,plotAll="none"
 	)

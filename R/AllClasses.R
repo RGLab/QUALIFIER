@@ -23,11 +23,10 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
 						,plotType="xyplot"
-						,width=numeric(10)
-						,height=numeric(10)
+						,width=10
+						,height=10
 						,par=list(horiz=FALSE)
-						,scatterPar=list(type="xyplot"
-										,formula=NULL)
+						,scatterPar=list(type="xyplot")
 						,htmlReport=FALSE
 						,db="ANY"
 						)

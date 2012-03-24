@@ -108,7 +108,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #browser()
 	if(is.null(formula))
 	{
-		formula<-formula(obj)
+		formula<-getFormula(obj)
 		
 	}
 	formuRes<-.formulaParser(formula)
