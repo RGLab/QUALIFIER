@@ -891,7 +891,7 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 			curFres<-filter
 #			browser()
 		
-			p.stats<-flowCore:::summary(curFres)@p
+			p.stats<-summary(curFres)@p
 			#remove stats for "rest" pop(usually the first one) from mulitfilterResults produced by filters such as curv2Filter
 			if(length(p.stats)>1)
 				p.stats<-p.stats[-1]

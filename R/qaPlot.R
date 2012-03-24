@@ -12,7 +12,7 @@
 #TODO:to merge this single plot to groupplot since groupPlot is also able to produce the same xyplot
 #just need to add timeline plot to groupPlot routine.
 ##single plot for each FCS
-qa.singlePlot<-function(db,yy,statsType)
+qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
 {
 #	browser()
 #	for(i in 1:nrow(yy))
@@ -36,11 +36,11 @@ qa.singlePlot<-function(db,yy,statsType)
 		
 		#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
 		#				browser()
-		individualPlot(x,curGate,curRow,statsType)
+		individualPlot(x,curGate,curRow,statsType,par)
 	}
 #	}	
 }
-individualPlot<-function(x,curGate,curRow,statsType)
+individualPlot<-function(x,curGate,curRow,statsType,par)
 {
 	cols <- colorRampPalette(IDPcolorRamp(21,
 					t(col2hsv(c("blue","green","yellow","red"))),
@@ -51,8 +51,8 @@ individualPlot<-function(x,curGate,curRow,statsType)
 	channel<-as.character(curRow$channel)
 	pop<-as.character(curRow$population)
 
-#	curID<-pData(x)$id
-	params<-flowCore:::colnames(x)
+#browser()
+	params<-colnames(x)
 
 	if(is.object(curGate))
 	{
@@ -63,7 +63,6 @@ individualPlot<-function(x,curGate,curRow,statsType)
 		chnls<-ifelse(statsType=="spike",channel,NA)
 		fres<-NULL
 	}
-	
 	
 
 	if(statsType=="count"&&pop=="/root")##total cell count
@@ -81,15 +80,54 @@ individualPlot<-function(x,curGate,curRow,statsType)
 			
 			if(statsType=="spike")
 			{
-				t1<-paste("`",chnls[1],"`~`",params[grep("time",params,ignore.case=T)],"`",sep="")					
+				yterm<-as.symbol(chnls[1])
+				xterm<-as.symbol(params[grep("time",params,ignore.case=T)])
+				t1<-substitute(y~x,list(y=yterm,x=xterm))
 			}else
 			{
-				t1<-paste("`",params[2],"`~`",chnls[1],"`",sep="")
+				yterm<-as.symbol(params[2])
+				xterm<-as.symbol(chnls[1])
+				if(par$type=="xyplot")
+					t1<-substitute(y~x,list(y=yterm,x=xterm))
+				else
+					t1<-substitute(~x,list(x=xterm))			
 			}
 		}else
 		{
-			t1<-paste("`",chnls[2],"`~`",chnls[1],"`",sep="")	
+			yterm<-as.symbol(chnls[2])
+			xterm<-as.symbol(chnls[1])
+			t1<-substitute(y~x,list(y=yterm,x=xterm))
 		}
+				
+		t1<-as.formula(t1)
+		
+		xlog<-par$scales$x$log
+		if(is.null(xlog))xlog<-FALSE
+		ylog<-par$scales$y$log
+		if(is.null(ylog))ylog<-FALSE
+		scales<-list()
+		browser()
+		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
+		{
+			x<-reScaleData(x,xterm,xlog)
+			#and manually calculate the axis labels in order to preserve the raw scale labels
+			xrg.new<-range(x)[,as.character(xterm)]
+			xats<- seq(from=max(0,min(xrg.new)),to=max(xrg.new),length.out=5)
+			xlabels<-round(xats^10)
+			scales$x<-list(labels=xlabels,at=xats)
+		}
+		
+		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
+		{
+			x<-reScaleData(x,yterm,ylog)
+			yrg.new<-range(x)[,as.character(yterm)]
+			
+			yats<- seq(from=max(0,min(yrg.new)),to=max(yrg.new),length.out=5)
+			ylabels<-round(yats^10)
+			scales$y<-list(labels=ylabels,at=yats)
+			
+		}	
+		
 		
 		if(is.object(curGate))
 		{
@@ -101,39 +139,57 @@ individualPlot<-function(x,curGate,curRow,statsType)
 		}
 		
 #			browser()	
-
-		xyplot(x=as.formula(t1)
-						,data=x
+	if(par$type=="xyplot")
+		xyplot(x=t1
+				,data=x
 #							xlim=range(exprs(x[[1]])[,parameters(curGate)[1]]),
 #							ylim=range(exprs(x[[1]])[,parameters(curGate)[2]]),
-						,smooth=FALSE
-						,colramp=cols
-						,filter=fres
-						,names=FALSE
-#									pd=pData(x),
-						,main=mainTitle
-						,par.settings=list(gate.text=list(text=0.7
-												,alpha=1
-												,cex=1
-												,font=1)
-										,gate=list(
-												fill="transparent"
-												,lwd<-2
-												,lty="solid"
-												,alpha=1
-												,col="red"
-											)
-										,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
-								)
-						,panel=panel.xyplot.flowframeEx
-				)
+				,smooth=FALSE
+				,colramp=cols
+				,filter=fres
+				,names=FALSE
+				,scales=scales
+		 		,main=mainTitle
+				,par.settings=list(gate.text=list(text=0.7
+										,alpha=1
+										,cex=1
+										,font=1)
+								,gate=list(
+										fill="transparent"
+										,lwd<-2
+										,lty="solid"
+										,alpha=1
+										,col="red"
+									)
+								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
+						)
+				,panel=panel.xyplot.flowframeEx
+		)
+	else
+	{
+		fcsName<-as.character(curRow$name)
+		fres@frameId<-fcsName			
+		fs<-flowSet(x)
+		sampleNames(fs)<-fcsName
+		freslist<-list(fres)
+		names(freslist)<-fcsName
+		densityplot(data=fs
+				,x=t1
+				,smooth=FALSE
+				,filter=freslist
+				,names=FALSE
+				,scales=scales
+				,main=mainTitle
+				,panel=qa.panel.densityplot
+		)	
+	}	
 
 	}
 
 }
 #TODO:check why colnames from flowCore is not dispatched correctly without namespace explicitly specified
 ##group plot for each sampleID or other aggregation ID
-qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
+qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 {
 	cols <- colorRampPalette(IDPcolorRamp(21,
 					t(col2hsv(c("blue","green","yellow","red"))),
@@ -187,36 +243,55 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 			
 			if(length(parameters(fres[[1]]))==2)
 			{
-				xterm<-parameters(gates[[1]])[2]
-				yterm<-parameters(gates[[1]])[1]
+				xterm<-as.symbol(parameters(gates[[1]])[2])
+				yterm<-as.symbol(parameters(gates[[1]])[1])
 			}else
 			{
-				xterm<-parameters(gates[[1]])[1]
-				yterm<-flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))]
+				xterm<-as.symbol(parameters(gates[[1]])[1])
+				yterm<-as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
 			}
-			t1<-paste("`",yterm,"`~`",xterm,"`",sep="")
+			t1<-substitute(y~x,list(y=yterm,x=xterm))
 			
 		}else
 		{
-			t1<-paste("~`",parameters(fres[[1]])[1],"`",sep="")
-			
+			xterm<-as.symbol(parameters(fres[[1]])[1])
+			t1<-substitute(~x,list(x=xterm))
+			yterm<-NULL
 		}
-		t1<-as.formula(t1)
-#				browser()
+		t1<-as.formula(t1)		
+		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
+		xlog<-par$scales$x$log
+		if(is.null(xlog))xlog<-FALSE
+		ylog<-par$scales$y$log
+		if(is.null(ylog))ylog<-FALSE
 		
-		#unfortunately		
-		if(!is.null(par$xscale))
+		scales<-list()
+#		browser()
+		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
-			
-			#			t1<-eval(substitute(update(t1,.~f(.)),list(f=par$xscale))) 		
-
-			
+			fs1<-reScaleData(fs1,xterm,xlog)
+			#and manually calculate the axis labels in order to preserve the raw scale labels
+			xrg.new<-range(eapply(fs1@frames, range, as.character(xterm)))
+			xats<- seq(from=max(0,min(xrg.new)),to=max(xrg.new),length.out=5)
+			xlabels<-round(xats^10)
+			scales$x<-list(labels=xlabels,at=xats)
 		}
-		if(!is.null(par$yscale))
+			
+		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
 		{
-			#			t1<-eval(substitute(update(t1,f(.)~.),list(f=par$yscale)))
+			fs1<-reScaleData(fs1,yterm,ylog)
+			yrg.new<-range(eapply(fs1@frames, range, as.character(yterm)))
 			
-		}
+			yats<- seq(from=max(0,min(yrg.new)),to=max(yrg.new),length.out=5)
+			ylabels<-round(yats^10)
+			scales$y<-list(labels=ylabels,at=yats)
+			
+		}	
+		
+		
+		
+	
+		
 #		browser()
 		if(par$type=="xyplot")
 			obj<-xyplot(x=t1,
@@ -225,8 +300,9 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 						colramp=cols,
 						filter=fres,
 						names=FALSE,
-						pd=pData(fs1),
-						par.settings=list(gate.text=list(text=0.7
+						pd=pData(fs1)
+						,scales=scales
+						,par.settings=list(gate.text=list(text=0.7
 														,alpha=1
 														,cex=1
 														,lineheight=2
@@ -242,15 +318,18 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 						panel=panel.xyplot.flowsetEx
 					)
 		else
+		{
+			
 			obj<-densityplot(data=fs1
 								,x=t1
 								,smooth=FALSE
 								,filter=fres
 								,names=FALSE
 								,pd=pData(fs1)
-#								,scales=list(x=list(log=TRUE))
+								,scales=scales
 								,panel=qa.panel.densityplot
 							)
+		}
 	}
 	
 			
@@ -258,12 +337,37 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot",formula=NULL))
 	
 	return(obj)
 	
-#	plotObj
 }
 
+#samp <- read.FCS(system.file("extdata",
+#				"0877408774.B08", package="flowCore"))
+#logTrans <- logTransform(transformationId="log10-transformation", logbase=10, r=1, d=1)
+#dataTransform <- transform(samp,`FSC-H`=logTrans(`FSC-H`))
 
-
-
+reScaleData<-function(fs,channel,logScale)
+{
+	#set the logbase if neccessary
+	if(!is.logical(logScale))
+	{
+		logbase<-logScale
+		logScale<-TRUE
+	}else
+	{
+		if(logScale)logbase<-10
+	}
+	
+#	browser()
+	if(logScale)
+	{
+		
+		logTrans <- logTransform(transformationId="log-transformation", logbase=logbase, r=1, d=1)
+#		fs <- transform(fs,channel=logTrans(channel))
+#		transform(fs,`PE-A`=logTrans(`PE-A`))
+		#somhow transform on logTrans doesn't work,has to use log directly
+		fs <- eval(parse(text=paste("transform(fs,`",channel,"`=log10(`",channel,"`))",sep="")))	
+	}
+	fs
+}
 
 setMethod("plot", signature=c(x="qaTask"),
 		function(x,y,...){
@@ -274,7 +378,7 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -288,10 +392,10 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 	
 #	browser()
 	par_old<-scatterPar(qaObj)
-	if(!missing(scatterPar1))##overwrite the elements of par slot of qa object if provided by argument
+	if(!missing(scatterPar))##overwrite the elements of par slot of qa object if provided by argument
 	{
-		for(x in names(scatterPar1))
-			eval(substitute(par_old$v<-scatterPar1$v,list(v=x)))
+		for(x in names(scatterPar))
+			eval(substitute(par_old$v<-scatterPar$v,list(v=x)))
 		
 		scatterPar(qaObj)<-par_old
 	}
@@ -371,7 +475,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 	}
 	
 	
-#	browser()
+	browser()
 	plotObjs=new.env()
 	if(scatterPlot)
 	{
@@ -382,8 +486,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 #			browser()
 			thisCall<-lapply(1:nrow(yy),function(i)
 			{
-#						browser()
-						qa.singlePlot(db,yy[i,,drop=FALSE],statsType)
+						browser()
+						qa.singlePlot(db,yy[i,,drop=FALSE],statsType,scatterPar(qaObj))
 			})
 			
 			

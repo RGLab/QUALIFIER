@@ -132,13 +132,15 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
 )
-plot(qaTask.list[["BoundaryEvents"]]
+
+plot.qaTask(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
 #		,dest="image"
-		,subset=id==245&channel=="PE-A"
+		,subset=coresampleid%in%c(11730)&channel=="PE-A"
 		,scatterPlot=T
-#		,par=list(ylab="percent")
-		,scatterPar=list(type="densityplot")
+		,par=list(ylab="percent")
+		,scatterPar=list(type="densityplot"
+						,scales=list(x=list(log=T)))
 )
 
 scatterPar(qaTask.list[["BoundaryEvents"]])
