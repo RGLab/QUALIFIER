@@ -14,6 +14,7 @@ setClass("qaTask",
 						,par="list"#arguments for lattice plot
 						,scatterPar="list"#arguments for indivdiual plot
 						,htmlReport="logical"#decide wether to plot even witout outliers detected
+						,rFunc="ANY"
 						,db="ANY"
 						),
 		prototype=list(qaID=integer(0)
@@ -28,6 +29,7 @@ setClass("qaTask",
 						,par=list(horiz=FALSE)
 						,scatterPar=list(type="xyplot")
 						,htmlReport=FALSE
+						,rFunc=NULL
 						,db="ANY"
 						)
 		)

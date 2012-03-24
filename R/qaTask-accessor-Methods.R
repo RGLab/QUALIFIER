@@ -49,6 +49,20 @@ setReplaceMethod("htmlReport",
 			return(x)
 		})
 
+setMethod("rFunc", signature=c(x="qaTask"),
+		function(x){
+			x@rFunc
+		})
+
+setReplaceMethod("rFunc",
+		signature=signature(x="qaTask",
+				value="ANY"),
+		definition=function(x, value)
+		{
+			x@rFunc<-value
+			return(x)
+		})
+
 setMethod("getName", signature=c(x="qaTask"),
 		function(x){
 			x@qaName

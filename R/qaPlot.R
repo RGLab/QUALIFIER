@@ -310,8 +310,10 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 	
 	if(is.null(qpar(qaObj)$horiz))
 		qpar(qaObj)$horiz<-FALSE
-
-
+	
+	if(is.null(rFunc))
+		rFunc<-rFunc(qaObj)
+	
 	#parse the formula
 	formuRes<-.formulaParser(formula1)
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
@@ -551,7 +553,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar1,isT
 #		print(thisCall)
 	}
 	
-	browser()
+#	browser()
 	if(isSvg)
 	{
 		print(thisCall)

@@ -152,7 +152,7 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('PE-Cy7-A')
-		,rFunc=rlm
+#		,rFunc=rlm
 
 )
 
@@ -236,7 +236,10 @@ plot(qaTask.list[["RedundantStain"]]
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
 ###############################################################################
+
+##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
+rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 
 qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
