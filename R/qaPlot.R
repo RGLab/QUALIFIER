@@ -101,32 +101,28 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 				
 		t1<-as.formula(t1)
 		
+		#convert frame to flowSet to plot
+		fcsName<-as.character(curRow$name)
+		fres@frameId<-fcsName			
+		fs<-flowSet(x)
+		sampleNames(fs)<-fcsName
+		fres<-list(fres)
+		names(fres)<-fcsName
+		
 		xlog<-par$scales$x$log
 		if(is.null(xlog))xlog<-FALSE
-		ylog<-par$scales$y$log
-		if(is.null(ylog))ylog<-FALSE
+#		ylog<-par$scales$y$log
+#		if(is.null(ylog))ylog<-FALSE
+#		browser()
 		scales<-list()
-		browser()
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
-			x<-reScaleData(x,xterm,xlog)
-			#and manually calculate the axis labels in order to preserve the raw scale labels
-			xrg.new<-range(x)[,as.character(xterm)]
-			xats<- seq(from=max(0,min(xrg.new)),to=max(xrg.new),length.out=5)
-			xlabels<-round(xats^10)
-			scales$x<-list(labels=xlabels,at=xats)
+			res<-reScaleData(fs,fres,xterm,xlog)
+#			browser()
+			fs<-res$fs
+			fres<-res$fres
+			scales$x<-res$scales
 		}
-		
-		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
-		{
-			x<-reScaleData(x,yterm,ylog)
-			yrg.new<-range(x)[,as.character(yterm)]
-			
-			yats<- seq(from=max(0,min(yrg.new)),to=max(yrg.new),length.out=5)
-			ylabels<-round(yats^10)
-			scales$y<-list(labels=ylabels,at=yats)
-			
-		}	
 		
 		
 		if(is.object(curGate))
@@ -142,13 +138,11 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 	if(par$type=="xyplot")
 		xyplot(x=t1
 				,data=x
-#							xlim=range(exprs(x[[1]])[,parameters(curGate)[1]]),
-#							ylim=range(exprs(x[[1]])[,parameters(curGate)[2]]),
 				,smooth=FALSE
 				,colramp=cols
 				,filter=fres
 				,names=FALSE
-				,scales=scales
+#				,scales=scales
 		 		,main=mainTitle
 				,par.settings=list(gate.text=list(text=0.7
 										,alpha=1
@@ -167,16 +161,11 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 		)
 	else
 	{
-		fcsName<-as.character(curRow$name)
-		fres@frameId<-fcsName			
-		fs<-flowSet(x)
-		sampleNames(fs)<-fcsName
-		freslist<-list(fres)
-		names(freslist)<-fcsName
+		
 		densityplot(data=fs
 				,x=t1
 				,smooth=FALSE
-				,filter=freslist
+				,filter=fres
 				,names=FALSE
 				,scales=scales
 				,main=mainTitle
@@ -262,35 +251,21 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
 		xlog<-par$scales$x$log
 		if(is.null(xlog))xlog<-FALSE
-		ylog<-par$scales$y$log
-		if(is.null(ylog))ylog<-FALSE
+#		ylog<-par$scales$y$log
+#		if(is.null(ylog))ylog<-FALSE
 		
-		scales<-list()
 #		browser()
+		scales<-list()
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
-			fs1<-reScaleData(fs1,xterm,xlog)
-			#and manually calculate the axis labels in order to preserve the raw scale labels
-			xrg.new<-range(eapply(fs1@frames, range, as.character(xterm)))
-			xats<- seq(from=max(0,min(xrg.new)),to=max(xrg.new),length.out=5)
-			xlabels<-round(xats^10)
-			scales$x<-list(labels=xlabels,at=xats)
+			res<-reScaleData(fs1,fres,xterm,xlog)
+#			browser()
+			fs1<-res$fs
+			fres<-res$fres
+			scales$x<-res$scales
 		}
-			
-		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
-		{
-			fs1<-reScaleData(fs1,yterm,ylog)
-			yrg.new<-range(eapply(fs1@frames, range, as.character(yterm)))
-			
-			yats<- seq(from=max(0,min(yrg.new)),to=max(yrg.new),length.out=5)
-			ylabels<-round(yats^10)
-			scales$y<-list(labels=ylabels,at=yats)
-			
-		}	
-		
-		
-		
-	
+#		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
+#			res<-reScaleData(fs1,fres,yterm,ylog)
 		
 #		browser()
 		if(par$type=="xyplot")
@@ -301,7 +276,7 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 						filter=fres,
 						names=FALSE,
 						pd=pData(fs1)
-						,scales=scales
+#						,scales=scales
 						,par.settings=list(gate.text=list(text=0.7
 														,alpha=1
 														,cex=1
@@ -339,12 +314,8 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 	
 }
 
-#samp <- read.FCS(system.file("extdata",
-#				"0877408774.B08", package="flowCore"))
-#logTrans <- logTransform(transformationId="log10-transformation", logbase=10, r=1, d=1)
-#dataTransform <- transform(samp,`FSC-H`=logTrans(`FSC-H`))
 
-reScaleData<-function(fs,channel,logScale)
+reScaleData<-function(fs,fres,channel,logScale)
 {
 	#set the logbase if neccessary
 	if(!is.logical(logScale))
@@ -359,14 +330,31 @@ reScaleData<-function(fs,channel,logScale)
 #	browser()
 	if(logScale)
 	{
-		
-		logTrans <- logTransform(transformationId="log-transformation", logbase=logbase, r=1, d=1)
-#		fs <- transform(fs,channel=logTrans(channel))
-#		transform(fs,`PE-A`=logTrans(`PE-A`))
-		#somhow transform on logTrans doesn't work,has to use log directly
-		fs <- eval(parse(text=paste("transform(fs,`",channel,"`=log10(`",channel,"`))",sep="")))	
+#		logTrans <- eval(substitute(logTransform(transformationId="log-transformation", logbase=v, r=1, d=1),list(v=logbase)))
+		#somhow transform on logTrans doesn't work with different base,due to the way transform function handle the expression parsing
+		fs <- eval(parse(text=paste("flowCore::transform(fs,`",channel,"`=log(`",channel,"`,base=",logbase,"))",sep="")))
+
+		#log transform the filter result
+		fres<-lapply(fres,function(curFres){
+						max<-curFres@filterDetails[[1]]$filter@max
+						curFres@filterDetails[[1]]$filter@max<-log(max,logbase)
+						min<-curFres@filterDetails[[1]]$filter@min
+#						browser()
+						#make sure to keep the the name of the scalar value in order for the flowViz plot properly
+						min1<-max(0,log(min,logbase))
+						names(min1)<-names(min)
+						curFres@filterDetails[[1]]$filter@min<-min1
+						curFres
+					})
+						
 	}
-	fs
+#	browser()
+	#and manually calculate the axis labels in order to preserve the raw scale labels
+	rg.new<-range(eapply(fs@frames, range, as.character(channel)))
+	ats<- seq(from=max(0,min(rg.new)),to=max(rg.new),length.out=5)
+	labels<-round(logbase^ats)
+	
+	list(fs=fs,fres=fres,scales=list(labels=labels,at=ats))
 }
 
 setMethod("plot", signature=c(x="qaTask"),
@@ -391,13 +379,13 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	}
 	
 #	browser()
-	par_old<-scatterPar(qaObj)
+	par_old<-QUALIFIER:::scatterPar(qaObj)
 	if(!missing(scatterPar))##overwrite the elements of par slot of qa object if provided by argument
 	{
 		for(x in names(scatterPar))
 			eval(substitute(par_old$v<-scatterPar$v,list(v=x)))
 		
-		scatterPar(qaObj)<-par_old
+		QUALIFIER:::scatterPar(qaObj)<-par_old
 	}
 	
 #	browser()
@@ -475,7 +463,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	}
 	
 	
-	browser()
+#	browser()
 	plotObjs=new.env()
 	if(scatterPlot)
 	{
@@ -486,14 +474,14 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 #			browser()
 			thisCall<-lapply(1:nrow(yy),function(i)
 			{
-						browser()
-						qa.singlePlot(db,yy[i,,drop=FALSE],statsType,scatterPar(qaObj))
+#						browser()
+						qa.singlePlot(db,yy[i,,drop=FALSE],statsType,QUALIFIER:::scatterPar(qaObj))
 			})
 			
 			
 		}else
 		{
-			thisCall<-qa.GroupPlot(db,yy,scatterPar(qaObj))
+			thisCall<-qa.GroupPlot(db,yy,QUALIFIER:::scatterPar(qaObj))
 		}
 		
 		
@@ -501,6 +489,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 
 		par<-qpar(qaObj)
+		
 		par$subscripts<-TRUE
 		par$strip<-TRUE
 		
@@ -526,19 +515,18 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 				par$scales<-list(x=c(cex=0.7
 						#						,rot=45	
 											))
-#			if(is.null(xscale.components))
-#				par$xscale.components<-function(...) {
-#					ans <- xscale.components.default(...)
-#					ans$bottom$ticks$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-#					ans$bottom$labels$at<-seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month")
-#					ans$bottom$labels$labels <- zoo::as.yearmon(seq(from=min(yy$RecdDt),to=max(yy$RecdDt),by="2 month"))
-#					ans
-#				}
+#browser()
 			thisCall<-quote(
 							xyplot(x=formula1,data=yy
 									,groups=outlier
-									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,...){
-										panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType,db=db,...)
+									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType
+													,scatterPar=QUALIFIER:::scatterPar(qaObj)
+													,...){
+#												browser()
+												panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll
+																,statsType.=statsType,db=db
+																,scatterPar=scatterPar
+																,...)
 								#if regression function is supplied, then plot the regression line
 										if(!is.null(rFunc))
 										{
@@ -638,12 +626,12 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 									,groupBy=groupBy.Panel
 									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs
 														,plotAll.=plotAll
-														,statsType.=statsType
+														,statsType.=statsType,scatterPar=QUALIFIER:::scatterPar(qaObj)
 														,...){
 #										browser()
 											panel.bwplotEx(data.=data,dest.=dest
 															,plotObjs.=plotObjs,plotAll.=plotAll
-															,statsType.=statsType
+															,statsType.=statsType,scatterPar=scatterPar
 															,db=db,...)
 											}
 									)

@@ -3,45 +3,6 @@
 # Author: mike
 ###############################################################################
 
-#prepanel.default.xyplot <-
-#		function(x, y, type, subscripts, groups = NULL, ...)
-#{
-#	## Note: shingles satisfy is.numeric()
-#	if (any(!is.na(x)) && any(!is.na(y)))
-#	{
-#		ord <- order(as.numeric(x))
-#		if (!is.null(groups))
-#		{
-#			gg <- groups[subscripts]
-#			dx <- unlist(lapply(split(as.numeric(x)[ord], gg[ord]), diff))
-#			dy <- unlist(lapply(split(as.numeric(y)[ord], gg[ord]), diff))
-#			## ok <- !is.na(gg)
-#			
-#			## One may argue that points with is.na(gg) should be
-#			## excluded from the data rectangle since they are not
-#			## plotted.  For now I'm going to take the other view,
-#			## namely that the points are there, they just happen to
-#			## be invisible because the value of the variable defining
-#			## their graphical parameters is unknown.
-#		}
-#		else
-#		{
-#			dx <- diff(as.numeric(x[ord]))
-#			dy <- diff(as.numeric(y[ord]))
-#			## ok <- TRUE
-#		}
-#		list(xlim = lattice:::scale.limits(x), ylim = lattice:::scale.limits(y), dx = dx, dy = dy,
-#				xat = if (is.factor(x)) sort(unique(as.numeric(x))) else NULL,
-#				yat = if (is.factor(y)) sort(unique(as.numeric(y))) else NULL)
-#		
-#		
-#	}
-#	else prepanel.null()
-#		
-#	
-#}
-
-
 ##add svg anno to the original panel function for xyplot of lattice package
 ##individual oultiers are colored based on the groups argument which passed through oultier column of dataframe
 panel.xyplotEx <-
@@ -133,6 +94,8 @@ panel.xyplotEx <-
 			plotObjs<-list(...)$plotObjs
 			plotAll<-list(...)$plotAll
 			statsType<-list(...)$statsType
+			scatterPar<-list(...)$scatterPar
+			
 			db<-list(...)$db
 #			browser()
 			if(is.null(plotAll))
@@ -159,7 +122,7 @@ panel.xyplotEx <-
 						{
 							##save the individual plot obj
 #						browser()
-							assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
+							assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 							
 #						png(file.path(dest,paths))
 #						qa.singlePlot(db,curOutRow)
@@ -307,6 +270,8 @@ panel.bwplotEx <-
 	plotObjs<-list(...)$plotObjs
 	plotAll<-list(...)$plotAll
 	statsType<-list(...)$statsType
+	scatterPar<-list(...)$scatterPar
+	
 	db<-list(...)$db
 	if(is.null(plotAll))
 		plotAll=FALSE
@@ -396,7 +361,7 @@ panel.bwplotEx <-
 					##can't print right away since there is issue with embeded lattice plot
 					##some how it alter the viewport or leves of parent lattice object 
 #				browser()
-					curPlotObj<-qa.GroupPlot(db,curGroup)
+					curPlotObj<-qa.GroupPlot(db,curGroup,par=scatterPar)
 					if(!is.null(curPlotObj))
 					{
 						assign(basename(paths),curPlotObj,envir=plotObjs)
@@ -489,7 +454,7 @@ panel.bwplotEx <-
 						
 						##save the individual plot obj
 	#						browser()
-						assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
+						assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 						
 						
 						setSVGShapeURL(paths)
@@ -763,16 +728,16 @@ qa.panel.densityplot<-function(...)
 	#add gate label
 	ny <- nlevels(y)
 	for (i in rev(seq_len(ny))){
+#					browser()			
 		
 		curFres<-filter[[i]]
-		p.stats<-summary(curFres)@p
+		p.stats<-flowCore::summary(curFres)@p
 		#remove stats for "rest" pop(usually the first one) from mulitfilterResults produced by filters such as curv2Filter
 		if(length(p.stats)>1)
 			p.stats<-p.stats[-1]
 		p.stats<-sprintf("%.2f%%",p.stats*100)
 		
 		bounds<-gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
-#			browser()			
 		
 		
 		for(j in 1:length(bounds))
@@ -866,7 +831,7 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 	##plot filter
 	if (!is.null(filter) && validName) {
 		if (!is(filter, "filterResult")) 
-			filter <- filter(frame, filter)
+			filter <- flowCore::filter(frame, filter)
 #			rest <- Subset(frame, !filter)
 #			x <- exprs(rest[, channel.x.name])
 #			y <- exprs(rest[, channel.y.name])
@@ -891,7 +856,7 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 			curFres<-filter
 #			browser()
 		
-			p.stats<-summary(curFres)@p
+			p.stats<-flowCore::summary(curFres)@p
 			#remove stats for "rest" pop(usually the first one) from mulitfilterResults produced by filters such as curv2Filter
 			if(length(p.stats)>1)
 				p.stats<-p.stats[-1]

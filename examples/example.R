@@ -2,7 +2,7 @@
 # 
 # Author: mike
 ###############################################################################
-#unloadNamespace("flowQA")
+unloadNamespace("QUALIFIER")
 library(QUALIFIER)
 library(Rmpi)
 library(multicore)
@@ -133,17 +133,24 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,uBound=0.0003
 )
 
+unloadNamespace("QUALIFIER")
+library(QUALIFIER)
 plot.qaTask(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-#		,dest="image"
-		,subset=coresampleid%in%c(11730)&channel=="PE-A"
-		,scatterPlot=T
-		,par=list(ylab="percent")
+		,dest="image"
+		,subset=channel=="PE-A"
+#					&id==245
+#		,par=list(ylab="percent")
+#		,scatterPlot=T
 		,scatterPar=list(type="densityplot"
-						,scales=list(x=list(log=T)))
+						,scales=list(x=list(log=T))
+						)
+		,plotAll=F
 )
 
 
+
+## creating and showing the summary
 scatterPar(qaTask.list[["BoundaryEvents"]])
 
 qaCheck(qaTask.list[["MFIOverTime"]]

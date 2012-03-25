@@ -105,7 +105,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 	
 	if(is.null(rFunc))
-		rFunc<-rFunc(qaObj)	
+		rFunc<-rFunc(obj)	
 
 #browser()
 	if(is.null(formula))
