@@ -100,10 +100,11 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 		}
 				
 		t1<-as.formula(t1)
-		
+#		browser()
 		#convert frame to flowSet to plot
 		fcsName<-as.character(curRow$name)
-		fres@frameId<-fcsName			
+		if(!is.null(fres))
+			fres@frameId<-fcsName			
 		fs<-flowSet(x)
 		sampleNames(fs)<-fcsName
 		fres<-list(fres)
@@ -137,12 +138,12 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 #			browser()	
 	if(par$type=="xyplot")
 		xyplot(x=t1
-				,data=x
+				,data=fs
 				,smooth=FALSE
 				,colramp=cols
 				,filter=fres
 				,names=FALSE
-#				,scales=scales
+				,scales=scales
 		 		,main=mainTitle
 				,par.settings=list(gate.text=list(text=0.7
 										,alpha=1
@@ -157,7 +158,7 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 									)
 								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
 						)
-				,panel=panel.xyplot.flowframeEx
+				,panel=panel.xyplot.flowsetEx
 		)
 	else
 	{
@@ -276,7 +277,7 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 						filter=fres,
 						names=FALSE,
 						pd=pData(fs1)
-#						,scales=scales
+						,scales=scales
 						,par.settings=list(gate.text=list(text=0.7
 														,alpha=1
 														,cex=1
@@ -438,10 +439,15 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 		}
 	}
 #	browser()
-#	if(getName(qaObj)=="BoundaryEvents")
-#		yy<-base::subset(yy,value>min(yy$value))##filter out those zero-value records which may cause slow plotting
-#			
-
+	if(getName(qaObj)=="BoundaryEvents")
+		yy<-base::subset(yy,value>0)##filter out those zero-value records which may cause slow plotting
+			
+	if(nrow(yy)==0)
+	{
+		message("no samples are matched!")
+		return()
+		
+	}
 	#append the outlier flag
 	yy$outlier<-yy$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
 	yy$gOutlier<-yy$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid

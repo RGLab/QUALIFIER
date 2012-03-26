@@ -86,30 +86,35 @@ CairoX11()#for faster rendering plot
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
 
-
 tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
-
-tubesEvents2009<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
-tubesEvents2007<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])
-
+tubesEventsOrig<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,3,drop=F])
+tubesEvents20090825<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,2,drop=F])
+tubesEvents20090622<-QUALIFIER:::.TubeNameMapping(db,tubesEvents[,1,drop=F])
 
 
 ###80% of the pre-defined the value for each pannel
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
-		,lBound=0.8*tubesEvents2009
-		,subset=RecdDt>='2009-08-01'
+		,lBound=0.8*tubesEvents20090825
+		,subset=RecdDt>='2009-08-25'
 )
-#Rprof()
+
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
 		,outlierfunc=outlier.cutoff
-		,lBound=0.8*tubesEvents2007
-		,subset=RecdDt<'2009-08-01'
+		,lBound=0.8*tubesEvents20090622
+		,subset=RecdDt<'2009-08-25'&RecdDt>='2009-06-22'
 )
-#Rprof(NULL)
-#summaryRprof()
+qaCheck(qaTask.list[["NumberOfEvents"]]
+		,formula=count ~ RecdDt | Tube
+		,outlierfunc=outlier.cutoff
+		,lBound=0.8*tubesEventsOrig
+		,subset=RecdDt<'2009-06-22'
+)
+
+
+
 plot(qaTask.list[["NumberOfEvents"]]
 #		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
@@ -119,13 +124,14 @@ plot(qaTask.list[["NumberOfEvents"]]
 		,subset=id=='245'
 		,scatterPlot=TRUE
 )
+clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
-addStats(db,definition=sum(proportion)~RecdDt|name
-			,statName="sum.prop"
-			,pop="margin"
-#			,subset=population=="margin"
-			)
+#addStats(db,definition=sum(proportion)~RecdDt|name
+#			,statName="sum.prop"
+#			,pop="margin"
+##			,subset=population=="margin"
+#			)
 	
 qaCheck(qaTask.list[["BoundaryEvents"]]
 		,sum(proportion) ~ RecdDt | name
@@ -133,38 +139,41 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,uBound=0.0003
 )
 
-unloadNamespace("QUALIFIER")
-library(QUALIFIER)
+
+
 plot.qaTask(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-		,dest="image"
-		,subset=channel=="PE-A"
-#					&id==245
+#		,dest="image"
+#		,subset=channel=="PE-A"
+##					&value>0
+#					&id==91
 #		,par=list(ylab="percent")
 #		,scatterPlot=T
-		,scatterPar=list(type="densityplot"
-						,scales=list(x=list(log=T))
-						)
-		,plotAll=F
+#		,scatterPar=list(type="densityplot"
+#						,scales=list(x=list(log=T))
+#						)
+##		,plotAll=F
 )
 
 
 
 ## creating and showing the summary
-scatterPar(qaTask.list[["BoundaryEvents"]])
+
 
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm
 		,rFunc=rlm
 #		,Subset=channel%in%c('PE-Cy7-A')
-		,z.cutoff=3
+		,z.cutoff=10
 )
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('PE-Cy7-A')
-#		,rFunc=rlm
+		,rFunc=rlm
+#		,dest="image"
 
 )
+clearCheck(qaTask.list[["MFIOverTime"]])
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
@@ -194,8 +203,11 @@ plot(qaTask.list[["spike"]]
 )
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
-		,subset=id%in%c(245,119)&channel=='FITC-A'
-		,scatterPlot=TRUE
+		,subset=channel=='FITC-A'
+#					&id%in%c(245,119)
+#		,scatterPlot=TRUE
+#		,dest="image"
+#		,plotAll="none"
 )
 
 
@@ -220,7 +232,7 @@ plot(qaTask.list[["MNC"]]
 		,subset=coresampleid%in%c(11730
 #									,8780
 									)
-		,scatterPlot=TRUE
+#		,scatterPlot=TRUE
 #		,dest="image"
 #		,plotAll="none"
 	)
@@ -238,8 +250,11 @@ qaCheck(qaTask.list[["RedundantStain"]]
 		
 ##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
-		,subset=channel=='APC-A'&stain%in%c('CD123','Auto')
+		,subset=channel=='APC-A'&stain%in%c('CD123')
+						&coresampleid==11496
 		,y=proportion~coresampleid|channel:stain
+		,scatterPlot=T
+#		,dest="image"
 )
 ################################################################################  
 #4.qa report in html format 
@@ -250,9 +265,11 @@ plot(qaTask.list[["RedundantStain"]]
 ##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
+scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
+scatterPar(qaTask.list[["RedundantStain"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
 
 
-qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qaReport(qaTask.list,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=F)
 
 
 

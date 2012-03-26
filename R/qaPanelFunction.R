@@ -560,7 +560,7 @@ panel.bwplotEx <-
 					##can't print right away since there is issue with embeded lattice plot
 					##some how it alter the viewport or leves of parent lattice object 
 #				browser()
-					curPlotObj<-qa.GroupPlot(db,curGroup)
+					curPlotObj<-qa.GroupPlot(db,curGroup,par=scatterPar)
 					if(!is.null(curPlotObj))
 					{
 						assign(basename(paths),curPlotObj,envir=plotObjs)
@@ -652,7 +652,7 @@ panel.bwplotEx <-
 
 					##save the individual plot obj
 #						browser()
-					assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType),envir=plotObjs)
+					assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 					
 					
 					setSVGShapeURL(paths)
@@ -879,22 +879,26 @@ panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE,
 				if(any(outInd))
 					bounds[[i]][outInd,1]<-max(x)
 				
-				outInd<-bounds[[i]][,2]>max(y)
-				if(any(outInd))
-					bounds[[i]][outInd,2]<-max(y)
+				
 				
 				outInd<-bounds[[i]][,1]<min(x)
 				if(any(outInd))
 					bounds[[i]][outInd,1]<-min(x)
 				
-				outInd<-bounds[[i]][,2]<min(y)
-				if(any(outInd))
-					bounds[[i]][outInd,2]<-min(y)
+			
 				
 				
 #				browser()
 				if(ncol(bounds[[i]])>1)
 				{
+					outInd<-bounds[[i]][,2]>max(y)
+					if(any(outInd))
+						bounds[[i]][outInd,2]<-max(y)
+					
+					outInd<-bounds[[i]][,2]<min(y)
+					if(any(outInd))
+						bounds[[i]][outInd,2]<-min(y)
+					
 					xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
 					yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
 #					yCenterPos<-eval(parse(text=paste("max(bounds[[i]][,'",ycolname,"'])",sep="")))
