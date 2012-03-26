@@ -2,7 +2,14 @@
 # 
 # Author: mike
 ###############################################################################
-
+clearCheck<-function(obj)
+{
+#	browser()
+	db<-getData(obj)
+	ind<-db$outlierResult$qaID%in%qaID(obj)
+	db$outlierResult<-db$outlierResult[!ind,]
+	
+}
 setMethod("qaCheck", signature=c(obj="qaTask"),
 		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
 			
@@ -103,12 +110,14 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		}
 	
 	}
-		
+	
+	if(is.null(rFunc))
+		rFunc<-rFunc(obj)	
 
 #browser()
 	if(is.null(formula))
 	{
-		formula<-formula(obj)
+		formula<-getFormula(obj)
 		
 	}
 	formuRes<-.formulaParser(formula)

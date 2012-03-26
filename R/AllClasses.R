@@ -11,9 +11,11 @@ setClass("qaTask",
 						,plotType="character"
 						,width="numeric"
 						,height="numeric"
-						,par="list"
+						,par="list"#arguments for lattice plot
+						,scatterPar="list"#arguments for indivdiual plot
+						,htmlReport="logical"#decide wether to plot even witout outliers detected
+						,rFunc="ANY"
 						,db="ANY"
-						
 						),
 		prototype=list(qaID=integer(0)
 						,qaName=character(0)
@@ -22,9 +24,12 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
 						,plotType="xyplot"
-						,width=numeric(10)
-						,height=numeric(10)
+						,width=10
+						,height=10
 						,par=list(horiz=FALSE)
+						,scatterPar=list(type="xyplot")
+						,htmlReport=FALSE
+						,rFunc=NULL
 						,db="ANY"
 						)
 		)

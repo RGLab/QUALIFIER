@@ -285,6 +285,7 @@ queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,
 	
 }
 
+#this routine keeps the original schema by replacing the stats value with aggregated value
 applyFunc<-function(data,term,func,groupBy)
 {
 #			browser()
@@ -299,7 +300,5 @@ applyFunc<-function(data,term,func,groupBy)
 			})
 	do.call("rbind",data)
 }
-
-
 
 

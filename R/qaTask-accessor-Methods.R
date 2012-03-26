@@ -20,6 +20,48 @@ setReplaceMethod("qpar",
 			object@par<-value
 			return(object)
 		})
+setMethod("scatterPar", signature=c(x="qaTask"),
+		function(x){
+			x@scatterPar
+		})
+
+setReplaceMethod("scatterPar",
+		signature=signature(object="qaTask",
+				value="list"),
+		definition=function(object, value)
+		{
+			object@scatterPar<-value
+			return(object)
+		})
+
+
+setMethod("htmlReport", signature=c(x="qaTask"),
+		function(x){
+			x@htmlReport
+		})
+
+setReplaceMethod("htmlReport",
+		signature=signature(x="qaTask",
+				value="logical"),
+		definition=function(x, value)
+		{
+			x@htmlReport<-value
+			return(x)
+		})
+
+setMethod("rFunc", signature=c(x="qaTask"),
+		function(x){
+			x@rFunc
+		})
+
+setReplaceMethod("rFunc",
+		signature=signature(x="qaTask",
+				value="ANY"),
+		definition=function(x, value)
+		{
+			x@rFunc<-value
+			return(x)
+		})
 
 setMethod("getName", signature=c(x="qaTask"),
 		function(x){
@@ -56,7 +98,7 @@ setMethod("getData", signature=c(obj="qaTask"),
 			obj@db
 		})
 
-setMethod("formula", signature=c(x="qaTask"),
+setMethod("getFormula", signature=c(x="qaTask"),
 		function(x){
 			x@formula
 		})
@@ -78,7 +120,7 @@ setMethod("show",
 			cat("population: ", getPop(object))
 			cat("\n")
 			cat("Default formula :")
-			print(formula(object))
+			print(getFormula(object))
 			cat("Plot type: ", plotType(object))
 			cat("\n")
 #			browser()
