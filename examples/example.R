@@ -266,7 +266,7 @@ plot(qaTask.list[["RedundantStain"]]
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
-scatterPar(qaTask.list[["RedundantStain"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
+QUALIFIER:::scatterPar(qaTask.list[["RedundantStain"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
 
 
 qaReport(qaTask.list,outDir="~/rglab/workspace/QUALIFIER/output",plotAll=F)
