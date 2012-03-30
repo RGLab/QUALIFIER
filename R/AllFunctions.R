@@ -16,7 +16,7 @@
 #	
 #}
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
-QUALIFIER<-function(db,G,metaFile,checkListFile,fcs.colname="name")
+qaPreprocess<-function(db,G,metaFile,checkListFile,fcs.colname="name")
 {
 	anno<-read.csv(metaFile)
 #	browser()

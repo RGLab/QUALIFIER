@@ -81,7 +81,7 @@ checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.cs
 qaTask.list<-makeQaTask(db,checkListFile)
 
 #or use the convienient wrapper function that does saveToDB,getQAStats,makeQaTask in one call
-qaTask.list<-QUALIFIER(db,G[1:20],metaFile,checkListFile,fcs.colname="FCS_Files")
+qaTask.list<-qaPreprocess(db,G[1:20],metaFile,checkListFile,fcs.colname="FCS_Files")
 
 
 	

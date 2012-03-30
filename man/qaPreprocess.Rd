@@ -1,5 +1,5 @@
-\name{QUALIFIER}
-\alias{QUALIFIER}
+\name{qaPreprocess}
+\alias{qaPreprocess}
 
 \title{
 a wrapper function 
@@ -8,7 +8,7 @@ a wrapper function
 a convenient way that does saveToDB,getQAStats,makeQaTask in one call
 }
 \usage{
-QUALIFIER(db,G,metaFile,checkListFile,fcs.colname)
+qaPreprocess(db,G,metaFile,checkListFile,fcs.colname)
 }
 \arguments{
   
@@ -54,7 +54,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 \dontrun{
 metaFile="FCS_File_mapping.csv"
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-QUALIFIER(db,G,metaFile,checkListFile)
+qaPreprocess(db,G,metaFile,checkListFile)
 }
 }
 \keyword{functions}
