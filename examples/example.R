@@ -58,7 +58,7 @@ save(G,file="gatingHierarchy/GS.Rda")
 ###############################################################################
 load(file="gatingHierarchy/GS.Rda")
 db<-new.env()##using environment to mimic a database connection
-saveToDB(db,G,anno)##append the annotation  and Gating set to db 
+saveToDB(db,G,anno,fcs.colname="FCS_File")##append the annotation  and Gating set to db 
 time1<-Sys.time()
 getQAStats(db$G)
 Sys.time()-time1
@@ -80,8 +80,12 @@ data("ITNQASTUDY")#load stats from disk
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-makeQaTask(db,checkListFile)
 
-CairoX11()#for faster rendering plot
+#or use the convienient wrapper function that does saveToDB,getQAStats,makeQaTask in one call
+qaTask.list<-QUALIFIER(db,G[1:20],metaFile,checkListFile,fcs.colname="FCS_Files")
 
+
+	
+CairoX11()#for faster rendering plot	
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
@@ -141,7 +145,7 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 
 
 
-plot.qaTask(qaTask.list[["BoundaryEvents"]]
+plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
 #		,dest="image"
 #		,subset=channel=="PE-A"
@@ -197,7 +201,7 @@ qaCheck(qaTask.list[["spike"]]
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
-		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
+#		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
 #	,dest="image"
 #	,plotAll=T
 )
@@ -217,7 +221,7 @@ qaCheck(qaTask.list[["MNC"]]
 )
 
 plot(qaTask.list[["MNC"]]
-#		,proportion~coresampleid
+		,proportion~factor(coresampleid)
 #		, factor(coresampleid)~proportion
 #		,par=list(horiz=TRUE)
 

@@ -15,6 +15,20 @@
 #	saveXML(top,sfile )
 #	
 #}
+#the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
+QUALIFIER<-function(db,G,metaFile,checkListFile,fcs.colname="name")
+{
+	anno<-read.csv(metaFile)
+#	browser()
+	##associate the anno with gating set and save them in db
+	saveToDB(db,G,anno,fcs.colname)
+	#extract stats from gating set named as "G" that was stored in db
+	getQAStats(db)
+	
+	qaTask.list<-makeQaTask(db,checkListFile)
+	#return a task list
+	qaTask.list
+}
 
 .postProcessSVG<-function(sfile)
 {
@@ -127,23 +141,17 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-saveToDB<-function(db,G,annoData)
+saveToDB<-function(db,G,annoData,fcs.colname="name")
 {
 	#####load sample info from xls
-#	annoData<-read.csv(metaFile, as.is=TRUE)
-	
-	###import global ID for each fcs from labkey
-#	ncfs<-ncFlowSet(G)
-#	objID.table<-ncfs@phenoData@data
-#	objID.table$id<-1:nrow(objID.table)
-#	annoData<-merge(annoData,objID.table,by.x="FCS_Files",by.y="name")
 	
 	annoData$id<-1:nrow(annoData)
-	if(!"name"%in%colnames(annoData))
-		stop("'name' column that stores FCS file names is missing in annotation data!")
-#	browser()
+	if(!fcs.colname%in%colnames(annoData))
+		stop("column that specify FCS file names is missing in annotation data!")
+	#rename the fcs filename column so that it can be fit into flowSet pData slot
+	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
+
 	#do some filtering for annoData
-#	annoData<-subset(annoData,!annoData$Tube%in%c("EMA/EMA/EMA/EMA/EMA","VD1/VD2/GD/BLK/CD3"))
 	annoData<-subset(annoData,name%in%getSamples(G))
 	
 	#do some format converting
@@ -152,7 +160,6 @@ saveToDB<-function(db,G,annoData)
 
 		
 	##fit it into GatingSet(or flowSet)
-#	colnames(annoData)[which(colnames(annoData)=="FCS_Files")]<-"name"
 	rownames(annoData)<-annoData$name
 	
 	G<-G[which(getSamples(G)%in%annoData$name)]

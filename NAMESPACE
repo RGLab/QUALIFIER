@@ -13,7 +13,7 @@ importFrom(hwriter, closePage, hwrite, openPage)
 
 exportClasses(qaTask)
 
-export( "saveToDB"
+export( "saveToDB",QUALIFIER
                 ,"makeQaTask"
                 ,"proportion.outliers.robust"
                 ,"proportion.outliers.mle"
