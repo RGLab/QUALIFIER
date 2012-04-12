@@ -144,7 +144,8 @@ matchStatType<-function(db,formuRes)
 saveToDB<-function(db,G,annoData,fcs.colname="name")
 {
 	#####load sample info from xls
-	
+	if(missing(annoData))
+		annoData<-data.frame(name=getSamples(G))
 	annoData$id<-1:nrow(annoData)
 	if(!fcs.colname%in%colnames(annoData))
 		stop("column that specify FCS file names is missing in annotation data!")
@@ -180,8 +181,11 @@ saveToDB<-function(db,G,annoData,fcs.colname="name")
 	
 	
 	###append the data to db
-
-	db$params<-colnames(getData(G[[1]]))
+	result<-try(colnames(getData(G[[1]])),silent=TRUE)
+	if(!inherits(result,"try-error")){
+		db$params<-result
+	}
+	
 	db$G<-G
 	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
 	db
