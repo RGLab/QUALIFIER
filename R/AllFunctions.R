@@ -15,6 +15,20 @@
 #	saveXML(top,sfile )
 #	
 #}
+#the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
+qaPreprocess<-function(db,G,metaFile,checkListFile,fcs.colname="name")
+{
+	anno<-read.csv(metaFile)
+#	browser()
+	##associate the anno with gating set and save them in db
+	saveToDB(db,G,anno,fcs.colname)
+	#extract stats from gating set named as "G" that was stored in db
+	getQAStats(db)
+	
+	qaTask.list<-makeQaTask(db,checkListFile)
+	#return a task list
+	qaTask.list
+}
 
 .postProcessSVG<-function(sfile)
 {
@@ -126,16 +140,27 @@ matchStatType<-function(db,formuRes)
 
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
+<<<<<<< HEAD
 #TODO:to save multipe gating set and try to associate them to the stats table
 saveToDB<-function(G,annoData)
 {
 	#####load sample info from xls
 
 	
+=======
+
+saveToDB<-function(db,G,annoData,fcs.colname="name")
+{
+	#####load sample info from xls
+	if(missing(annoData))
+		annoData<-data.frame(name=getSamples(G))
+>>>>>>> master
 	annoData$id<-1:nrow(annoData)
-	if(!"name"%in%colnames(annoData))
-		stop("'name' column that stores FCS file names is missing in annotation data!")
-#	browser()
+	if(!fcs.colname%in%colnames(annoData))
+		stop("column that specify FCS file names is missing in annotation data!")
+	#rename the fcs filename column so that it can be fit into flowSet pData slot
+	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
+
 	#do some filtering for annoData
 	annoData<-subset(annoData,name%in%getSamples(G))
 	
@@ -161,8 +186,11 @@ saveToDB<-function(G,annoData)
 	
 	
 	###append the data to db
-
-	db$params<-colnames(getData(G[[1]]))
+	result<-try(colnames(getData(G[[1]])),silent=TRUE)
+	if(!inherits(result,"try-error")){
+		db$params<-result
+	}
+	
 	db$G<-G
 #	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
 	db

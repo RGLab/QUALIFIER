@@ -43,6 +43,19 @@ Objects can be created by using:
     \item{\code{width}:}{A numeric scalar indicating the  width of svg figure .}
     \item{\code{height}:}{A numeric scalar indicating the  height of svg figure .}
     \item{\code{par}:}{A list storing all the lattice arguments to control the appearance of the plot. See \code{\link{xyplot}} for details.}
+    \item{\code{scatterPar}:}{A list storing the arguments to control the appearance of 
+    							the individual plot.
+    							Example scatterPar value:
+    							list(type="densityplot",scales=list(x=list(log=TRUE)))
+    							this will set the log scale for x axis of the 1D-densityplot
+    							}
+   
+    \item{\code{htmlReport}:}{A logical scalar indicating whether to plot the task when \code{\link{qaReport}} is called. 
+							    By default, when there are no outliers detected for the qaTask,it is not plotted in the report.
+							    But sometime it is helpful to still look at the plot with the trend of the data like MFI stability over time.
+							    So by setting this flag to TRUE, we force this task to be plotted anyway. }
+   
+   \item{\code{rFunc}:}{A regression function passed to some qa tasks to monitor the long term trend.}
     \item{\code{db}:}{An environment containing the database connection, which stores the gating hierarchy,QA task list,sample information and outliers detection results. .}
   }
 }
@@ -59,7 +72,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 
 \seealso{
-\code{\link{qaCheck}},\code{\link{plot}}
+\code{\link{qaCheck}},\code{\link{plot}},\code{\link{qaReport}}
 }
 
 \keyword{classes}

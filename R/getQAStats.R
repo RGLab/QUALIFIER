@@ -50,14 +50,14 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 				cl<-parallel::makeCluster(nslaves,type="SOCK")
 				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
 					library(QUALIFIER)
-					getQAStats(gh)
+					getQAStats(gh,isFlowCore=isFlowCore)
 					})
 			parallel::stopCluster(cl)
 			}else
 			{
 				message("It is currently running in serial mode and the parallel mode is recommend for faster processing.")
 				
-				statsOfGS<-lapply(glist,getQAStats)
+				statsOfGS<-lapply(glist,getQAStats,isFlowCore=isFlowCore)
 			}
 			
 			statsOfGS
@@ -72,24 +72,36 @@ setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
 					,collapse="/")
 				paste("/",path,sep="")
 				})
-##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
+setMethod("getPath",signature("GatingHierarchyInternal"),function(x,y,...){
+#			browser()
+			ind<-which(getNodes(x)%in%y)
+			getNodes(x,isPath=T)[ind]
 			
-			statsOfGh<-NULL#data.frame(id=as.integer(),node=as.character(),population=as.character(),stats=as.character(),value=as.numeric())
-	#		params<-colnames(getData(gh))#TODO:it is wierd that colnames methods does not work after enter this function
-			params<-parameters(getData(obj))$name
+			
+		})
+##extract stats from a gating hierarchy\\
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...){
+			
+			statsOfGh<-NULL
+			#check if data is gated
+			params<-try(parameters(getData(obj))$name,silent=TRUE)
+			if(inherits(params,"try-error"))
+				params<-NULL
+			
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
-			
 #			browser()
 			for(i in 1:length(nodes))
 			{
 				curNode<-nodes[i]
 #				print(curNode)
+				if(!is.null(params))
+				{
+					curData<-getData(obj,curNode)
+					curGate<-getGate(obj,curNode)
+				}
 				
-				curData<-getData(obj,curNode)
-				curGate<-getGate(obj,curNode)
-				
+#				browser()
 				##extract pop name
 				curPopName<-getPath(obj,curNode)
 #				browser()
@@ -97,7 +109,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)
 #				if(curPopName%in%c("margin","MFI"))
-				if(!QUALIFIER:::.isRoot(obj,curNode))#&&!is.na(curGate)
+				if(!is.null(params)&&!QUALIFIER:::.isRoot(obj,curNode))#&&!is.na(curGate)
 				{
 					chnl<-parameters(curGate)
 					#only 1D gate needs to save channel info
@@ -107,10 +119,22 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore...){
 				{
 					chnl<-NA
 				}
-				statsOfNode<-data.frame(channel=chnl,stats=c("proportion","count"),value=c(statsOfNode$flowCore.freq,statsOfNode$flowCore.count),row.names=NULL)
+				if(isFlowCore)
+				{
+					stats_prop<-statsOfNode$flowCore.freq
+					stats_count<-statsOfNode$flowCore.count	
+				}else
+				{
+					stats_prop<-statsOfNode$flowJo.freq
+					stats_count<-statsOfNode$flowJo.count
+				}
+				
+				statsOfNode<-data.frame(channel=chnl,stats=c("proportion","count")
+										,value=c(stats_prop,stats_count)
+										,row.names=NULL)
 				
 				#get spikes meatures for each channel at root level
-				if(QUALIFIER:::.isRoot(obj,curNode))
+				if(!is.null(params)&&QUALIFIER:::.isRoot(obj,curNode))
 				{
 
 #					browser()
