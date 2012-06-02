@@ -4,8 +4,7 @@
 ###############################################################################
 unloadNamespace("QUALIFIER")
 library(QUALIFIER)
-library(Rmpi)
-library(multicore)
+
 
 library(ncdfFlow)
 library(flowWorkspace)

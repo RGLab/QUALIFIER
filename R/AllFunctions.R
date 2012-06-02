@@ -15,21 +15,25 @@
 #	saveXML(top,sfile )
 #	
 #}
+
+initDB<-function(db=.db){
+	createDbSchema(db)
+}
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
-qaPreprocess<-function(db,G,metaFile,checkListFile,fcs.colname="name")
+qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name")
 {
 	anno<-read.csv(metaFile)
-#	browser()
 	##associate the anno with gating set and save them in db
-	saveToDB(db,G,anno,fcs.colname)
+	gsid<-saveToDB(db,gs,gs.name,anno,fcs.colname)
+		
 	#extract stats from gating set named as "G" that was stored in db
-	getQAStats(db)
+#	browser()
 	
-	qaTask.list<-makeQaTask(db,checkListFile)
-	#return a task list
-	qaTask.list
+	getQAStats(db,gsid)
+	
+	
+	ls(db)
 }
-
 .postProcessSVG<-function(sfile)
 {
 
@@ -140,21 +144,13 @@ matchStatType<-function(db,formuRes)
 
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
-<<<<<<< HEAD
-#TODO:to save multipe gating set and try to associate them to the stats table
-saveToDB<-function(G,annoData)
-{
-	#####load sample info from xls
 
-	
-=======
-
-saveToDB<-function(db,G,annoData,fcs.colname="name")
+saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name")
 {
 	#####load sample info from xls
 	if(missing(annoData))
 		annoData<-data.frame(name=getSamples(G))
->>>>>>> master
+	
 	annoData$id<-1:nrow(annoData)
 	if(!fcs.colname%in%colnames(annoData))
 		stop("column that specify FCS file names is missing in annotation data!")
@@ -191,9 +187,15 @@ saveToDB<-function(db,G,annoData,fcs.colname="name")
 		db$params<-result
 	}
 	
-	db$G<-G
-#	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
-	db
+
+	if(nrow(db$gstbl)==0)
+		gsid<-1
+	else
+		gsid<-max(db$gstbl$gsid)+1
+	db$gstbl<-rbind(db$gstbl,data.frame(gsid=gsid,gsname=gs.name))
+#	browser()	
+	db$gs[[gsid]]<-G
+	gsid
 }
 
 

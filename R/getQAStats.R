@@ -3,18 +3,40 @@
 # Author: wjiang2
 ###############################################################################
 ##TODO:to append the stats to the current table
-setMethod("getQAStats",signature("environment"),function(obj,isFlowCore=TRUE,nslaves=NULL,...){
+setMethod("getQAStats",signature=c("environment"),function(obj,gsid,isFlowCore=TRUE,nslaves=NULL,...){
+			if(missing(gsid))
+				stop("missing gsid!")
 			
-			statsOfGS<-getQAStats(obj$G,isFlowCore,nslaves)
-#						browser()
+			
+			gs<-obj$gs[[gsid]][1:20]
+			
+#			browser()
+			
+			statsOfGS<-getQAStats(gs,isFlowCore,nslaves)
+			
+			
+			
 			statsOfGS<-lapply(names(statsOfGS),function(curID){
-						curStats<-statsOfGS[[curID]]
-						curStats$id<-as.integer(curID)
-						curStats
-					})
+												curStats<-statsOfGS[[curID]]
+												curStats$id<-as.integer(curID)
+												curStats
+											})
+			statsOfGS<-do.call("rbind",statsOfGS)
+			
 
-			db$statsOfGS<-do.call("rbind",statsOfGS)
-			obj$statsOfGS$sid<-1:nrow(obj$statsOfGS)
+			##append sid and gsid
+			if(nrow(obj$stats)==0)
+				msid<-0
+			else
+				msid<-max(obj$stats$sid)
+			statsOfGS$sid<-1:nrow(statsOfGS)+msid
+			statsOfGS$gsid<-gsid
+			
+
+			#save it db (remove the old records with the same gsid
+#			browser()
+			ind<-obj$stats$gsid==gsid
+			obj$stats<-rbind(obj$stats[!ind,],statsOfGS[,colnames(obj$stats)])
 			print("stats saved!")
 			
 		})
@@ -56,33 +78,35 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 			}else
 			{
 				message("It is currently running in serial mode and the parallel mode is recommend for faster processing.")
-				
+
+#				browser()
+#				time1<-Sys.time()
 				statsOfGS<-lapply(glist,getQAStats,isFlowCore=isFlowCore)
+#				Sys.time()-time1
 			}
 			
 			statsOfGS
 			
 		})
 #TODO:GateingHierarchy already has fjName slot, this is method should directly get this slot
-setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
-#			browser()
-				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
-				path_detail[1]<-".root"
-				path<-paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
-					,collapse="/")
-				paste("/",path,sep="")
-				})
-setMethod("getPath",signature("GatingHierarchyInternal"),function(x,y,...){
-#			browser()
-			ind<-which(getNodes(x)%in%y)
-			getNodes(x,isPath=T)[ind]
-			
-			
-		})
+#setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
+##			browser()
+#				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
+#				path_detail[1]<-".root"
+#				path<-paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
+#					,collapse="/")
+#				paste("/",path,sep="")
+#				})
+#setMethod("getPath",signature("GatingHierarchyInternal"),function(x,y,...){
+##			browser()
+#			ind<-which(getNodes(x)%in%y)
+#			getNodes(x,isPath=T)[ind]
+#			
+#			
+#		})
 ##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...){
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,...){
 			
-			statsOfGh<-NULL
 			#check if data is gated
 			params<-try(parameters(getData(obj))$name,silent=TRUE)
 			if(inherits(params,"try-error"))
@@ -90,9 +114,28 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...)
 			
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
+			nodePaths<-getNodes(obj,isPath=T)
 #			browser()
-			for(i in 1:length(nodes))
+			nParam<-length(params)-1 #minus time channel
+			nNodes<-length(nodes)
+#			nStats<-nParam+2 #root stats(spikes+count+%)
+#					+(nNodes-1)*2##count,%
+#					
+#			statsOfGh<-data.frame(sid=integer(nNodes) #statesID:unique for each stat entry
+#								,id=integer(nNodes)#fileID:unique for each FCS
+#								,gsid=integer(nNodes)#gatignSetID:unique fore each gatingSet
+#								,population=character(nNodes)
+#								,stats=character(nNodes)
+#								,node=character(nNodes)
+#								,channel=character(nNodes)
+#								,value=numeric(nNodes)
+#								)
+			statsOfGh<-NULL
+#			browser()
+			fdata<-getData(obj)
+			for(i in 1:nNodes)
 			{
+				curPopName<-nodePaths[i]
 				curNode<-nodes[i]
 #				print(curNode)
 				if(!is.null(params))
@@ -103,7 +146,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...)
 				
 #				browser()
 				##extract pop name
-				curPopName<-getPath(obj,curNode)
+#				curPopName<-getPath(obj,curNode)
 #				browser()
 		
 				##get count and proportion
@@ -138,14 +181,14 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...)
 				{
 
 #					browser()
-					expr <- exprs(getData(obj))
+					expr <- exprs(fdata)
 					
 					time <- flowCore:::findTimeChannel(expr)
 					if(!(time %in% colnames(expr)))
 						stop("Invalid name of variable (", time, ") recording the ",
 								"\ntime domain specified as 'time' argument.", call.=FALSE)
 					
-					spikes<-unlist(lapply(params[!params%in%time],QUALIFIER:::.timelineplot,x=getData(obj), binSize=50))
+					spikes<-unlist(lapply(params[!params%in%time],QUALIFIER:::.timelineplot,x=fdata, binSize=50))
 					
 					statsOfNode<-rbind(statsOfNode,data.frame(channel=params[!params%in%time],stats="spike",value=spikes))
 					chnls<-params[!params%in%time] #select channel at root level
@@ -156,9 +199,13 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore,...)
 				#get MIF meatures
 				if(!is.na(chnl))
 				{
-					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
+#					browser()
+					mat<-exprs(curData)[,chnl,drop=FALSE]
+					chnames<-colnames(mat)
+					MFI<-rowMedians(t(mat))#using rowMedian to speed up
+#					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
 					if(all(!is.na(MFI)))
-						statsOfNode<-rbind(statsOfNode,data.frame(channel=names(MFI),stats="MFI",value=MFI))
+						statsOfNode<-rbind(statsOfNode,data.frame(channel=chnames,stats="MFI",value=MFI))
 				}
 				##append the rows
 				

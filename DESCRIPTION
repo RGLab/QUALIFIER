@@ -21,6 +21,7 @@ Collate: AllGenerics.R
 		addStats.R
 		qaReport.R
 		utils.R 
+		zzz.R
 Description: Provides quality control and quality assessment tools for gated flow cytometry data. 
 License: Artistic-2.0
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays
