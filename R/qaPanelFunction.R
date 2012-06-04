@@ -95,7 +95,7 @@ panel.xyplotEx <-
 			plotAll<-list(...)$plotAll
 			statsType<-list(...)$statsType
 			scatterPar<-list(...)$scatterPar
-			
+			highlight=list(...)$highlight
 			db<-list(...)$db
 #			browser()
 			if(is.null(plotAll))
@@ -107,7 +107,8 @@ panel.xyplotEx <-
 				{
 					curRowID<-rowIds[i]
 					curOutRow<-data[curRowID,]
-					FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
+					
+					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
 					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)

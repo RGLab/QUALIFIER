@@ -8,7 +8,7 @@ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,isFlowCore=T
 				stop("missing gsid!")
 			
 			
-			gs<-obj$gs[[gsid]][1:20]
+			gs<-obj$gs[[gsid]]
 			
 #			browser()
 			

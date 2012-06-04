@@ -371,7 +371,7 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL)
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL,highlight="id")
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -459,10 +459,13 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	#reshape the data to include the column of the statType which can be passed to lattice	as it is
 	yy<-as.data.frame(cast(yy,...~stats))
 
-#	dest=list(...)$dest
-
+	if(!highlight%in%colnames(yy))
+		stop(paste(highlight,"not fouind in the data"))
+#	browser()	
 	if(!is.null(dest))
 	{	
+		if(!file.exists(dest))
+			stop(paste("folder '",dest,"' does not exist!",sep=""))
 		sfile<-tempfile(pattern=getName(qaObj),tmpdir=dest,fileext=".svg")
 #		browser()
 		devSVGTips(sfile,width=width,height=height)
@@ -498,6 +501,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 
+		
+			
 		par<-qpar(qaObj)
 		
 		par$subscripts<-TRUE
@@ -531,11 +536,13 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 									,groups=outlier
 									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType
 													,scatterPar=QUALIFIER:::scatterPar(qaObj)
+													,highlight.=highlight
 													,...){
 #												browser()
 												panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll
 																,statsType.=statsType,db=db
 																,scatterPar=scatterPar
+																,highlight.=highlight
 																,...)
 								#if regression function is supplied, then plot the regression line
 										if(!is.null(rFunc))
