@@ -74,7 +74,7 @@ read.qaTask<-function(db,checkListFile)
 				curQa					
 			},db)
 	names(qaTask.list)<-qaCheckList$qaName
-	db$qaCheckList<-qaTask.list
+	db$qaTaskList<-qaTask.list
 	print(paste(nrow(qaCheckList),"qaTask created ahd saved in db!"))
 	qaTask.list
 }

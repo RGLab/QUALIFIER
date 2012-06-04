@@ -26,7 +26,7 @@
 #			{
 #				df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
 #			}
-#				df<-df[,colnames(db$statsOfGS)]
+#				df<-df[,colnames(db$stats)]
 #				
 #			
 #})

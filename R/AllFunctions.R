@@ -67,7 +67,7 @@ matchStatType<-function(db,formuRes)
 	for(CurTerm in c("xTerm","yTerm"))
 	{
 		strTerm<-as.character(formuRes[[CurTerm]])
-		if(!is.na(match(strTerm,levels(db$statsOfGS$stats))))
+		if(!is.na(match(strTerm,levels(db$stats$stats))))
 		{
 			statsType=strTerm
 			break
@@ -245,14 +245,15 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 }
 
 #queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
-queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE)
+queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE,gsid)
 {
 #	browser()
 
+	if(is.null(gsid))
+		gsid<-max(db$gstbl$gsid)
+	ret_anno<-pData(db$gs[[gsid]])
 	
-	ret_anno<-pData(db$G)
-	
-	ret_stats<-db$statsOfGS
+	ret_stats<-db$stats
 	
 #	browser()
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 

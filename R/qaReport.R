@@ -4,12 +4,12 @@
 ###############################################################################
 ##generate report for qaTask list
 setMethod("qaReport", signature=c(obj="list"),
-		function(obj,outDir,plotAll=FALSE,...){
+		function(obj,outDir,plotAll=FALSE,gsid=NULL,...){
 			if(missing(outDir))
 				stop("outDir has to be specified!")
 			p<-.writeHead(outDir,...)
 #			browser()
-			qaWrite.list(obj,p,outDir,plotAll)
+			qaWrite.list(obj,p,outDir,plotAll,gsid=gsid)
 		})
 ##generate report for single qaTask 
 setMethod("qaReport", signature=c(obj="qaTask"),
@@ -37,16 +37,18 @@ qaWrite.list<-function(x,page,...){
 			closePage(page, splash=FALSE)
 		}
 
-qaWrite.task<-function(x,p,outDir,plotAll){
-			
+qaWrite.task<-function(x,p,outDir,plotAll,gsid){
+#			browser()
 			imageDir<-file.path(outDir,"image")
-			
 			db<-getData(x)
-			anno<-pData(db$G)
+			if(is.null(gsid))
+				gsid<-max(db$gstbl$gsid)
+			curGS<-db$gs[[gsid]]
+			anno<-pData(curGS)
 			curQaID<-qaID(x)
 #			browser()
 			outResult<-subset(db$outlierResult,qaID==curQaID)
-			outResult<-merge(outResult,db$statsOfGS[,c("sid","id","channel")])
+			outResult<-merge(outResult,db$stats[,c("sid","id","channel")])
 			outResult<-merge(outResult,anno)#[,c("sid","id","name","channel","Tube")]
 #			names(outResult)<-c("sid","id","fcsFile" ,"channel","Tube")
 			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
@@ -54,7 +56,7 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 				outResult$qaTask<-getName(x)
 			
 			gOutResult<-subset(db$GroupOutlierResult,qaID==curQaID)
-			gOutResult<-merge(gOutResult,db$statsOfGS)
+			gOutResult<-merge(gOutResult,db$stats)
 			gOutResult<-merge(gOutResult,anno)
 			nFscFailed<-length(unique(outResult$fcsFile))
 			if(nrow(gOutResult)>0)
@@ -264,9 +266,9 @@ qaWrite.task<-function(x,p,outDir,plotAll){
 						
 						)
 					}
-#							browser()
-#					yy<-queryStats(db,formula1,pop=getPop(x))
-					yy<-queryStats(db,statsType=statsType,pop=getPop(x),isTerminal=T,fixed=F)
+
+
+					yy<-queryStats(db,statsType=statsType,pop=getPop(x),isTerminal=T,fixed=F,gsid=gsid)
 
 					factors<-lapply(groupBy,function(x){
 								eval(substitute(yy$v,list(v=x)))

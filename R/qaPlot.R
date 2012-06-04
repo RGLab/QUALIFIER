@@ -19,10 +19,12 @@ qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
 #	{
 #		curRow<-yy[i,]
 	curRow<-yy
-	ghInd<-which(getSamples(db$G)==curRow$name)
+	gsid<-as.integer(curRow[["gsid"]])
+	curGS<-db$gs[[gsid]]
+	ghInd<-which(getSamples(curGS)==curRow$name)
 	if(length(ghInd)>0)
 	{
-		curGh<-db$G[[ghInd]]
+		curGh<-curGS[[ghInd]]
 		parentNode<-getParent(curGh,as.character(curRow$node))
 		if(length(parentNode)>0)
 		{
@@ -193,9 +195,11 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 	frlist<-apply(yy,1,function(curRow){
 #		browser()
 		#get the parent population for the scatter plot
-		
-		curSampleInd<-which(getSamples(db$G)%in%curRow["name"])
-		curGh<-db$G[[curSampleInd]]
+				
+		gsid<-as.integer(curRow[["gsid"]])
+		curGS<-db$gs[[gsid]]
+		curSampleInd<-which(getSamples(curGS)%in%curRow["name"])
+		curGh<-curGS[[curSampleInd]]
 		curNode<-as.character(curRow["node"])
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
@@ -210,7 +214,7 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 		list(frame=fr,gate=curGate)
 	})
 	names(frlist)<-yy[,"name"]
-	
+#	browser()
 	#merge frames into flowSet for flowViz plot
 	fs1<-flowSet(lapply(frlist,"[[","frame"))
 	#append outlier flags
@@ -221,7 +225,7 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 
 	#extract gates from the list
 	gates<-lapply(frlist,"[[","gate")
-	
+#	browser()
 	obj<-NULL
 	if(!pop=="/root")##total cell count
 	{
@@ -367,7 +371,7 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE)
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -417,9 +421,9 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 #		browser()
 	
 	if(missing(subset))
-		yy<-queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed)
+		yy<-queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 	else
-		yy<-queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed)
+		yy<-queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 	if(nrow(yy)==0)
 	{
 		message("no samples are matched!")

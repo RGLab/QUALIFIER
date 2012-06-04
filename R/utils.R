@@ -5,12 +5,16 @@
 
 
 
-.TubeNameMapping<-function(db,tubesEvents)
+.TubeNameMapping<-function(db,tubesEvents,gsid)
 {
-	tt<-unique(pData(db$G)[,c("Tube","tubeID")])
+	if(missing(gsid))
+		gsid<-max(db$gstbl$gsid)
+	tt<-unique(pData(db$gs[[gsid]])[,c("Tube","tubeID")])
+#	browser()
 	rownames(tt)<-NULL
 	tt$events<-tubesEvents[tt$tubeID,]
 	rownames(tt)<-tt$Tube
-	tt[,"events",drop=FALSE]
+	tt[!is.na(tt$events),"events",drop=FALSE]
+	
 
 }

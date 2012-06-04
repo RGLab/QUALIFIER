@@ -115,6 +115,10 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
 			nodePaths<-getNodes(obj,isPath=T)
+			#convert to QUALIFIER's path
+			nodePaths[1]<-paste("/",nodePaths[1],sep="")
+			nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
+#			browser()
 #			browser()
 			nParam<-length(params)-1 #minus time channel
 			nNodes<-length(nodes)
