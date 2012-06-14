@@ -709,6 +709,7 @@ boxplot.statsEx<-function (x, coef = 1.5, do.conf = TRUE, do.out = TRUE)
 										nna] else numeric())
 }
 
+#TODO:move this to flowViz as well
 #qa.panel.densityplot<-function(x,y,frames,filter,channel,channel.name,overlap,...)
 qa.panel.densityplot<-function(...)
 {
@@ -760,193 +761,18 @@ qa.panel.densityplot<-function(...)
 	
 	
 }
-## Panel function copied from flowViz and change the way it handles density color
-panel.xyplot.flowframeEx <- function (x, y, frame, filter = NULL, smooth = TRUE, margin = TRUE, 
-		outline = FALSE, channel.x.name, channel.y.name, pch = gpar$flow.symbol$pch, 
-		alpha = gpar$flow.symbol$alpha, cex = gpar$flow.symbol$cex, 
-		col = gpar$flow.symbol$col, gp,outlier=TRUE, ...) 
-{
-	argcolramp <- list(...)$colramp
-	gpar <- flowViz.par.get()
-	if (!is.null(gp)) 
-		gpar <- lattice:::updateList(gpar, gp)
-	if (is.null(gpar$gate$cex)) 
-		gpar$gate$cex <- cex
-	if (is.null(gpar$gate$pch)) 
-		gpar$gate$pch <- pch
-	validName <- !(length(grep("\\(", channel.x.name)) || length(grep("\\(", 
-								channel.y.name)))
-#				browser()
-	
-	if (smooth) {
-		if (margin) {
-			r <- range(frame, c(channel.x.name, channel.y.name))
-			l <- length(x)
-			inc <- apply(r, 2, diff)/1e+05
-			dots <- list(...)
-			nb <- if ("nbin" %in% names(dots)) 
-						rep(dots$nbin, 2)
-					else rep(64, 2)
-			selxL <- x > r[2, channel.x.name] - inc[1]
-			selxS <- x < r[1, channel.x.name] + inc[1]
-			selyL <- y > r[2, channel.y.name] - inc[2]
-			selyS <- y < r[1, channel.y.name] + inc[2]
-			allsel <- !(selxL | selxS | selyL | selyS)
-			if (sum(allsel) > 0) {
-				panel.smoothScatter(x[allsel], y[allsel], range.x = list(r[, 
-										1], r[, 2]), ...)
-				flowViz:::addMargin(r[1, channel.x.name], y[selxS], r, 
-						l, nb)
-				flowViz:::addMargin(r[2, channel.x.name], y[selxL], r, 
-						l, nb, b = TRUE)
-				flowViz:::addMargin(x[selyS], r[1, channel.y.name], r, 
-						l, nb)
-				flowViz:::addMargin(x[selyL], r[2, channel.y.name], r, 
-						l, nb, b = TRUE)
-			}
-			else {
-				panel.smoothScatter(x, y, ...)
-			}
-		}
-		else {
-			panel.smoothScatter(x, y, ...)
-		}
-		flowViz:::plotType("gsmooth", c(channel.x.name, channel.y.name))
-#		if (!is.null(filter) & validName) {
-#			glpolygon(filter, frame, channels = c(channel.x.name, 
-#							channel.y.name), verbose = FALSE, gpar = gpar, 
-#					strict = FALSE, ...)
-#		}
-	}
-	else {
-		
-		if (!is.null(argcolramp)) {
-			col <- densCols(x, y, colramp = argcolramp)
-		}
-		panel.xyplot(x, y, col = col, cex = cex, pch = pch, main="gateName",
-				alpha = alpha, ...)
-		
-		flowViz:::plotType("gpoints", c(channel.x.name, channel.y.name))
-	}
-#	browser()
-	##plot filter
-	if (!is.null(filter) && validName) {
-		if (!is(filter, "filterResult")) 
-			filter <- flowCore::filter(frame, filter)
-#			rest <- Subset(frame, !filter)
-#			x <- exprs(rest[, channel.x.name])
-#			y <- exprs(rest[, channel.y.name])
-		
-#			browser()
-		
-		if(!is.null(outlier))
-		{
-			gpar$gate$col<-ifelse(outlier,"red","black")	
-		}else
-		{
-			gpar$gate$col<-"black"
-		}
-		
-		
-		glpolygon(filter, frame, channels = c(channel.x.name, 
-						channel.y.name), verbose = FALSE, gpar = gpar, 
-				names = FALSE, strict = FALSE)
-		if(list(...)$names==FALSE)
-		{
-			#add gate label
-			curFres<-filter
-#			browser()
-		
-			p.stats<-flowCore::summary(curFres)@p
-			#remove stats for "rest" pop(usually the first one) from mulitfilterResults produced by filters such as curv2Filter
-			if(length(p.stats)>1)
-				p.stats<-p.stats[-1]
-			p.stats<-sprintf("%.2f%%",p.stats*100)
-			
-			
-			bounds<-QUALIFIER:::gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
-			
-			for(i in 1:length(bounds))
-			{
-				
-				
-				xcolname<-channel.x.name
-				ycolname<-channel.y.name
-				xlim<-range(x)
-				ylim<-range(y)
-				
-				##fix the vertices outside of the x,y range
-				outInd<-bounds[[i]][,1]>max(x)
-				if(any(outInd))
-					bounds[[i]][outInd,1]<-max(x)
-				
-				
-				
-				outInd<-bounds[[i]][,1]<min(x)
-				if(any(outInd))
-					bounds[[i]][outInd,1]<-min(x)
-				
-			
-				
-				
-#				browser()
-				if(ncol(bounds[[i]])>1)
-				{
-					outInd<-bounds[[i]][,2]>max(y)
-					if(any(outInd))
-						bounds[[i]][outInd,2]<-max(y)
-					
-					outInd<-bounds[[i]][,2]<min(y)
-					if(any(outInd))
-						bounds[[i]][outInd,2]<-min(y)
-					
-					xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
-					yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
-#					yCenterPos<-eval(parse(text=paste("max(bounds[[i]][,'",ycolname,"'])",sep="")))
-					
-#					xleft<-xCenterPos-diff(xlim)/6
-#					xright=xCenterPos+diff(xlim)/6
-#					ybottom=yCenterPos#-diff(ylim)/6
-#					ytop=max(ylim)
-				}else
-				{
-					xCenterPos<-mean(bounds[[i]])
-					yCenterPos<-mean(y)
-					
-					xleft<-xCenterPos-diff(xlim)/6
-					xright=xCenterPos+diff(xlim)/6
-					
-					ybottom=yCenterPos-diff(ylim)/30
-					ytop=yCenterPos+diff(ylim)/30
-				}
 
+panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...) 
+{
 	
-				grid.rect(x=unit(xCenterPos,"native")
-						,y=unit(yCenterPos,"native")
-						,width=unit(1,'strwidth',p.stats[i])
-						,height=unit(1,'strheight',p.stats[i])
-						,draw=T, gp=gpar(font=gpar$gate.text$font
-										,fill="white"
-										,col="transparent"
-										,alpha=0.7
-										)
-								)
-				panel.text(
-						x=xCenterPos
-						,y=yCenterPos
-						,labels=p.stats[i]
-						,col=gpar$gate.text$col
-						,alpha=gpar$gate.text$alpha
-#						,lineheight=gpar$gate.text$lineheight
-#						,font=gpar$gate.text$font
-#						,cex=gpar$gate.text$cex
-#						,adj=c(0.5,0.5)
-						,...
-						)
-			}
-			
-		}
+	if(!is.null(outlier))
+	{
+		gp$gate$col<-ifelse(outlier,"red","black")	
+	}else
+	{
+		gp$gate$col<-"black"
 	}
+	flowViz:::panel.xyplot.flowframe(gp=gp,...)	
 }
 
 

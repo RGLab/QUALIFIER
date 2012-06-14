@@ -77,7 +77,7 @@ save(db,file="data/ITN029_all.rda")#save stats
 data("ITNQASTUDY")#load stats from disk
 #db$G<-G
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-makeQaTask(db,checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile)
 
 #or use the convienient wrapper function that does saveToDB,getQAStats,makeQaTask in one call
 qaTask.list<-qaPreprocess(db,G[1:20],metaFile,checkListFile,fcs.colname="FCS_Files")
