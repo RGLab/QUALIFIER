@@ -652,6 +652,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 															,statsType.=statsType,scatterPar=scatterPar
 															,db=db,...)
 											}
+									,...
 									)
 							)
 			
