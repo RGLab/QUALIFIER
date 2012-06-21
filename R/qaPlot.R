@@ -371,7 +371,7 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL,highlight="id")
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL,highlight="id",...)
 {
 #	browser()
 	par_old<-qpar(qaObj)
@@ -530,10 +530,11 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 				par$scales<-list(x=c(cex=0.7
 						#						,rot=45	
 											))
-#browser()
+		
+		
 			thisCall<-quote(
 							xyplot(x=formula1,data=yy
-									,groups=outlier
+									,...
 									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType
 													,scatterPar=QUALIFIER:::scatterPar(qaObj)
 													,highlight.=highlight
