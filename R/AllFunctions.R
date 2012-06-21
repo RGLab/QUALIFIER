@@ -275,7 +275,7 @@ queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,
 	if(!is.null(statsType))
 		ret_stats<-subset(ret_stats,stats%in%statsType)
 	
-	ret<-merge(ret_stats,ret_anno,by.x="id",by.y="id")
+	ret<-merge(ret_stats,ret_anno,by.x=c("gsid","id"),by.y=c("gsid","id"))
 	
 	##add stain column from tube and channel
 	ret$stain<-apply(ret,1,function(x){
