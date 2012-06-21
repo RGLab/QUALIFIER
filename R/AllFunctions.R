@@ -250,8 +250,17 @@ queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,
 #	browser()
 
 	if(is.null(gsid))
-		gsid<-max(db$gstbl$gsid)
-	ret_anno<-pData(db$gs[[gsid]])
+	{
+		ret_anno<-lapply(1:length(db$gs),function(i){
+									
+									meta<-pData(db$gs[[i]])
+									meta$gsid=i
+									meta
+							})
+		ret_anno<-do.call(rbind,ret_anno)
+					
+	}else	
+		ret_anno<-pData(db$gs[[gsid]])
 	
 	ret_stats<-db$stats
 	

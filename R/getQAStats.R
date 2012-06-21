@@ -192,7 +192,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 						stop("Invalid name of variable (", time, ") recording the ",
 								"\ntime domain specified as 'time' argument.", call.=FALSE)
 					
-					spikes<-unlist(lapply(params[!params%in%time],QUALIFIER:::.timelineplot,x=fdata, binSize=50))
+					spikes<-unlist(lapply(params[!params%in%time],.timelineplot,x=fdata, binSize=50))
 					
 					statsOfNode<-rbind(statsOfNode,data.frame(channel=params[!params%in%time],stats="spike",value=spikes))
 					chnls<-params[!params%in%time] #select channel at root level
@@ -228,7 +228,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 	## Sanity checking up front
 	if(!length(channel)==1)
 		stop("'channel' must be character scalar")
-	if(!channel %in% flowCore:::colnames(x))
+	if(!channel %in% flowCore::colnames(x))
 		stop(channel, " is not a valid channel in this flowSet.")
 	if(tolower(channel) == "time")
 		stop("Argument 'channel' can not be the time channel")
