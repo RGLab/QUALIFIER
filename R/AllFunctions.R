@@ -20,7 +20,7 @@ initDB<-function(db=.db){
 	createDbSchema(db)
 }
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
-qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name")
+qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",...)
 {
 	anno<-read.csv(metaFile)
 	##associate the anno with gating set and save them in db
@@ -29,7 +29,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
 	
-	getQAStats(db,gsid)
+	getQAStats(db,gsid,...)
 	
 	
 	ls(db)

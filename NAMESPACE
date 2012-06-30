@@ -22,6 +22,7 @@ export( "saveToDB",qaPreprocess
                 ,"outlier.t"
                 ,"outlier.norm"
                 ,rlm
+                ,initDB
                 )
 
 

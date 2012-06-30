@@ -76,7 +76,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 							eval(cur.call.f)
 							
 						}
-						return()
+#						browser()
+						return("done!")
 					}
 				}
 				
@@ -140,10 +141,9 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 #		browser()	
 	if(nrow(yy)==0)
-		{
-			warning("empty subsets!")
-			return()
-		}
+	{
+		return("empty subsets!")
+	}
 		
 	yy<-cast(yy,...~stats)
 		
@@ -246,7 +246,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	db$outlierResult<-db$outlierResult[!ind,]
 	ind<-db$GroupOutlierResult$sid%in%yy$sid&qaID==db$GroupOutlierResult$qaID
 	db$GroupOutlierResult<-db$GroupOutlierResult[!ind,]
-	
+#	browser()
 	#append the new one
 	if(length(stats_list)>0)
 	{

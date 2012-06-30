@@ -5,7 +5,7 @@
 
 
 
-.TubeNameMapping<-function(db,tubesEvents,gsid)
+.TubeNameMapping<-function(db=.db,tubesEvents,gsid)
 {
 	if(missing(gsid))
 		gsid<-max(db$gstbl$gsid)

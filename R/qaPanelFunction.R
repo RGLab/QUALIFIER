@@ -710,6 +710,7 @@ boxplot.statsEx<-function (x, coef = 1.5, do.conf = TRUE, do.out = TRUE)
 }
 
 #TODO:move this to flowViz as well
+##right now in QUALIFIER I replace all the 1-D density plot with xyplot instead.
 #qa.panel.densityplot<-function(x,y,frames,filter,channel,channel.name,overlap,...)
 qa.panel.densityplot<-function(...)
 {
@@ -761,7 +762,8 @@ qa.panel.densityplot<-function(...)
 	
 	
 }
-
+##these panel functions are modified based on flowViz
+##the only change is to pass outlier flag so that they can be distinguished by gate color
 panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...) 
 {
 	

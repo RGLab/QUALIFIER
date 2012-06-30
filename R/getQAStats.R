@@ -69,12 +69,13 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 			if(!is.null(nslaves)&&nslaves>1)
 			{
 				message("Using the parallel mode with ",nslaves," cores")
-				cl<-parallel::makeCluster(nslaves,type="SOCK")
-				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
-					library(QUALIFIER)
-					getQAStats(gh,isFlowCore=isFlowCore)
-					})
-			parallel::stopCluster(cl)
+#				browser()
+				cl<-parallel::makeCluster(nslaves,type="PSOCK")
+				statsOfGS<-parallel::parLapply(cl,glist[1:6],function(gh){
+#												library(QUALIFIER)
+												getQAStats(gh,isFlowCore=isFlowCore)
+												})
+				parallel::stopCluster(cl)
 			}else
 			{
 				message("It is currently running in serial mode and the parallel mode is recommend for faster processing.")

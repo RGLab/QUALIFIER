@@ -44,9 +44,6 @@ qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
 }
 individualPlot<-function(x,curGate,curRow,statsType,par)
 {
-	cols <- colorRampPalette(IDPcolorRamp(21,
-					t(col2hsv(c("blue","green","yellow","red"))),
-					fr=c(0.7,0)))
 	
 	#get gate
 #	statsType<-curRow$stat
@@ -142,24 +139,23 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 		xyplot(x=t1
 				,data=fs
 				,smooth=FALSE
-				,colramp=cols
 				,filter=fres
-				,names=FALSE
+#				,names=FALSE
 				,scales=scales
 		 		,main=mainTitle
-				,par.settings=list(gate.text=list(text=0.7
-										,alpha=1
-										,cex=1
-										,font=1)
-								,gate=list(
-										fill="transparent"
-										,lwd<-2
-										,lty="solid"
-										,alpha=1
-										,col="red"
-									)
-								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
-						)
+#				,par.settings=list(gate.text=list(text=0.7
+#										,alpha=1
+#										,cex=1
+#										,font=1)
+#								,gate=list(
+#										fill="transparent"
+#										,lwd<-2
+#										,lty="solid"
+#										,alpha=1
+#										,col="red"
+#									)
+#								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
+#						)
 				,panel=panel.xyplot.flowsetEx
 		)
 	else
@@ -371,25 +367,37 @@ setMethod("plot", signature=c(x="qaTask"),
 			plot.qaTask(qaObj=x,formula1=y,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTerminal=TRUE,fixed=FALSE,dest=NULL,rFunc=NULL,plotAll=FALSE,scatterPlot=FALSE,gsid=NULL,highlight="id",...)
+plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
+#						,par
+#						,main=description(qaObj)
+						,scatterPar
+						,isTerminal=TRUE,fixed=FALSE
+						,dest=NULL,rFunc=NULL,plotAll=FALSE
+						,scatterPlot=FALSE,gsid=NULL,highlight="id"
+						,...)
 {
 #	browser()
-	par_old<-qpar(qaObj)
-	if(!missing(par))##overwrite the elements of par slot of qa object if provided by argument
-	{
-		for(x in names(par))
-			eval(substitute(par_old$v<-par$v,list(v=x)))
-				
-		qpar(qaObj)<-par_old
-	}
+	
+	par<-list(main=description(qaObj))
+	#overwrite par with par slot of the qa object
+	par<-lattice:::updateList(par,qpar(qaObj))
+	#overwrite par with whatever provided in ...
+	par<-lattice:::updateList(par,list(...))
+#	if(!missing(par))##overwrite the elements of par slot of qa object if provided by argument
+#	{
+#		for(x in names(par))
+#			eval(substitute(par_old$v<-par$v,list(v=x)))
+#				
+#		qpar(qaObj)<-par_old
+#	}
 	
 #	browser()
 	par_old<-QUALIFIER:::scatterPar(qaObj)
 	if(!missing(scatterPar))##overwrite the elements of par slot of qa object if provided by argument
 	{
-		for(x in names(scatterPar))
-			eval(substitute(par_old$v<-scatterPar$v,list(v=x)))
-		
+#		for(x in names(scatterPar))
+#			eval(substitute(par_old$v<-scatterPar$v,list(v=x)))
+		par_old<-lattice:::updateList(par_old,scatterPar)
 		QUALIFIER:::scatterPar(qaObj)<-par_old
 	}
 	
@@ -476,7 +484,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 	}
 	
 	
-#	browser()
+	browser()
 	plotObjs=new.env()
 	if(scatterPlot)
 	{
@@ -503,38 +511,38 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 
 		
 			
-		par<-qpar(qaObj)
-		
-		par$subscripts<-TRUE
-		par$strip<-TRUE
-		
-		xlab<-par$xlab
-		ylab<-par$ylab
-		main<-par$main
-		pch<-par$pch
-		layout<-par$layout
-		cex<-par$cex
-		par.strip.text<-par$par.strip.text
-		scales<-par$scales
-		xscale.components<-par$xscale.components
+#		par<-qpar(qaObj)
+#		
+#		par$subscripts<-TRUE
+#		par$strip<-TRUE
+#		
+#		xlab<-par$xlab
+#		ylab<-par$ylab
+#		main<-par$main
+#		pch<-par$pch
+#		layout<-par$layout
+#		cex<-par$cex
+#		par.strip.text<-par$par.strip.text
+#		scales<-par$scales
+#		xscale.components<-par$xscale.components
 		if(plotType(qaObj)=="xyplot")
 		{
 			##parse the viz par
-			if(is.null(main))
-				par$main<-paste(description(qaObj),curGroup,sep=":")	
-			if(is.null(pch))
-				par$pch<-19		
-			if(is.null(par.strip.text))
-				par$par.strip.text<-list(lines=2)	
-			if(is.null(scales))
-				par$scales<-list(x=c(cex=0.7
-						#						,rot=45	
-											))
+#			if(is.null(main))
+#				par$main<-paste(description(qaObj),curGroup,sep=":")	
+#			if(is.null(pch))
+#				par$pch<-19		
+#			if(is.null(par.strip.text))
+#				par$par.strip.text<-list(lines=2)	
+#			if(is.null(scales))
+#				par$scales<-list(x=c(cex=0.7
+#						#						,rot=45	
+#											))
 		
-		
+#		browser()
 			thisCall<-quote(
 							xyplot(x=formula1,data=yy
-									,...
+#									,...
 									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType
 													,scatterPar=QUALIFIER:::scatterPar(qaObj)
 													,highlight.=highlight
@@ -609,7 +617,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 			
 #		lattice.options(print.function=plot.trellisEx)
 	
-			if(qpar(qaObj)$horiz)
+			if(horiz)
 			{
 				groupBy.Panel<-as.character(formuRes$yTerm)#formula[[3]][[2]])
 				
@@ -626,19 +634,19 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 #				par$xlab<-groupBy.Panel
 #			if(is.null(ylab))
 #				par$ylab<-statsType
-			if(is.null(main))
-				par$main<-paste(description(qaObj),curGroup,sep=":")	
-			if(is.null(pch))
-				par$pch<-"."	
-			if(is.null(cex))
-				par$cex<-5
-			if(is.null(par.strip.text))
-				par$par.strip.text<-list(lines=2)	
-			if(is.null(scales))
-				par$scales<-list(x=c(cex=0.9
-											,rot=45	
-											)
-										)
+#			if(is.null(main))
+#				par$main<-paste(description(qaObj),curGroup,sep=":")	
+#			if(is.null(pch))
+#				par$pch<-"."	
+#			if(is.null(cex))
+#				par$cex<-5
+#			if(is.null(par.strip.text))
+#				par$par.strip.text<-list(lines=2)	
+#			if(is.null(scales))
+#				par$scales<-list(x=c(cex=0.9
+#											,rot=45	
+#											)
+#										)
 									
 			thisCall<-quote(bwplot(x=formula1,data=yy
 									,groupBy=groupBy.Panel
@@ -652,7 +660,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height,par,scatterPar,isTe
 															,statsType.=statsType,scatterPar=scatterPar
 															,db=db,...)
 											}
-									,...
+#									,...
 									)
 							)
 			

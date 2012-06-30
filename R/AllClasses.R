@@ -55,7 +55,7 @@ makeQaTask<-function(db,qaName,description,qaLevel,pop,formula,plotType)
 	qa
 }
 
-read.qaTask<-function(db,checkListFile)
+read.qaTask<-function(db=.db,checkListFile)
 {
 	qaCheckList<-read.csv(checkListFile)
 	
