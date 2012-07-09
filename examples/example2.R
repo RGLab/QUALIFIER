@@ -38,20 +38,22 @@ getPopStats(G[[1]])[,2:3]
 #3.extract stats
 ###############################################################################
 library(parallel)
-qaPreprocess(gs=G,metaFile=metaFile,fcs.colname="FCS_Files",nslave=0)
+db<-new.env()
+initDB(db)
+metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
+qaPreprocess(db=db,gs=G,metaFile=metaFile,fcs.colname="FCS_Files",nslave=0)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
-metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-read.qaTask(checkListFile=checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
-Rprof()
-getQAStats(db$gs[[1]][1])
-Rprof(NULL)
-summaryRprof()
+#Rprof()
+#getQAStats(db$gs[[1]][1])
+#Rprof(NULL)
+#summaryRprof()
 
-initDB()
+
 
 
 ##TODO: to change other parts adapting the change of schema of gs and stats table
@@ -62,9 +64,9 @@ initDB()
 ##to represent the tube
 
 tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
-tubesEventsOrig<-.TubeNameMapping(tubesEvents=tubesEvents[,3,drop=F])
-tubesEvents20090825<-.TubeNameMapping(tubesEvents=tubesEvents[,2,drop=F])
-tubesEvents20090622<-.TubeNameMapping(tubesEvents=tubesEvents[,1,drop=F])
+tubesEventsOrig<-.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
+tubesEvents20090825<-.TubeNameMapping(db,tubesEvents=tubesEvents[,2,drop=F])
+tubesEvents20090622<-.TubeNameMapping(db,tubesEvents=tubesEvents[,1,drop=F])
 
 
 ###80% of the pre-defined the value for each pannel
@@ -91,11 +93,12 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 CairoX11()
 
 plot(qaTask.list[["NumberOfEvents"]]
-#		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
-		,scales=list(x=list(rot=45
-							,cex=0.5))
-		,pch=19
+#		,scales=list(x=list(rot=45
+#							,cex=0.5
+#							))
+#		,pch=19
 )
 
 
@@ -163,12 +166,12 @@ qaCheck(qaTask.list[["RBCLysis"]]
 		,lBound=0.9 #0.8
 )
 plot(qaTask.list[["RBCLysis"]]
-#		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #		, RecdDt~proportion | Tube
 #		,par=list(ylab="percent")
 #		,horiz=T
-		,dest="image"
-		,highlight="coresampleid"
+#		,dest="image"
+#		,highlight="coresampleid"
 #	,plotAll="none"
 )	
 

@@ -38,7 +38,22 @@ createDbSchema <- function(db)
 .onLoad <- function(libname, pkgname) 
 {
 	createDbSchema(.db)
+	.db$lattice<-list(par.settings=lattice:::updateList(standard.theme()
+														,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
+															,background=list(col="white")
+															,plot.symbol=list(pch=19)
+															,superpose.symbol=list(pch=rep(19,7)
+																					,col=RColorBrewer::brewer.pal(7, "Set1")[c(2,1,3:7)])
+															)
+																				
+														)
+						,scales=list(x=list(rot=45
+										,cex=0.5
+										))
+						)
+																				
 }
+
 
 
 

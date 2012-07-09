@@ -377,8 +377,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 						,...)
 {
 #	browser()
-	
-	par<-list(main=description(qaObj))
+	par<-.db$lattice
+	par<-lattice:::updateList(par,list(main=description(qaObj)))
 	#overwrite par with par slot of the qa object
 	par<-lattice:::updateList(par,qpar(qaObj))
 	#overwrite par with whatever provided in ...
@@ -484,7 +484,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	}
 	
 	
-	browser()
+#	browser()
 	plotObjs=new.env()
 	if(scatterPlot)
 	{
@@ -542,13 +542,18 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 #		browser()
 			thisCall<-quote(
 							xyplot(x=formula1,data=yy
-#									,...
-									,panel=function(x=x,y=y,data=yy,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll,statsType.=statsType
+									,groups=outlier
+									,panel=function(x=x,y=y
+													,data=yy,dest.=dest
+													,plotObjs.=plotObjs
+													,plotAll.=plotAll
+													,statsType.=statsType
 													,scatterPar=QUALIFIER:::scatterPar(qaObj)
 													,highlight.=highlight
 													,...){
 #												browser()
-												panel.xyplotEx(x,y,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll
+												panel.xyplotEx(x,y
+															,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll
 																,statsType.=statsType,db=db
 																,scatterPar=scatterPar
 																,highlight.=highlight
