@@ -88,16 +88,22 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 		,subset=as.Date(RecdDt,"%m/%d/%y")<'2009-06-22'
 )
 
-
+CairoX11()
 
 plot(qaTask.list[["NumberOfEvents"]]
 #		,Subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
+		,scales=list(x=list(rot=45
+							,cex=0.5))
+		,pch=19
 )
+
+
 
 plot(qaTask.list[["NumberOfEvents"]]
 		,subset=id=='245'
 		,scatterPlot=TRUE
+		,scatterPar=list(stat=T)
 )
 clearCheck(qaTask.list[["NumberOfEvents"]])
 
