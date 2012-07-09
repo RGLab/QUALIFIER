@@ -23,3 +23,5 @@ setGeneric("rFunc<-",function (x,value)standardGeneric("rFunc<-"))
 setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
 setGeneric("getPath",function (x, ...)standardGeneric("getPath"))
 #setGeneric("addStats",function (x,definition, ...)standardGeneric("addStats"))
+
+setGeneric("queryStats",function (x, ...)standardGeneric("queryStats"))

@@ -124,19 +124,23 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 )
 
 
-
+head(subset(
+				queryStats(qaTask.list[["BoundaryEvents"]]
+						,proportion ~ RecdDt |channel
+						,subset=channel=="PE-A"&value>0&id==270
+						)
+			,outlier==TRUE)
+	)
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-#		,dest="image"
-#		,subset=
-#				channel=="PE-A"
-#					&value>0
-#					id==119
-#		,par=list(ylab="percent")
+		,dest="image"
+		,subset=channel=="PE-A"&id==270
+		,ylab="percent"
 #		,scatterPlot=T
-#		,scatterPar=list(type="densityplot"
-#						,scales=list(x=list(log=T))
-#						)
+		,scatterPar=list(
+						xlog=T
+						,stat=T
+						)
 ##		,plotAll=F
 )
 

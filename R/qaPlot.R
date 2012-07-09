@@ -12,7 +12,7 @@
 #TODO:to merge this single plot to groupplot since groupPlot is also able to produce the same xyplot
 #just need to add timeline plot to groupPlot routine.
 ##single plot for each FCS
-qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
+.qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
 {
 #	browser()
 #	for(i in 1:nrow(yy))
@@ -42,7 +42,7 @@ qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
 	}
 #	}	
 }
-individualPlot<-function(x,curGate,curRow,statsType,par)
+.individualPlot<-function(x,curGate,curRow,statsType,par)
 {
 	
 	#get gate
@@ -134,7 +134,7 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 			mainTitle<-""
 		}
 		
-#			browser()	
+			browser()	
 	if(par$type=="xyplot")
 		xyplot(x=t1
 				,data=fs
@@ -177,18 +177,25 @@ individualPlot<-function(x,curGate,curRow,statsType,par)
 }
 #TODO:check why colnames from flowCore is not dispatched correctly without namespace explicitly specified
 ##group plot for each sampleID or other aggregation ID
-qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
+qa.GroupPlot<-function(db,df,statsType,par)
 {
-	cols <- colorRampPalette(IDPcolorRamp(21,
-					t(col2hsv(c("blue","green","yellow","red"))),
-					fr=c(0.7,0)))
-
-	pop<-unique(as.character(yy$population))
+#browser()
+	type<-par$type
+	xlog<-par$xlog
+	#remove from par list before pass to xyplot
+	par$type<-NULL
+	par$xlog<-NULL
+	if(is.null(type))
+		type<-"xyplot"
+	if(is.null(xlog))
+		xlog<-FALSE
+	
+	pop<-unique(as.character(df$population))
 	if(length(pop)>1)
 		stop("not the same population in lattice group plot!")
 #	browser()
 	#extract flowFrame and gate from each gating hierarchy
-	frlist<-apply(yy,1,function(curRow){
+	frlist<-apply(df,1,function(curRow){
 #		browser()
 		#get the parent population for the scatter plot
 				
@@ -209,26 +216,30 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 		}
 		list(frame=fr,gate=curGate)
 	})
-	names(frlist)<-yy[,"name"]
+	names(frlist)<-df[,"name"]
 #	browser()
 	#merge frames into flowSet for flowViz plot
 	fs1<-flowSet(lapply(frlist,"[[","frame"))
 	#append outlier flags
-	if(!"outlier"%in%colnames(yy))
-		yy$outlier<-FALSE
-	pData(fs1)$outlier<-yy$outlier
+	if(!"outlier"%in%colnames(df))
+		df$outlier<-FALSE
+	pData(fs1)$outlier<-df$outlier
 	varMetadata(fs1)["outlier",]<-"outlier"
 
 	#extract gates from the list
 	gates<-lapply(frlist,"[[","gate")
 #	browser()
-	obj<-NULL
-	if(!pop=="/root")##total cell count
+	thisCall<-NULL
+	if(statsType=="count"&&pop=="/root")##total cell count
+	{
+		##individual xyplot without gate
+		thisCall<-xyplot(`SSC-A`~`FSC-A`,data=fs1,smooth=FALSE)
+	}else
 	{
 		
 	
 		fres<-filter(fs1,gates)
-		if(par$type=="xyplot")
+		if(type=="xyplot")
 		{
 			
 			if(length(parameters(fres[[1]]))==2)
@@ -250,68 +261,38 @@ qa.GroupPlot<-function(db,yy,par=list(type="xyplot"))
 		}
 		t1<-as.formula(t1)		
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
-		xlog<-par$scales$x$log
-		if(is.null(xlog))xlog<-FALSE
 #		ylog<-par$scales$y$log
 #		if(is.null(ylog))ylog<-FALSE
 		
-#		browser()
-		scales<-list()
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
 			res<-reScaleData(fs1,fres,xterm,xlog)
 #			browser()
 			fs1<-res$fs
 			fres<-res$fres
-			scales$x<-res$scales
 		}
 #		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
 #			res<-reScaleData(fs1,fres,yterm,ylog)
 		
 #		browser()
-		if(par$type=="xyplot")
-			obj<-xyplot(x=t1,
-						data=fs1,
-						smooth=FALSE,
-						colramp=cols,
-						filter=fres,
-						names=FALSE,
-						pd=pData(fs1)
-						,scales=scales
-						,par.settings=list(gate.text=list(text=0.7
-														,alpha=1
-														,cex=1
-														,lineheight=2
-														,font=1)
-											,gate=list(
-													fill="transparent"
-													,lwd<-2
-													,lty="solid"
-													,alpha=1
-													,col="red"
-													)
-											),
-						panel=panel.xyplot.flowsetEx
-					)
-		else
-		{
-			
-			obj<-densityplot(data=fs1
-								,x=t1
-								,smooth=FALSE
-								,filter=fres
-								,names=FALSE
-								,pd=pData(fs1)
-								,scales=scales
-								,panel=qa.panel.densityplot
-							)
-		}
+		if(type=="xyplot")
+			thisCall<-quote(xyplot(x=t1,
+								data=fs1,
+								smooth=FALSE,
+								filter=fres,
+								pd=pData(fs1)
+								)
+						)
+		
+		thisCall<-as.call(c(as.list(thisCall),par))
+		thisCall<-eval(thisCall)			
+	
 	}
 	
 			
 			
 	
-	return(obj)
+	return(thisCall)
 	
 }
 
@@ -368,9 +349,7 @@ setMethod("plot", signature=c(x="qaTask"),
 		})
 
 plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
-#						,par
-#						,main=description(qaObj)
-						,scatterPar
+						,scatterPar=list()
 						,isTerminal=TRUE,fixed=FALSE
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
 						,scatterPlot=FALSE,gsid=NULL,highlight="id"
@@ -383,31 +362,19 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	par<-lattice:::updateList(par,qpar(qaObj))
 	#overwrite par with whatever provided in ...
 	par<-lattice:::updateList(par,list(...))
-#	if(!missing(par))##overwrite the elements of par slot of qa object if provided by argument
-#	{
-#		for(x in names(par))
-#			eval(substitute(par_old$v<-par$v,list(v=x)))
-#				
-#		qpar(qaObj)<-par_old
-#	}
 	
+
+	scatterP<-QUALIFIER:::scatterPar(qaObj)
 #	browser()
-	par_old<-QUALIFIER:::scatterPar(qaObj)
-	if(!missing(scatterPar))##overwrite the elements of par slot of qa object if provided by argument
-	{
-#		for(x in names(scatterPar))
-#			eval(substitute(par_old$v<-scatterPar$v,list(v=x)))
-		par_old<-lattice:::updateList(par_old,scatterPar)
-		QUALIFIER:::scatterPar(qaObj)<-par_old
-	}
+	scatterP<-lattice:::updateList(scatterP,scatterPar)
 	
-#	browser()
+
 	if(missing(width))
 		width<-QUALIFIER:::width(qaObj)
 	if(missing(height))
 		height<-QUALIFIER:::height(qaObj)
 	lattice.options(print.function=plot.trellisEx)
-#	browser()
+
 	db<-getData(qaObj)
 	##query db
 	curGroup<-NULL
@@ -426,16 +393,16 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	statsType<-matchStatType(db,formuRes)
 	if(missing(pop))
 		pop<-getPop(qaObj)
-#		browser()
+		
 	
 	if(missing(subset))
-		yy<-queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 	else
-		yy<-queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
-	if(nrow(yy)==0)
+		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+	if(nrow(res)==0)
 	{
-		message("no samples are matched!")
-		return()
+		return("no samples are matched!")
+		
 		
 	}
 	
@@ -444,7 +411,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	for(curGroupBy in formuRes$groupBy)
 	{
 
-		curCol<-substitute(yy$v,list(v=curGroupBy))
+		curCol<-substitute(res$v,list(v=curGroupBy))
 		if(!class(eval(curCol))=="factor")
 		{
 			eval(substitute(v<-as.factor(v),list(v=curCol)))
@@ -452,23 +419,23 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	}
 #	browser()
 	if(getName(qaObj)=="BoundaryEvents")
-		yy<-base::subset(yy,value>0)##filter out those zero-value records which may cause slow plotting
+		res<-base::subset(res,value>0)##filter out those zero-value records which may cause slow plotting
 			
-	if(nrow(yy)==0)
+	if(nrow(res)==0)
 	{
-		message("no samples are matched!")
-		return()
+#		message()
+		return("no samples with the value>0 matched!")
 		
 	}
 	#append the outlier flag
-	yy$outlier<-yy$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
-	yy$gOutlier<-yy$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
+	res$outlier<-res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
+	res$gOutlier<-res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
 	
 	#reshape the data to include the column of the statType which can be passed to lattice	as it is
-	yy<-as.data.frame(cast(yy,...~stats))
+	res<-as.data.frame(cast(res,...~stats))
 
-	if(!highlight%in%colnames(yy))
-		stop(paste(highlight,"not fouind in the data"))
+	if(!highlight%in%colnames(res))
+		stop(paste(highlight,"not found in the data"))
 #	browser()	
 	if(!is.null(dest))
 	{	
@@ -489,66 +456,38 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	if(scatterPlot)
 	{
 		##if scatterPlot flag is true then just plot the scatter plot
-		
-		if(statsType=="spike"||(statsType=="count"&&yy$population[1]=="/root"))
-		{
-#			browser()
-			thisCall<-lapply(1:nrow(yy),function(i)
-			{
-#						browser()
-						qa.singlePlot(db,yy[i,,drop=FALSE],statsType,QUALIFIER:::scatterPar(qaObj))
-			})
-			
-			
-		}else
-		{
-			thisCall<-qa.GroupPlot(db,yy,QUALIFIER:::scatterPar(qaObj))
-		}
+#		
+#		if(statsType=="spike"||(statsType=="count"&&res$population[1]=="/root"))
+#		{
+##			browser()
+#			thisCall<-lapply(1:nrow(res),function(i)
+#			{
+##						browser()
+#						qa.singlePlot(db,res[i,,drop=FALSE],statsType,QUALIFIER:::scatterPar(qaObj))
+#			})
+#			
+#			
+#		}else
+#		{
+			thisCall<-qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
+#		}
 		
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
-
-		
 			
-#		par<-qpar(qaObj)
-#		
-#		par$subscripts<-TRUE
-#		par$strip<-TRUE
-#		
-#		xlab<-par$xlab
-#		ylab<-par$ylab
-#		main<-par$main
-#		pch<-par$pch
-#		layout<-par$layout
-#		cex<-par$cex
-#		par.strip.text<-par$par.strip.text
-#		scales<-par$scales
-#		xscale.components<-par$xscale.components
 		if(plotType(qaObj)=="xyplot")
 		{
-			##parse the viz par
-#			if(is.null(main))
-#				par$main<-paste(description(qaObj),curGroup,sep=":")	
-#			if(is.null(pch))
-#				par$pch<-19		
-#			if(is.null(par.strip.text))
-#				par$par.strip.text<-list(lines=2)	
-#			if(is.null(scales))
-#				par$scales<-list(x=c(cex=0.7
-#						#						,rot=45	
-#											))
 		
-#		browser()
 			thisCall<-quote(
-							xyplot(x=formula1,data=yy
+							xyplot(x=formula1,data=res
 									,groups=outlier
 									,panel=function(x=x,y=y
-													,data=yy,dest.=dest
+													,data=res,dest.=dest
 													,plotObjs.=plotObjs
 													,plotAll.=plotAll
 													,statsType.=statsType
-													,scatterPar=QUALIFIER:::scatterPar(qaObj)
+													,scatterPar=scatterP
 													,highlight.=highlight
 													,...){
 #												browser()
@@ -653,16 +592,18 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 #											)
 #										)
 									
-			thisCall<-quote(bwplot(x=formula1,data=yy
+			thisCall<-quote(bwplot(x=formula1,data=res
 									,groupBy=groupBy.Panel
-									,panel=function(data=yy,dest.=dest,plotObjs.=plotObjs
+									,panel=function(data=res,dest.=dest,plotObjs.=plotObjs
 														,plotAll.=plotAll
-														,statsType.=statsType,scatterPar=QUALIFIER:::scatterPar(qaObj)
+														,statsType.=statsType
+														,scatterPar=scatterP
 														,...){
 #										browser()
 											panel.bwplotEx(data.=data,dest.=dest
 															,plotObjs.=plotObjs,plotAll.=plotAll
-															,statsType.=statsType,scatterPar=scatterPar
+															,statsType.=statsType
+															,scatterPar=scatterPar
 															,db=db,...)
 											}
 #									,...

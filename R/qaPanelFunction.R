@@ -123,10 +123,10 @@ panel.xyplotEx <-
 						{
 							##save the individual plot obj
 #						browser()
-							assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
+							assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 							
 #						png(file.path(dest,paths))
-#						qa.singlePlot(db,curOutRow)
+#						qa.GroupPlot(db,curOutRow)
 #						dev.off()
 #						dev.set(2)
 							
@@ -455,7 +455,7 @@ panel.bwplotEx <-
 						
 						##save the individual plot obj
 	#						browser()
-						assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
+						assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 						
 						
 						setSVGShapeURL(paths)
@@ -653,7 +653,7 @@ panel.bwplotEx <-
 
 					##save the individual plot obj
 #						browser()
-					assign(basename(paths),qa.singlePlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
+					assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 					
 					
 					setSVGShapeURL(paths)

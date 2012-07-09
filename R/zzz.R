@@ -47,9 +47,7 @@ createDbSchema <- function(db)
 															)
 																				
 														)
-						,scales=list(x=list(rot=45
-										,cex=0.5
-										))
+						,scales=list(x=list(rot=45))
 						)
 																				
 }

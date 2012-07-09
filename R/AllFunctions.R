@@ -244,8 +244,37 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 	
 }
 
+##API to query stats entries from db by qaTask object and formula
+setMethod("queryStats", signature=c(x="qaTask"),
+		function(x,y,subset,pop,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
+			if(missing(y))
+				y<-getFormula(x)
+			db<-getData(x)
+			formuRes<-.formulaParser(y)
+			#determine the statsType(currently only one of the terms can be statType,we want to extend both in the future)
+			statsType<-matchStatType(db,formuRes)
+			if(missing(pop))
+				pop<-getPop(x)
+			
+			if(missing(subset))
+				res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+			else
+				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+			
+			if(nrow(res)!=0)
+			{
+				
+				#append the outlier flag
+				res$outlier<-res$sid%in%base::subset(db$outlierResult,qaID==qaID(x))$sid
+				res$gOutlier<-res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(x))$sid	
+				
+			}
+			
+			
+			res
+		})
 #queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
-queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE,gsid)
+.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE,gsid)
 {
 #	browser()
 
