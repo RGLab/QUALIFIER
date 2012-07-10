@@ -182,13 +182,17 @@ qa.GroupPlot<-function(db,df,statsType,par)
 #browser()
 	type<-par$type
 	xlog<-par$xlog
+	ylog<-par$ylog
 	#remove from par list before pass to xyplot
 	par$type<-NULL
 	par$xlog<-NULL
+	par$ylog<-NULL
 	if(is.null(type))
 		type<-"xyplot"
 	if(is.null(xlog))
 		xlog<-FALSE
+	if(is.null(ylog))
+		ylog<-FALSE
 	
 	pop<-unique(as.character(df$population))
 	if(length(pop)>1)
@@ -236,52 +240,68 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		thisCall<-xyplot(`SSC-A`~`FSC-A`,data=fs1,smooth=FALSE)
 	}else
 	{
-		
-	
-		fres<-filter(fs1,gates)
-		if(type=="xyplot")
+					
+			
+		if(statsType=="spike")
 		{
-			
-			if(length(parameters(fres[[1]]))==2)
-			{
-				xterm<-as.symbol(parameters(gates[[1]])[2])
-				yterm<-as.symbol(parameters(gates[[1]])[1])
-			}else
-			{
-				xterm<-as.symbol(parameters(gates[[1]])[1])
-				yterm<-as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
-			}
+			chnl<-unique(as.character(df$channel))
+			fres<-NULL
+			if(length(chnl)>1)
+				stop("can't display multiple channels at a time!")
+			else
+			yterm<-as.symbol(chnl)
+			xterm<-as.symbol(colnames(fs1[[1]])[grep("time",colnames(fs1[[1]]),ignore.case=T)])
 			t1<-substitute(y~x,list(y=yterm,x=xterm))
-			
 		}else
 		{
-			xterm<-as.symbol(parameters(fres[[1]])[1])
-			t1<-substitute(~x,list(x=xterm))
-			yterm<-NULL
+	
+			fres<-filter(fs1,gates)
+			if(type=="xyplot")
+			{
+				
+				if(length(parameters(fres[[1]]))==2)
+				{
+					xterm<-as.symbol(parameters(gates[[1]])[2])
+					yterm<-as.symbol(parameters(gates[[1]])[1])
+				}else
+				{
+					xterm<-as.symbol(parameters(gates[[1]])[1])
+					yterm<-as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
+				}
+				t1<-substitute(y~x,list(y=yterm,x=xterm))
+				
+			}else
+			{
+				xterm<-as.symbol(parameters(fres[[1]])[1])
+				t1<-substitute(~x,list(x=xterm))
+				yterm<-NULL
+			}
 		}
 		t1<-as.formula(t1)		
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
-#		ylog<-par$scales$y$log
-#		if(is.null(ylog))ylog<-FALSE
-		
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
 			res<-reScaleData(fs1,fres,xterm,xlog)
-#			browser()
+		#			browser()
 			fs1<-res$fs
 			fres<-res$fres
 		}
-#		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
-#			res<-reScaleData(fs1,fres,yterm,ylog)
+		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
+		{
+			res<-reScaleData(fs1,fres,yterm,ylog)
+		#			browser()
+			fs1<-res$fs
+			fres<-res$fres
+		}
 		
 #		browser()
 		if(type=="xyplot")
 			thisCall<-quote(xyplot(x=t1,
-								data=fs1,
-								smooth=FALSE,
-								filter=fres,
-								pd=pData(fs1)
-								)
+									data=fs1,
+									smooth=FALSE,
+									filter=fres,
+									pd=pData(fs1)
+									)
 						)
 		
 		thisCall<-as.call(c(as.list(thisCall),par))
@@ -317,7 +337,8 @@ reScaleData<-function(fs,fres,channel,logScale)
 		fs <- eval(parse(text=paste("flowCore::transform(fs,`",channel,"`=log(`",channel,"`,base=",logbase,"))",sep="")))
 
 		#log transform the filter result
-		fres<-lapply(fres,function(curFres){
+		if(!is.null(fres))
+			fres<-lapply(fres,function(curFres){
 						max<-curFres@filterDetails[[1]]$filter@max
 						curFres@filterDetails[[1]]$filter@max<-log(max,logbase)
 						min<-curFres@filterDetails[[1]]$filter@min
@@ -500,8 +521,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 								#if regression function is supplied, then plot the regression line
 										if(!is.null(rFunc))
 										{
-	#							browser()
-										
+#								browser()
+#											x1<-as.Date(x,"%m/%d/%y")
 											reg.res<-try(rFunc(y~x),silent=TRUE)
 											if(all(class(reg.res)!="try-error"))
 											{

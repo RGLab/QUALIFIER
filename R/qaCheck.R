@@ -132,11 +132,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	##query db
 	if(missing(Subset))
 	{		
-		yy<-queryStats(db,statsType=statsType,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		yy<-.queryStats(db,statsType=statsType,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 		
 	}else
 	{
-		yy<-queryStats(db,statsType=statsType,Subset,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		yy<-.queryStats(db,statsType=statsType,Subset,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 		
 	}
 #		browser()	

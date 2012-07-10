@@ -53,7 +53,8 @@ qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 #Rprof(NULL)
 #summaryRprof()
 
-
+#TODO: try to figure out the generic way to format the date column 
+pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt,"%m/%d/%y")
 
 
 ##TODO: to change other parts adapting the change of schema of gs and stats table
@@ -145,10 +146,6 @@ plot(qaTask.list[["BoundaryEvents"]]
 )
 
 
-
-## creating and showing the summary
-
-
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm
 		,rFunc=rlm
@@ -158,6 +155,7 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('PE-Cy7-A')
+#				&stain=="CD3"
 		,rFunc=rlm
 #		,dest="image"
 
@@ -167,17 +165,26 @@ clearCheck(qaTask.list[["MFIOverTime"]])
 
 qaCheck(qaTask.list[["RBCLysis"]]
 		,outlierfunc=outlier.cutoff
-		,lBound=0.9 #0.8
+		,lBound=0.8
 )
+
+subset(
+		queryStats(qaTask.list[["RBCLysis"]]
+					,subset=Tube=='CD8/CD25/CD4/CD3/CD62L')
+		,outlier==TRUE)
 plot(qaTask.list[["RBCLysis"]]
-		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&id%in%c(270)
 #		, RecdDt~proportion | Tube
-#		,par=list(ylab="percent")
+		,ylab="percent"
+		,scatterPlot=T
+		,scatterPar=list(stat=T
+						,xbin=128)
 #		,horiz=T
 #		,dest="image"
 #		,highlight="coresampleid"
 #	,plotAll="none"
 )	
+clearCheck(qaTask.list[["RBCLysis"]])
 
 
 qaCheck(qaTask.list[["spike"]]
@@ -196,6 +203,10 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 		,subset=channel=='FITC-A'
 					&id%in%c(245,119)
 		,scatterPlot=TRUE
+		,scatterPar=list(ylog=T
+						,xlim=c(0,100)
+#						,xbin=128
+						)
 #		,dest="image"
 #		,plotAll="none"
 )
