@@ -295,12 +295,15 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		}
 		
 #		browser()
+
 		if(type=="xyplot")
-			thisCall<-quote(xyplot(x=t1,
-									data=fs1,
-									smooth=FALSE,
-									filter=fres,
-									pd=pData(fs1)
+			thisCall<-quote(
+							xyplot(t1
+									,fs1
+									,smooth=FALSE
+									,filter=fres
+									,pd=pData(fs1)
+									,panel=panel.xyplot.flowsetEx
 									)
 						)
 		

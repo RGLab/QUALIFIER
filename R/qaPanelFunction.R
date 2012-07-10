@@ -847,7 +847,7 @@ panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...)
 	flowViz:::panel.xyplot.flowframe(gp=gp,...)	
 }
 
-
+##this is copied from flowViz just for dispatching to panel.xyplot.flowframeEx
 panel.xyplot.flowsetEx <- function(x,
 		frames,
 		filter=NULL,

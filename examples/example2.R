@@ -48,10 +48,7 @@ qaPreprocess(db=db,gs=G,metaFile=metaFile,fcs.colname="FCS_Files",nslave=0)
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
-#Rprof()
-#getQAStats(db$gs[[1]][1])
-#Rprof(NULL)
-#summaryRprof()
+save(db,file="db_500.rda")
 
 #TODO: try to figure out the generic way to format the date column 
 pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt,"%m/%d/%y")
@@ -230,8 +227,9 @@ plot(qaTask.list[["MNC"]]
 #		,par=list(xlab="coresampleid")
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
-		,subset=coresampleid%in%c(11730
-#									,8780
+		,subset=coresampleid%in%c(
+#									11730
+									8780
 		)
 		,scatterPlot=TRUE
 		,scatterPar=list(xbin=128
@@ -257,6 +255,9 @@ plot(qaTask.list[["RedundantStain"]]
 				&coresampleid==11730
 		,y=proportion~factor(coresampleid)|channel:stain
 		,scatterPlot=T
+		,scatterPar=list(xlog=TRUE
+						,stat=T
+						)
 #		,dest="image"
 )
 ################################################################################  
