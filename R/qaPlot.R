@@ -374,6 +374,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 						,isTerminal=TRUE,fixed=FALSE
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
 						,scatterPlot=FALSE,gsid=NULL,highlight="id"
+						,horiz=FALSE
 						,...)
 {
 #	browser()
@@ -399,13 +400,13 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	db<-getData(qaObj)
 	##query db
 	curGroup<-NULL
-#	browser()
 	
 	if(is.null(qpar(qaObj)$horiz))
 		qpar(qaObj)$horiz<-FALSE
 	
 	if(is.null(rFunc))
 		rFunc<-rFunc(qaObj)
+		
 	
 	#parse the formula
 	formuRes<-.formulaParser(formula1)
@@ -496,79 +497,23 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		
 	}else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
-			
+				
 		if(plotType(qaObj)=="xyplot")
 		{
-		
+#			browser()
 			thisCall<-quote(
-							xyplot(x=formula1,data=res
+							xyplot(x=formula1
+									,data=res
 									,groups=outlier
-									,panel=function(x=x,y=y
-													,data=res,dest.=dest
-													,plotObjs.=plotObjs
-													,plotAll.=plotAll
-													,statsType.=statsType
-													,scatterPar=scatterP
-													,highlight.=highlight
-													,...){
-#												browser()
-												panel.xyplotEx(x,y
-															,data=data,dest.=dest,plotObjs.=plotObjs,plotAll.=plotAll
-																,statsType.=statsType,db=db
-																,scatterPar=scatterPar
-																,highlight.=highlight
-																,...)
-								#if regression function is supplied, then plot the regression line
-										if(!is.null(rFunc))
-										{
-#								browser()
-#											x1<-as.Date(x,"%m/%d/%y")
-											reg.res<-try(rFunc(y~x),silent=TRUE)
-											if(all(class(reg.res)!="try-error"))
-											{
-												sumry<-summary(reg.res)
-												if(class(sumry)=="summary.rlm"){
-													coefs<-coef(sumry)
-													t.value<-coefs[,"t value"]
-													slope<-coefs[2,"Value"]
-													intercept<-coefs[1,"Value"]
-													df<-summary(reg.res)$df
-													pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
-													intercept.p<-pvalues[1]
-													slope.p<-pvalues[2]
-												}else if (class(sumry)=="summary.lm"){
-													pvalues<-coefficients(sumry)[,4]
-													slope<-coefficients(sumry)[2,1]
-													intercept.p<-pvalues[1]
-													slope.p<-pvalues[2]
-													
-												}	
-												if(any(pvalues<0.05))
-												{
-													regLine.col<-"red"
-												}else
-												{
-													regLine.col<-"black"
-												}
-												curVp<-current.viewport()
-												
-												
-												#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
-												panel.text(x=mean(curVp$xscale)
-														,y=quantile(curVp$yscale)[4]
-														,labels=paste("s=",format(slope*30,digits=2)
-																#														," v=",format(var(y),digits=2)
-																,"\np=",paste(format(slope.p,digits=2),collapse=",")
-														)
-														,cex=0.5
-												#										,col="white"		
-												)
-												
-												panel.abline(reg.res,col=regLine.col,lty="dashed")
-												}
-										}
-								
-									}
+									,panel=panel.xyplotEx
+									,df=res
+									,dest=dest
+									,plotObjs=plotObjs
+									,plotAll=plotAll
+									,statsType=statsType
+									,db=db
+									,scatterPar=scatterPar
+									,highlight=highlight
 								)
 							)
 		}
@@ -576,12 +521,16 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		if(plotType(qaObj)=="bwplot")
 		{
 			
-			plot.symbol<-trellis.par.get("plot.symbol")
-			plot.symbol$col<-"red"
-			trellis.par.set("plot.symbol",plot.symbol)
+
+			par<-lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
+																					,pch=21
+																					)
+																	,strip.text=list(lines=2)
+																	)
+												)
+										)
 			
-#		lattice.options(print.function=plot.trellisEx)
-	
+		
 			if(horiz)
 			{
 				groupBy.Panel<-as.character(formuRes$yTerm)#formula[[3]][[2]])
@@ -592,42 +541,26 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		}
 
 			
-			
-			
-	
+#		browser()
+
 #			if(is.null(xlab))
 #				par$xlab<-groupBy.Panel
 #			if(is.null(ylab))
 #				par$ylab<-statsType
 #			if(is.null(main))
 #				par$main<-paste(description(qaObj),curGroup,sep=":")	
-#			if(is.null(pch))
-#				par$pch<-"."	
-#			if(is.null(cex))
-#				par$cex<-5
-#			if(is.null(par.strip.text))
-#				par$par.strip.text<-list(lines=2)	
-#			if(is.null(scales))
-#				par$scales<-list(x=c(cex=0.9
-#											,rot=45	
-#											)
-#										)
-									
-			thisCall<-quote(bwplot(x=formula1,data=res
+
+			thisCall<-quote(bwplot(x=formula1
+									,data=res ##this argument does not get passed to panel function
+									,panel=panel.bwplotEx
+									,df=res#arguments from this are passed to panel function
 									,groupBy=groupBy.Panel
-									,panel=function(data=res,dest.=dest,plotObjs.=plotObjs
-														,plotAll.=plotAll
-														,statsType.=statsType
-														,scatterPar=scatterP
-														,...){
-#										browser()
-											panel.bwplotEx(data.=data,dest.=dest
-															,plotObjs.=plotObjs,plotAll.=plotAll
-															,statsType.=statsType
-															,scatterPar=scatterPar
-															,db=db,...)
-											}
-#									,...
+									,dest=dest
+									,plotObjs=plotObjs
+									,plotAll=plotAll
+									,statsType=statsType
+									,scatterPar=scatterPar
+									,db=db
 									)
 							)
 			

@@ -194,7 +194,7 @@ qaCheck(qaTask.list[["spike"]]
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
-#		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
+		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
 #	,dest="image"
 #	,plotAll=T
 )
@@ -218,7 +218,7 @@ qaCheck(qaTask.list[["MNC"]]
 )
 
 plot(qaTask.list[["MNC"]]
-		,proportion~factor(coresampleid)|gsid
+		,proportion~factor(coresampleid)
 #		, factor(coresampleid)~proportion
 #		,par=list(horiz=TRUE)
 
@@ -231,9 +231,11 @@ plot(qaTask.list[["MNC"]]
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
 		,subset=coresampleid%in%c(11730
-									,8780
+#									,8780
 		)
 		,scatterPlot=TRUE
+		,scatterPar=list(xbin=128
+						,stat=T)
 #		,dest="image"
 #		,plotAll="none"
 )

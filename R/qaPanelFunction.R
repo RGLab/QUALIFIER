@@ -4,7 +4,7 @@
 ###############################################################################
 
 ##add svg anno to the original panel function for xyplot of lattice package
-##individual oultiers are colored based on the groups argument which passed through oultier column of dataframe
+##individual oultiers are colored based on the groups argument which passed through oultier column of dfframe
 panel.xyplotEx <-
 		function(x, y, type = "p",
 				groups = NULL,
@@ -19,13 +19,25 @@ panel.xyplotEx <-
 				cex = if (is.null(groups)) plot.symbol$cex else superpose.symbol$cex,
 				fill = if (is.null(groups)) plot.symbol$fill else superpose.symbol$fill,
 				lwd = if (is.null(groups)) plot.line$lwd else superpose.line$lwd,
-				horizontal = FALSE,
-				...,
-				grid = FALSE, abline = NULL,
+				horizontal = FALSE
+				,subscripts
+				,dest
+				,df
+				,plotObjs
+				,plotAll=FALSE
+				,statsType
+				,scatterPar
+				,highlight
+				,db
+				,rFunc=NULL
+				,...
+				,grid = FALSE, abline = NULL,
 				jitter.x = FALSE, jitter.y = FALSE,
 				factor = 0.5, amount = NULL,
 				identifier = "xyplot")
 {
+	
+#	browser()
 	if (all(is.na(x) | is.na(y))) return()
 	plot.symbol <- trellis.par.get("plot.symbol")
 	plot.line <- trellis.par.get("plot.line")
@@ -47,66 +59,77 @@ panel.xyplotEx <-
 					list(h = 0, v = 0))
 		do.call(panel.grid, grid)
 	}
-#	browser()
+
 	if (!is.null(abline))
 	{
 		if (is.numeric(abline)) abline <- as.list(abline)
 		do.call(panel.abline, abline)
 	}
-#	browser()
+#	browser()	
 	
 	if (!is.null(groups))
-		panel.superpose(x, y,
-				type = type,
-				groups = groups,
-				pch = pch,
-				col.line = col.line,
-				col.symbol = col.symbol,
-				font = font,
-				fontfamily = fontfamily,
-				fontface = fontface,
-				lty = lty,
-				cex = cex,
-				fill = fill,
-				lwd = lwd,
-				horizontal = horizontal,
-				panel.groups = panel.xyplotEx,
-				jitter.x = jitter.x,
-				jitter.y = jitter.y,
-				factor = factor,
-				amount = amount,
-				grid = FALSE, ## grid=TRUE/type="g" already handled
-				...)
+		panel.superpose(x=x, y=y
+				,groups = groups
+				,panel.groups = panel.xyplotEx
+				,subscripts=subscripts
+				,dest=dest
+				,df=df
+				,plotObjs=plotObjs
+				,plotAll=plotAll
+				,statsType=statsType
+				,scatterPar=scatterPar
+				,highlight=highlight
+				,db=db
+				,rFunc=rFunc
+				,...
+				,type = type
+				,pch = pch
+				,col.line = col.line
+				,col.symbol = col.symbol
+				,font = font
+				,fontfamily = fontfamily
+				,fontface = fontface
+				,lty = lty
+				,cex = cex
+				,fill = fill
+				,lwd = lwd
+				,horizontal = horizontal
+				,jitter.x = jitter.x
+				,jitter.y = jitter.y
+				,factor = factor
+				,amount = amount
+				,grid = FALSE ## grid=TRUE/type="g" already handled
+				)
 	else
 	{
 		x <- as.numeric(x)
 		y <- as.numeric(y)
 		id <- identifier
-#		browser()
-		dest<-list(...)$dest
-		
-#		dest<-NULL
+	
+#		dest<-list(...)$dest
 		if(!is.null(dest))
 		{
 			###add svg anno
-			rowIds<-list(...)$subscripts
-			data<-list(...)$data
-			plotObjs<-list(...)$plotObjs
-			plotAll<-list(...)$plotAll
-			statsType<-list(...)$statsType
-			scatterPar<-list(...)$scatterPar
-			highlight=list(...)$highlight
-			db<-list(...)$db
-#			browser()
-			if(is.null(plotAll))
-				plotAll=FALSE
-#			browser()
+#			rFunc<-list(...)$rFunc
+#			subscripts<-list(...)$subscripts
+
+#			plotObjs<-list(...)$plotObjs
+#			plotAll<-list(...)$plotAll
+#			statsType<-list(...)$statsType
+#			scatterPar<-list(...)$scatterPar
+#			db<-list(...)$db
+#			if(is.null(plotAll))
+#				plotAll=FALSE
+		
+			df<-df[subscripts,]
+			
+			
 			if ("o" %in% type || "b" %in% type) type <- c(type, "p", "l")
 			if ("p" %in% type)
 				for(i in 1:length(x))
 				{
 					curRowID<-rowIds[i]
-					curOutRow<-data[curRowID,]
+					curOutRow<-df[curRowID,]
 					
 					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
@@ -221,6 +244,58 @@ panel.xyplotEx <-
 					col.line = col.line,
 					...)
 	}
+	
+	#if regression function is supplied, then plot the regression line
+	if(!is.null(rFunc))
+	{
+#								browser()
+#											x1<-as.Date(x,"%m/%d/%y")
+		reg.res<-try(rFunc(y~x),silent=TRUE)
+		if(all(class(reg.res)!="try-error"))
+		{
+			sumry<-summary(reg.res)
+			if(class(sumry)=="summary.rlm"){
+				coefs<-coef(sumry)
+				t.value<-coefs[,"t value"]
+				slope<-coefs[2,"Value"]
+				intercept<-coefs[1,"Value"]
+				df<-summary(reg.res)$df
+				pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+				intercept.p<-pvalues[1]
+				slope.p<-pvalues[2]
+			}else if (class(sumry)=="summary.lm"){
+				pvalues<-coefficients(sumry)[,4]
+				slope<-coefficients(sumry)[2,1]
+				intercept.p<-pvalues[1]
+				slope.p<-pvalues[2]
+				
+			}	
+			if(any(pvalues<0.05))
+			{
+				regLine.col<-"red"
+			}else
+			{
+				regLine.col<-"black"
+			}
+			curVp<-current.viewport()
+			
+			
+			#							panel.lines(y=rFunc(y~x)$fitted,x=x,type="l",col="black",lty="solid")
+			panel.text(x=mean(curVp$xscale)
+					,y=quantile(curVp$yscale)[4]
+					,labels=paste("s=",format(slope*30,digits=2)
+							#														," v=",format(var(y),digits=2)
+							,"\np=",paste(format(slope.p,digits=2),collapse=",")
+					)
+					,cex=0.5
+			#										,col="white"		
+			)
+			
+			panel.abline(reg.res,col=regLine.col,lty="dashed")
+		}
+	}
+	
+	
 }
 
 ##add svg anno to the original panel function for boxplot of lattice package
@@ -237,9 +312,18 @@ panel.bwplotEx <-
 				fill = box.rectangle$fill,
 				varwidth = FALSE,
 				notch = FALSE,
-				notch.frac = 0.5,
-				...,
-				levels.fos = if (horizontal) sort(unique(y)) else sort(unique(x)),
+				notch.frac = 0.5
+				,...
+				,dest
+				,subscripts
+				,df
+				,groupBy
+				,plotObjs
+				,plotAll=FALSE
+				,statsType
+				,scatterPar
+				,db
+				,levels.fos = if (horizontal) sort(unique(y)) else sort(unique(x)),
 				stats = boxplot.statsEx,
 				coef = 1.5, do.out = TRUE,
 				identifier = "bwplot")
@@ -260,24 +344,10 @@ panel.bwplotEx <-
 	yscale <- cur.limits$ylim
 	
 	if (!notch) notch.frac <- 0
-#	browser()
-	dest<-list(...)$dest
-#		dest<-NULL
 	
-	gOutResult<-list(...)$gOutResult
-	rowIds<-list(...)$subscripts
-	data=list(...)$data[rowIds,]
-	groupBy<-list(...)$groupBy
-	plotObjs<-list(...)$plotObjs
-	plotAll<-list(...)$plotAll
-	statsType<-list(...)$statsType
-	scatterPar<-list(...)$scatterPar
 	
-	db<-list(...)$db
-	if(is.null(plotAll))
-		plotAll=FALSE
-	
-	dataGroups<-split(data,f=eval(parse(text=paste("data$",groupBy,sep=""))),drop=TRUE)
+	df<-df[subscripts,]
+	dataGroups<-split(df,f=eval(parse(text=paste("df$",groupBy,sep=""))),drop=TRUE)
 	nGroups<-length(dataGroups)	
 #	browser()
 	if (horizontal)
@@ -377,7 +447,7 @@ panel.bwplotEx <-
 					lty = box.rectangle$lty,
 					col = fill,
 					alpha = box.rectangle$alpha,
-					border = ifelse(cur.btw.groups.outliers,"red",box.rectangle$col),
+					border = ifelse(cur.btw.groups.outliers,"#E41A1C",box.rectangle$col),
 					identifier = paste(identifier, "box", sep="."))
 			## end of major changes to support notches
 			
@@ -578,7 +648,7 @@ panel.bwplotEx <-
 					col = fill,
 					alpha = box.rectangle$alpha,
 					border = ifelse(cur.btw.groups.outliers,"red",box.rectangle$col),
-					identifier = paste(identifier, "box", sep="."))
+					identifier = paste(identifier, "#E41A1C", sep="."))
 			
 			## whiskers
 			

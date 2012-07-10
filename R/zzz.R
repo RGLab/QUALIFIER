@@ -38,12 +38,20 @@ createDbSchema <- function(db)
 .onLoad <- function(libname, pkgname) 
 {
 	createDbSchema(.db)
+	myColorPal<-RColorBrewer::brewer.pal(7, "Set1")
 	.db$lattice<-list(par.settings=lattice:::updateList(standard.theme()
 														,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
 															,background=list(col="white")
-															,plot.symbol=list(pch=19)
+															,plot.symbol=list(pch=19
+																			,col=myColorPal[2])
 															,superpose.symbol=list(pch=rep(19,7)
-																					,col=RColorBrewer::brewer.pal(7, "Set1")[c(2,1,3:7)])
+																					,col=myColorPal[c(2,1,3:7)])
+															,box.dot=list(pch=16
+																		,col=myColorPal[2]
+																		)
+															,box.rectangle=list(col=myColorPal[2])
+															,box.umbrella=list(col=myColorPal[2])
+															,plot.polygon=list(col=myColorPal[2])
 															)
 																				
 														)
