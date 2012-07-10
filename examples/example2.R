@@ -54,9 +54,6 @@ save(db,file="db_500.rda")
 pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt,"%m/%d/%y")
 
 
-##TODO: to change other parts adapting the change of schema of gs and stats table
-## fix the other issues that ITN raises.
-
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
@@ -269,8 +266,8 @@ plot(qaTask.list[["RedundantStain"]]
 ##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
-scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
-QUALIFIER:::scatterPar(qaTask.list[["RedundantStain"]])<-list(type="densityplot",scales=list(x=list(log=TRUE)))
+scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="xyplot",scales=list(xlog=TRUE))
+scatterPar(qaTask.list[["RedundantStain"]])<-list(type="xyplot",scales=list(xlog=TRUE))
 
 
 qaReport(qaTask.list[[5]],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")

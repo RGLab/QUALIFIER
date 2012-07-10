@@ -325,7 +325,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 #										##table+image
 #
 								
-		
+#		browser()
 								plotCallStr<-quote(plot(x
 														,formula1
 														,dest=imageDir

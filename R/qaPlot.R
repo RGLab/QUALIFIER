@@ -300,7 +300,6 @@ qa.GroupPlot<-function(db,df,statsType,par)
 			thisCall<-quote(
 							xyplot(t1
 									,fs1
-									,smooth=FALSE
 									,filter=fres
 									,pd=pData(fs1)
 									,panel=panel.xyplot.flowsetEx

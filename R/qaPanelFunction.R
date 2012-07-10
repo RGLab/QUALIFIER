@@ -120,9 +120,9 @@ panel.xyplotEx <-
 #			db<-list(...)$db
 #			if(is.null(plotAll))
 #				plotAll=FALSE
-		
-			df<-df[subscripts,]
-			
+#		browser()
+			rowIds<-subscripts
+			#should not subset df since subscripts are global indices to the original dataframe
 			
 			if ("o" %in% type || "b" %in% type) type <- c(type, "p", "l")
 			if ("p" %in% type)
@@ -130,7 +130,7 @@ panel.xyplotEx <-
 				{
 					curRowID<-rowIds[i]
 					curOutRow<-df[curRowID,]
-					
+#					browser()
 					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
@@ -345,8 +345,9 @@ panel.bwplotEx <-
 	
 	if (!notch) notch.frac <- 0
 	
+	rowIds<-subscripts
+#	df<-df[rowIds,]
 	
-	df<-df[subscripts,]
 	dataGroups<-split(df,f=eval(parse(text=paste("df$",groupBy,sep=""))),drop=TRUE)
 	nGroups<-length(dataGroups)	
 #	browser()
@@ -390,10 +391,7 @@ panel.bwplotEx <-
 				ybot + notch.frac * blist.height / 2,
 				ybot, ybot, ytop, ytop,
 				ytop - notch.frac * blist.height / 2)
-		## xs <- matrix(NA_real_, nrow = nrow(xbnd) * 2, ncol = ncol(xbnd))
-		## ys <- matrix(NA_real_, nrow = nrow(xbnd) * 2, ncol = ncol(xbnd))
-		## xs[seq(along.with = levels.fos, by = 2), ] <- xbnd[seq(along.with = levels.fos), ]
-		## ys[seq(along.with = levels.fos, by = 2), ] <- ybnd[seq(along.with = levels.fos), ]
+		
 		
 		## box
 		
@@ -415,7 +413,7 @@ panel.bwplotEx <-
 			if(!is.null(dest))
 				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
 			##lattice plot for outlier group
-			
+#			browser()
 			if(plotAll!="none"&&!is.null(dest))
 			{
 				if(cur.btw.groups.outliers||plotAll==TRUE)
@@ -432,7 +430,7 @@ panel.bwplotEx <-
 					##can't print right away since there is issue with embeded lattice plot
 					##some how it alter the viewport or leves of parent lattice object 
 #				browser()
-					curPlotObj<-qa.GroupPlot(db,curGroup,par=scatterPar)
+					curPlotObj<-qa.GroupPlot(db,curGroup,statsType=statsType,par=scatterPar)
 					if(!is.null(curPlotObj))
 					{
 						assign(basename(paths),curPlotObj,envir=plotObjs)
@@ -631,7 +629,7 @@ panel.bwplotEx <-
 					##can't print right away since there is issue with embeded lattice plot
 					##some how it alter the viewport or leves of parent lattice object 
 #				browser()
-					curPlotObj<-qa.GroupPlot(db,curGroup,par=scatterPar)
+					curPlotObj<-qa.GroupPlot(db,curGroup,statsType=statsType,par=scatterPar)
 					if(!is.null(curPlotObj))
 					{
 						assign(basename(paths),curPlotObj,envir=plotObjs)
@@ -832,8 +830,7 @@ qa.panel.densityplot<-function(...)
 	
 	
 }
-##these panel functions are modified based on flowViz
-##the only change is to pass outlier flag so that they can be distinguished by gate color
+##mark outliers by by gate color
 panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...) 
 {
 	
@@ -847,7 +844,8 @@ panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...)
 	flowViz:::panel.xyplot.flowframe(gp=gp,...)	
 }
 
-##this is copied from flowViz just for dispatching to panel.xyplot.flowframeEx
+##this is copied from flowViz just for dispatching
+##and the only change is to pass outlier flag to panel.xyplot.flowframeEx
 panel.xyplot.flowsetEx <- function(x,
 		frames,
 		filter=NULL,

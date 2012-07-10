@@ -27,7 +27,8 @@ setClass("qaTask",
 						,width=10
 						,height=10
 						,par=list(horiz=FALSE)
-						,scatterPar=list(type="xyplot")
+						,scatterPar=list(type="xyplot"
+										,stat=TRUE)
 						,htmlReport=FALSE
 						,rFunc=NULL
 						,db="ANY"
