@@ -261,8 +261,8 @@ qa.GroupPlot<-function(db,df,statsType,par)
 				
 				if(length(parameters(fres[[1]]))==2)
 				{
-					xterm<-as.symbol(parameters(gates[[1]])[2])
-					yterm<-as.symbol(parameters(gates[[1]])[1])
+					xterm<-as.symbol(parameters(gates[[1]])[1])
+					yterm<-as.symbol(parameters(gates[[1]])[2])
 				}else
 				{
 					xterm<-as.symbol(parameters(gates[[1]])[1])
@@ -277,6 +277,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 				yterm<-NULL
 			}
 		}
+#		browser()
 		t1<-as.formula(t1)		
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
@@ -516,6 +517,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 									,db=db
 									,scatterPar=scatterPar
 									,highlight=highlight
+									,rFunc=rFunc
 								)
 							)
 		}

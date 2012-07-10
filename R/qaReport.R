@@ -76,18 +76,8 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 			
 			formuRes<-.formulaParser(formula1)
 			xTerm<-formuRes$xTerm
-#			groupBy<-formuRes$groupBy
 			
 			statsType<-matchStatType(db,formuRes)
-#			cond<-NULL
-#			if(length(formula1[[3]])>1)
-#			{
-#				cond<-formula1[[3]][[3]]
-#				xTerm<-formula1[[3]][[2]]
-#			}else
-#			{
-#				xTerm<-formula1[[3]]
-#			}
 			groupField<-NULL
 			if(plotType(x)=="bwplot")
 			{
@@ -268,7 +258,8 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 					}
 
 
-					yy<-queryStats(db,statsType=statsType,pop=getPop(x),isTerminal=T,fixed=F,gsid=gsid)
+					yy<-.queryStats(db,statsType=statsType,pop=getPop(x)
+									,isTerminal=T,fixed=F,gsid=gsid)
 
 					factors<-lapply(groupBy,function(x){
 								eval(substitute(yy$v,list(v=x)))

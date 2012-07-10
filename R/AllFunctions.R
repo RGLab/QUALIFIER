@@ -289,8 +289,10 @@ setMethod("queryStats", signature=c(x="qaTask"),
 		ret_anno<-do.call(rbind,ret_anno)
 					
 	}else	
+	{
 		ret_anno<-pData(db$gs[[gsid]])
-	
+		ret_anno$gsid=gsid
+	}
 	ret_stats<-db$stats
 	
 #	browser()

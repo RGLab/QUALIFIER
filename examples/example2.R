@@ -166,18 +166,21 @@ subset(
 		queryStats(qaTask.list[["RBCLysis"]]
 					,subset=Tube=='CD8/CD25/CD4/CD3/CD62L')
 		,outlier==TRUE)
+
 plot(qaTask.list[["RBCLysis"]]
-		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&id%in%c(270)
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#				&id%in%c(270)
 #		, RecdDt~proportion | Tube
 		,ylab="percent"
-		,scatterPlot=T
+#		,scatterPlot=T
 		,scatterPar=list(stat=T
 						,xbin=128)
 #		,horiz=T
-#		,dest="image"
+		,dest="image"
 #		,highlight="coresampleid"
 #	,plotAll="none"
 )	
+
 clearCheck(qaTask.list[["RBCLysis"]])
 
 
@@ -232,7 +235,7 @@ plot(qaTask.list[["MNC"]]
 		,scatterPar=list(xbin=128
 						,stat=T)
 #		,dest="image"
-#		,plotAll="none"
+		,plotAll=TRUE
 )
 #scatter for one sample
 plot(qaTask.list[["MNC"]]
@@ -270,6 +273,6 @@ scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="xyplot",scales=list(xlog
 scatterPar(qaTask.list[["RedundantStain"]])<-list(type="xyplot",scales=list(xlog=TRUE))
 
 
-qaReport(qaTask.list[[5]],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
 
 

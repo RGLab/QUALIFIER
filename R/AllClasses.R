@@ -13,7 +13,7 @@ setClass("qaTask",
 						,height="numeric"
 						,par="list"#arguments for lattice plot
 						,scatterPar="list"#arguments for indivdiual plot
-						,htmlReport="logical"#decide wether to plot even witout outliers detected
+						,htmlReport="logical"#decide wether to plot even without outliers detected
 						,rFunc="ANY"
 						,db="ANY"
 						),
@@ -28,6 +28,7 @@ setClass("qaTask",
 						,height=10
 						,par=list(horiz=FALSE)
 						,scatterPar=list(type="xyplot"
+										,smooth=FALSE
 										,stat=TRUE)
 						,htmlReport=FALSE
 						,rFunc=NULL
