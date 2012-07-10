@@ -346,7 +346,7 @@ panel.bwplotEx <-
 	if (!notch) notch.frac <- 0
 	
 	rowIds<-subscripts
-#	df<-df[rowIds,]
+	df<-df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
 	
 	dataGroups<-split(df,f=eval(parse(text=paste("df$",groupBy,sep=""))),drop=TRUE)
 	nGroups<-length(dataGroups)	

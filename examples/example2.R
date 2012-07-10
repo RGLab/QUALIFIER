@@ -251,13 +251,15 @@ qaCheck(qaTask.list[["RedundantStain"]]
 
 ##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
-		,subset=channel=='APC-A'&stain%in%c('CD123')
-				&coresampleid==11730
+		,subset=channel=='APC-A'&stain%in%c('CD123','CD3')
+#				&coresampleid==11730
 		,y=proportion~factor(coresampleid)|channel:stain
-		,scatterPlot=T
+#		,scatterPlot=T
 		,scatterPar=list(xlog=TRUE
 						,stat=T
 						)
+		,scales=list(x=list(relation="free"))
+		,layout=c(1,NA,1)
 #		,dest="image"
 )
 ################################################################################  
@@ -271,8 +273,14 @@ htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="xyplot",scales=list(xlog=TRUE))
 scatterPar(qaTask.list[["RedundantStain"]])<-list(type="xyplot",scales=list(xlog=TRUE))
+qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
+											,scales=list(x=list(relation="free"))
+											,layout=c(2,NA,1))
 
 
-qaReport(qaTask.list[1],outDir="~/rglab/workspace/QUALIFIER/output",plotAll="none")
+qaReport(qaTask.list[4]
+		,outDir="~/rglab/workspace/QUALIFIER/output"
+#		,plotAll="none"
+		)
 
 
