@@ -9,173 +9,172 @@
 	paste(fileName,collapse="_")
 	
 }
-#TODO:to merge this single plot to groupplot since groupPlot is also able to produce the same xyplot
-#just need to add timeline plot to groupPlot routine.
-##single plot for each FCS
-.qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
-{
-#	browser()
-#	for(i in 1:nrow(yy))
+#
+###single plot for each FCS
+#.qa.singlePlot<-function(db,yy,statsType,par=list(type="xyplot"))
+#{
+##	browser()
+##	for(i in 1:nrow(yy))
+##	{
+##		curRow<-yy[i,]
+#	curRow<-yy
+#	gsid<-as.integer(curRow[["gsid"]])
+#	curGS<-db$gs[[gsid]]
+#	ghInd<-which(getSamples(curGS)==curRow$name)
+#	if(length(ghInd)>0)
 #	{
-#		curRow<-yy[i,]
-	curRow<-yy
-	gsid<-as.integer(curRow[["gsid"]])
-	curGS<-db$gs[[gsid]]
-	ghInd<-which(getSamples(curGS)==curRow$name)
-	if(length(ghInd)>0)
-	{
-		curGh<-curGS[[ghInd]]
-		parentNode<-getParent(curGh,as.character(curRow$node))
-		if(length(parentNode)>0)
-		{
-			x<-getData(curGh,parentNode)
-		}else
-		{
-			x<-getData(curGh)
-		}
-		
-		curGate<-getGate(curGh,as.character(curRow$node))
-		
-		#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
-		#				browser()
-		individualPlot(x,curGate,curRow,statsType,par)
-	}
-#	}	
-}
-.individualPlot<-function(x,curGate,curRow,statsType,par)
-{
-	
-	#get gate
-#	statsType<-curRow$stat
-	channel<-as.character(curRow$channel)
-	pop<-as.character(curRow$population)
-
-#browser()
-	params<-colnames(x)
-
-	if(is.object(curGate))
-	{
-		chnls<-parameters(curGate)
-		fres <- filter(x,curGate)
-	}else
-	{
-		chnls<-ifelse(statsType=="spike",channel,NA)
-		fres<-NULL
-	}
-	
-
-	if(statsType=="count"&&pop=="/root")##total cell count
-	{
-		##individual xyplot without gate
-		xyplot(eval(parse(text=paste("`",params[2],"`~`",params[1],"`",sep="")))
-						,data=x,smooth=FALSE,colramp=cols)
-	}else
-	{
-
-		
-		if(length(chnls)==1)
-		{
-			
-			
-			if(statsType=="spike")
-			{
-				yterm<-as.symbol(chnls[1])
-				xterm<-as.symbol(params[grep("time",params,ignore.case=T)])
-				t1<-substitute(y~x,list(y=yterm,x=xterm))
-			}else
-			{
-				yterm<-as.symbol(params[2])
-				xterm<-as.symbol(chnls[1])
-				if(par$type=="xyplot")
-					t1<-substitute(y~x,list(y=yterm,x=xterm))
-				else
-					t1<-substitute(~x,list(x=xterm))			
-			}
-		}else
-		{
-			yterm<-as.symbol(chnls[2])
-			xterm<-as.symbol(chnls[1])
-			t1<-substitute(y~x,list(y=yterm,x=xterm))
-		}
-				
-		t1<-as.formula(t1)
-#		browser()
-		#convert frame to flowSet to plot
-		fcsName<-as.character(curRow$name)
-		if(!is.null(fres))
-			fres@frameId<-fcsName			
-		fs<-flowSet(x)
-		sampleNames(fs)<-fcsName
-		fres<-list(fres)
-		names(fres)<-fcsName
-		
-		xlog<-par$scales$x$log
-		if(is.null(xlog))xlog<-FALSE
-#		ylog<-par$scales$y$log
-#		if(is.null(ylog))ylog<-FALSE
-#		browser()
-		scales<-list()
-		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
-		{
-			res<-reScaleData(fs,fres,xterm,xlog)
-#			browser()
-			fs<-res$fs
-			fres<-res$fres
-			scales$x<-res$scales
-		}
-		
-		
-		if(is.object(curGate))
-		{
-			gateName<-strsplit(curGate@filterId,split="\\.")[[1]][2]##remove prefix			
-			mainTitle<-paste(gateName,"Gate")	
-		}else
-		{
-			mainTitle<-""
-		}
-		
-			browser()	
-	if(par$type=="xyplot")
-		xyplot(x=t1
-				,data=fs
-				,smooth=FALSE
-				,filter=fres
+#		curGh<-curGS[[ghInd]]
+#		parentNode<-getParent(curGh,as.character(curRow$node))
+#		if(length(parentNode)>0)
+#		{
+#			x<-getData(curGh,parentNode)
+#		}else
+#		{
+#			x<-getData(curGh)
+#		}
+#		
+#		curGate<-getGate(curGh,as.character(curRow$node))
+#		
+#		#		curGate<-getGate(G[[which(getSamples(G)==curRow$name)]],as.character(curRow$node))
+#		#				browser()
+#		individualPlot(x,curGate,curRow,statsType,par)
+#	}
+##	}	
+#}
+#.individualPlot<-function(x,curGate,curRow,statsType,par)
+#{
+#	
+#	#get gate
+##	statsType<-curRow$stat
+#	channel<-as.character(curRow$channel)
+#	pop<-as.character(curRow$population)
+#
+##browser()
+#	params<-colnames(x)
+#
+#	if(is.object(curGate))
+#	{
+#		chnls<-parameters(curGate)
+#		fres <- filter(x,curGate)
+#	}else
+#	{
+#		chnls<-ifelse(statsType=="spike",channel,NA)
+#		fres<-NULL
+#	}
+#	
+#
+#	if(statsType=="count"&&pop=="/root")##total cell count
+#	{
+#		##individual xyplot without gate
+#		xyplot(eval(parse(text=paste("`",params[2],"`~`",params[1],"`",sep="")))
+#						,data=x,smooth=FALSE,colramp=cols)
+#	}else
+#	{
+#
+#		
+#		if(length(chnls)==1)
+#		{
+#			
+#			
+#			if(statsType=="spike")
+#			{
+#				yterm<-as.symbol(chnls[1])
+#				xterm<-as.symbol(params[grep("time",params,ignore.case=T)])
+#				t1<-substitute(y~x,list(y=yterm,x=xterm))
+#			}else
+#			{
+#				yterm<-as.symbol(params[2])
+#				xterm<-as.symbol(chnls[1])
+#				if(par$type=="xyplot")
+#					t1<-substitute(y~x,list(y=yterm,x=xterm))
+#				else
+#					t1<-substitute(~x,list(x=xterm))			
+#			}
+#		}else
+#		{
+#			yterm<-as.symbol(chnls[2])
+#			xterm<-as.symbol(chnls[1])
+#			t1<-substitute(y~x,list(y=yterm,x=xterm))
+#		}
+#				
+#		t1<-as.formula(t1)
+##		browser()
+#		#convert frame to flowSet to plot
+#		fcsName<-as.character(curRow$name)
+#		if(!is.null(fres))
+#			fres@frameId<-fcsName			
+#		fs<-flowSet(x)
+#		sampleNames(fs)<-fcsName
+#		fres<-list(fres)
+#		names(fres)<-fcsName
+#		
+#		xlog<-par$scales$x$log
+#		if(is.null(xlog))xlog<-FALSE
+##		ylog<-par$scales$y$log
+##		if(is.null(ylog))ylog<-FALSE
+##		browser()
+#		scales<-list()
+#		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
+#		{
+#			res<-reScaleData(fs,fres,xterm,xlog)
+##			browser()
+#			fs<-res$fs
+#			fres<-res$fres
+#			scales$x<-res$scales
+#		}
+#		
+#		
+#		if(is.object(curGate))
+#		{
+#			gateName<-strsplit(curGate@filterId,split="\\.")[[1]][2]##remove prefix			
+#			mainTitle<-paste(gateName,"Gate")	
+#		}else
+#		{
+#			mainTitle<-""
+#		}
+#		
+#			browser()	
+#	if(par$type=="xyplot")
+#		xyplot(x=t1
+#				,data=fs
+#				,smooth=FALSE
+#				,filter=fres
+##				,names=FALSE
+#				,scales=scales
+#		 		,main=mainTitle
+##				,par.settings=list(gate.text=list(text=0.7
+##										,alpha=1
+##										,cex=1
+##										,font=1)
+##								,gate=list(
+##										fill="transparent"
+##										,lwd<-2
+##										,lty="solid"
+##										,alpha=1
+##										,col="red"
+##									)
+##								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
+##						)
+#				,panel=panel.xyplot.flowsetEx
+#		)
+#	else
+#	{
+#		
+#		densityplot(data=fs
+#				,x=t1
+#				,smooth=FALSE
+#				,filter=fres
 #				,names=FALSE
-				,scales=scales
-		 		,main=mainTitle
-#				,par.settings=list(gate.text=list(text=0.7
-#										,alpha=1
-#										,cex=1
-#										,font=1)
-#								,gate=list(
-#										fill="transparent"
-#										,lwd<-2
-#										,lty="solid"
-#										,alpha=1
-#										,col="red"
-#									)
-#								,flow.symbol=list(cex=ifelse(statsType=="spike",2,flowViz.par.get("flow.symbol")$cex))
-#						)
-				,panel=panel.xyplot.flowsetEx
-		)
-	else
-	{
-		
-		densityplot(data=fs
-				,x=t1
-				,smooth=FALSE
-				,filter=fres
-				,names=FALSE
-				,scales=scales
-				,main=mainTitle
-				,panel=qa.panel.densityplot
-		)	
-	}	
+#				,scales=scales
+#				,main=mainTitle
+#				,panel=qa.panel.densityplot
+#		)	
+#	}	
+#
+#	}
+#
+#}
 
-	}
-
-}
-#TODO:check why colnames from flowCore is not dispatched correctly without namespace explicitly specified
 ##group plot for each sampleID or other aggregation ID
 qa.GroupPlot<-function(db,df,statsType,par)
 {
@@ -389,7 +388,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	par<-lattice:::updateList(par,list(...))
 	
 
-	scatterP<-QUALIFIER:::scatterPar(qaObj)
+	scatterP<-scatterPar(qaObj)
 #	browser()
 	scatterP<-lattice:::updateList(scatterP,scatterPar)
 	
@@ -515,7 +514,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 									,plotAll=plotAll
 									,statsType=statsType
 									,db=db
-									,scatterPar=scatterPar
+									,scatterPar=scatterP
 									,highlight=highlight
 									,rFunc=rFunc
 								)
@@ -529,7 +528,6 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 			par<-lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
 																					,pch=21
 																					)
-																	,strip.text=list(lines=2)
 																	)
 												)
 										)
@@ -563,7 +561,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 									,plotObjs=plotObjs
 									,plotAll=plotAll
 									,statsType=statsType
-									,scatterPar=scatterPar
+									,scatterPar=scatterP
 									,db=db
 									)
 							)
