@@ -17,7 +17,7 @@ setReplaceMethod("qpar",
 				value="list"),
 		definition=function(object, value)
 		{
-			object@par<-value
+			object@par<-lattice:::updateList(object@par,value)
 			return(object)
 		})
 setMethod("scatterPar", signature=c(x="qaTask"),
@@ -30,7 +30,7 @@ setReplaceMethod("scatterPar",
 				value="list"),
 		definition=function(object, value)
 		{
-			object@scatterPar<-value
+			object@scatterPar<-lattice:::updateList(object@scatterPar,value)
 			return(object)
 		})
 

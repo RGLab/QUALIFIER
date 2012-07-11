@@ -126,21 +126,22 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 head(subset(
 				queryStats(qaTask.list[["BoundaryEvents"]]
 						,proportion ~ RecdDt |channel
-						,subset=channel=="PE-A"&value>0&id==270
+						,subset=channel=="PE-A"&value>0&id==806
 						)
 			,outlier==TRUE)
 	)
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
-		,dest="image"
-		,subset=channel=="PE-A"&id==270
+		,subset=channel=="PE-A"
+				&id==806
 		,ylab="percent"
-#		,scatterPlot=T
+		,scatterPlot=T
 		,scatterPar=list(
 						xlog=T
 						,stat=T
 						)
 ##		,plotAll=F
+#		,dest="image"
 )
 
 
@@ -154,8 +155,10 @@ plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('PE-Cy7-A')
 #				&stain=="CD3"
+				&id==806
 		,rFunc=rlm
 		,scales=list(format="%m/%d/%y")
+		,scatterPlot=TRUE
 #		,dest="image"
 
 )
@@ -223,7 +226,6 @@ plot(qaTask.list[["MNC"]]
 		,proportion~factor(coresampleid)
 #		, factor(coresampleid)~proportion
 #		,par=list(horiz=TRUE)
-
 )
 
 #scatter plot for a sample group	
@@ -260,12 +262,12 @@ plot(qaTask.list[["RedundantStain"]]
 				&stain%in%c('CD123','CD3')
 				&coresampleid==11730
 		,y=proportion~factor(coresampleid)|channel:stain
-		,scatterPlot=T
+#		,scatterPlot=T
 		,scatterPar=list(xlog=TRUE
 						,stat=T
 						)
 		,scales=list(x=list(relation="free"))
-		,layout=c(2,NA,1)
+#		,layout=c(2,NA,1)
 #		,dest="image"
 )
 ################################################################################  
@@ -277,10 +279,11 @@ plot(qaTask.list[["RedundantStain"]]
 ##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
-scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="xyplot",xlog=TRUE)
-scatterPar(qaTask.list[["RedundantStain"]])<-list(type="xyplot",xlog=TRUE)
-qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
-											,scales=list(x=list(relation="free"))
+
+scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
+scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
+scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
+qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 #											,layout=c(2,NA,1)
 											)
 
