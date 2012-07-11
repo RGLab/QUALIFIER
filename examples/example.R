@@ -120,8 +120,11 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,sum(proportion) ~ RecdDt | name
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
+		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 )
 
+
+clearCheck(qaTask.list[["BoundaryEvents"]])
 
 head(subset(
 				queryStats(qaTask.list[["BoundaryEvents"]]
@@ -133,13 +136,14 @@ head(subset(
 plot(qaTask.list[["BoundaryEvents"]]
 		,proportion ~ RecdDt |channel
 		,subset=channel=="PE-A"
-				&id==806
+#				&id==806
 		,ylab="percent"
-		,scatterPlot=T
+#		,scatterPlot=T
 		,scatterPar=list(
 						xlog=T
 						,stat=T
 						)
+		,scales=list(format="%m/%d/%y")
 ##		,plotAll=F
 #		,dest="image"
 )
@@ -159,6 +163,7 @@ plot(qaTask.list[["MFIOverTime"]]
 		,rFunc=rlm
 		,scales=list(format="%m/%d/%y")
 		,scatterPlot=TRUE
+		,scatterPar=list(xlog=F)
 #		,dest="image"
 
 )
@@ -206,8 +211,8 @@ plot(qaTask.list[["spike"]]
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 		,subset=channel=='FITC-A'
-					&id%in%c(245,119)
-		,scatterPlot=TRUE
+#					&id%in%c(245,119)
+#		,scatterPlot=TRUE
 		,scatterPar=list(ylog=T
 						,xlim=c(0,100)
 #						,xbin=128
@@ -259,11 +264,11 @@ qaCheck(qaTask.list[["RedundantStain"]]
 ##example of passing lattice arguments		
 plot(qaTask.list[["RedundantStain"]]
 		,subset=channel=='APC-A'
-				&stain%in%c('CD123','CD3')
-				&coresampleid==11730
+#				&stain%in%c('CD123','CD3')
+#				&coresampleid==11730
 		,y=proportion~factor(coresampleid)|channel:stain
 #		,scatterPlot=T
-		,scatterPar=list(xlog=TRUE
+		,scatterPar=list(xlog=F
 						,stat=T
 						)
 		,scales=list(x=list(relation="free"))
@@ -288,9 +293,16 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 											)
 
 
-qaReport(qaTask.list
+m.outResult<-melt(db$stats,measure.vars="qaTask")
+castResult<-cast(m.outResult,f1
+		,fun.aggregate=length)
+castResult<-as.data.frame(castResult)
+
+
+qaReport(qaTask.list[1]
 		,outDir="~/rglab/workspace/QUALIFIER/output"
-#		,plotAll="none"
+		,plotAll="none"
+		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 		)
 
 

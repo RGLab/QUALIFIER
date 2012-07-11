@@ -27,7 +27,8 @@ setClass("qaTask",
 						,width=10
 						,height=10
 						,par=list(horiz=FALSE
-								,format="%m/%d/%y")
+								,scales=list(format="%m/%d/%y")
+								)
 						,scatterPar=list(type="xyplot"
 										,smooth=FALSE
 										,stat=TRUE)

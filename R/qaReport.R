@@ -4,12 +4,16 @@
 ###############################################################################
 ##generate report for qaTask list
 setMethod("qaReport", signature=c(obj="list"),
-		function(obj,outDir,plotAll=FALSE,gsid=NULL,...){
+		function(obj,outDir,plotAll=FALSE,gsid=NULL,subset,...){
+			
 			if(missing(outDir))
 				stop("outDir has to be specified!")
 			p<-.writeHead(outDir,...)
-#			browser()
-			qaWrite.list(obj,p,outDir,plotAll,gsid=gsid)
+			
+			if(missing(subset))
+				qaWrite.list(obj,p,outDir,plotAll,gsid=gsid)
+			else
+				qaWrite.list(obj,p,outDir,plotAll,gsid=gsid,Subset=substitute(subset))
 		})
 ##generate report for single qaTask 
 setMethod("qaReport", signature=c(obj="qaTask"),
@@ -36,8 +40,8 @@ qaWrite.list<-function(x,page,...){
 			
 			closePage(page, splash=FALSE)
 		}
-
-qaWrite.task<-function(x,p,outDir,plotAll,gsid){
+#TODO:multi-gs is not fully supported in qaReport yet
+qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset){
 #			browser()
 			imageDir<-file.path(outDir,"image")
 			db<-getData(x)
@@ -47,15 +51,15 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 			anno<-pData(curGS)
 			curQaID<-qaID(x)
 #			browser()
-			outResult<-subset(db$outlierResult,qaID==curQaID)
+			outResult<-base::subset(db$outlierResult,qaID==curQaID)
 			outResult<-merge(outResult,db$stats[,c("sid","id","channel")])
-			outResult<-merge(outResult,anno)#[,c("sid","id","name","channel","Tube")]
-#			names(outResult)<-c("sid","id","fcsFile" ,"channel","Tube")
+			outResult<-merge(outResult,anno)
+
 			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
 			if(nrow(outResult)>0)
 				outResult$qaTask<-getName(x)
 			
-			gOutResult<-subset(db$GroupOutlierResult,qaID==curQaID)
+			gOutResult<-base::subset(db$GroupOutlierResult,qaID==curQaID)
 			gOutResult<-merge(gOutResult,db$stats)
 			gOutResult<-merge(gOutResult,anno)
 			nFscFailed<-length(unique(outResult$fcsFile))
@@ -264,7 +268,8 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 					factors<-lapply(groupBy,function(x){
 								eval(substitute(yy$v,list(v=x)))
 							})
-					by(yy,factors,function(sub2,x,groupBy){
+#					browser()
+					by(yy,factors,function(sub2,x,groupBy,Subset){
 								
 #											browser()
 								#find the outliers of the current pannael
@@ -326,8 +331,10 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 														)
 								plotCallStr$subset[[2]]<-as.symbol(eval(plotCallStr$subset[[2]]))
 								plotCallStr$subset[[3]]<-as.character(eval(plotCallStr$subset[[3]]))
-#	
 #								browser()
+								if(!missing(Subset))
+									plotCallStr$subset<-as.call(list(as.symbol("&"),plotCallStr$subset,Subset))
+								
 								imageName<-eval(plotCallStr)
 
 #								imageName<-eval(parse(text=plotCallStr))
@@ -391,6 +398,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 							}
 							,x
 							,groupBy
+							,Subset
 					)
 				}else
 				{
@@ -399,7 +407,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 					#simply order by it and output the fcsfile list
 					if(length(formuRes$groupBy)==0)
 					{
-#								groupBy<-as.character(formula1[[3]])
+
 						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
 										,list(u=as.symbol("outResult"),w="fcsFile")
 								)
@@ -412,12 +420,12 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 					}else
 					{
 						groupBy<-formuRes$groupBy
-#								groupByStr<-paste("outResult$",groupBy,sep="")
+
 						castResult<-eval(substitute(u[order(u$v),c(w,v)]
 													,list(u=as.symbol("outResult"),v=groupBy,w="fcsFile")
 												)
 											)
-						#outResult[order(eval(parse(text=groupByStr))),c("fcsFile",groupBy)]
+
 						gcastResult<-eval(substitute(u[order(u$v),c(w,v)]
 														,list(u=as.symbol("gOutResult"),v=groupBy,w=groupField)
 												)
@@ -425,15 +433,21 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid){
 					}
 					
 					
-#							browser()
-					##make sure the w and h pass to plot and large enough to display strip text
-					imageName<-plot(x
-							,y=getFormula(x)
-							,plotAll=plotAll
-							,dest=imageDir
-							,width=27,height=13)
 					
-#							browser()
+					##make sure the w and h pass to plot and large enough to display strip text
+					thisCall<-	quote(
+										plot(x
+											,y=getFormula(x)
+											,plotAll=plotAll
+											,dest=imageDir
+											,width=27,height=13
+											)
+										)
+					
+					if(!missing(Subset))
+						thisCall$subset<-Subset
+					imageName<-eval(thisCall)
+					
 					rownames(castResult)<-NULL#1:nrow(castResult)
 					#section
 					hwrite(paste(
