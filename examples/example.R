@@ -55,7 +55,7 @@ checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.cs
 qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
 save(db,file="db_500.rda")
-
+pData(db$gs[[4]])$RecdDt<-factor(pData(db$gs[[4]])$RecdDt)
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
 ##to represent the tube
@@ -90,7 +90,8 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 CairoX11()
 
 plot(qaTask.list[["NumberOfEvents"]]
-#		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,count ~ RecdDt
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #,dest="image"
 #		,scales=list(x=list(rot=45
 #							,cex=0.5

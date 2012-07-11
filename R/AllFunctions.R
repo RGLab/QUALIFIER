@@ -164,7 +164,7 @@ saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name",date.colname=NUL
 		if(!date.colname%in%colnames(annoData))
 			warning("date column not found in annotation data!")
 		else
-			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x)as.character(as.Date(as.character(x),"%m/%d/%y")))
+			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x)factor(as.character(as.Date(as.character(x),"%m/%d/%y"))))
 					
 	}
 	
