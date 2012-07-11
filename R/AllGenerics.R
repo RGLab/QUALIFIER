@@ -1,4 +1,4 @@
-setGeneric("gateBoundary", function(x,y,...) standardGeneric("gateBoundary"))
+#setGeneric("gateBoundary", function(x,y,...) standardGeneric("gateBoundary"))
 
 ###########################################
 

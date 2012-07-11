@@ -3,7 +3,7 @@
 # Author: wjiang2
 ###############################################################################
 ##TODO:to append the stats to the current table
-setMethod("getQAStats",signature=c("environment"),function(obj,gsid,isFlowCore=TRUE,nslaves=NULL,...){
+setMethod("getQAStats",signature=c("environment"),function(obj,gsid,...){
 			if(missing(gsid))
 				stop("missing gsid!")
 			
@@ -12,7 +12,7 @@ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,isFlowCore=T
 			
 #			browser()
 			
-			statsOfGS<-getQAStats(gs,isFlowCore,nslaves)
+			statsOfGS<-getQAStats(gs,...)
 			
 			
 			
@@ -42,7 +42,7 @@ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,isFlowCore=T
 		})
 
 
-setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslaves=NULL,...){
+setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PSOCK",...){
 			
 			
 			print("extracting stats...")
@@ -66,48 +66,36 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,isFlowCore=TRUE,nslav
 				
 				
 			}
-			if(!is.null(nslaves)&&nslaves>1)
-			{
-				message("Using the parallel mode with ",nslaves," cores")
-#				browser()
-				cl<-parallel::makeCluster(nslaves,type="PSOCK")
-				statsOfGS<-parallel::parLapply(cl,glist[1:6],function(gh){
+			##parallel mode is not available for gating set of internal structure  
+			##due to the undistributable pointer
+#			if(!is.null(nslaves)&&nslaves>1)
+#			{
+#							
+#				message("Using the parallel mode with ",nslaves," cores")
+#				
+#				cl<-parallel::makeCluster(nslaves,type)
+#				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
 #												library(QUALIFIER)
-												getQAStats(gh,isFlowCore=isFlowCore)
-												})
-				parallel::stopCluster(cl)
-			}else
-			{
-				message("It is currently running in serial mode and the parallel mode is recommend for faster processing.")
+#												getQAStats(gh,...)
+#												},...)
+#				parallel::stopCluster(cl)
+#			}else
+#			{
+#				message("It is currently running in serial mode.")
 
-#				browser()
+
 #				time1<-Sys.time()
-				statsOfGS<-lapply(glist,getQAStats,isFlowCore=isFlowCore)
+				statsOfGS<-lapply(glist,getQAStats,...)
 #				Sys.time()-time1
-			}
+#			}
 			
 			statsOfGS
 			
 		})
-#TODO:GateingHierarchy already has fjName slot, this is method should directly get this slot
-#setMethod("getPath",signature("GatingHierarchy"),function(x,y,...){
-##			browser()
-#				path_detail<-sp.between(x@tree,getNodes(x)[1],y)[[1]]$path_detail
-#				path_detail[1]<-".root"
-#				path<-paste(unlist(lapply(path_detail,function(x)strsplit(x,"\\.")[[1]][2]))
-#					,collapse="/")
-#				paste("/",path,sep="")
-#				})
-#setMethod("getPath",signature("GatingHierarchyInternal"),function(x,y,...){
-##			browser()
-#			ind<-which(getNodes(x)%in%y)
-#			getNodes(x,isPath=T)[ind]
-#			
-#			
-#		})
 ##extract stats from a gating hierarchy\\
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,...){
 			
+			message("reading GatingHierarchy:",getSample(obj))
 			#check if data is gated
 			params<-try(parameters(getData(obj))$name,silent=TRUE)
 			if(inherits(params,"try-error"))
@@ -119,22 +107,9 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			#convert to QUALIFIER's path
 			nodePaths[1]<-paste("/",nodePaths[1],sep="")
 			nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
-#			browser()
-#			browser()
 			nParam<-length(params)-1 #minus time channel
 			nNodes<-length(nodes)
-#			nStats<-nParam+2 #root stats(spikes+count+%)
-#					+(nNodes-1)*2##count,%
 #					
-#			statsOfGh<-data.frame(sid=integer(nNodes) #statesID:unique for each stat entry
-#								,id=integer(nNodes)#fileID:unique for each FCS
-#								,gsid=integer(nNodes)#gatignSetID:unique fore each gatingSet
-#								,population=character(nNodes)
-#								,stats=character(nNodes)
-#								,node=character(nNodes)
-#								,channel=character(nNodes)
-#								,value=numeric(nNodes)
-#								)
 			statsOfGh<-NULL
 #			browser()
 			fdata<-getData(obj)
@@ -149,10 +124,6 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 					curGate<-getGate(obj,curNode)
 				}
 				
-#				browser()
-				##extract pop name
-#				curPopName<-getPath(obj,curNode)
-#				browser()
 		
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)

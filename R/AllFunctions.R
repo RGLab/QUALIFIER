@@ -20,11 +20,11 @@ initDB<-function(db=.db){
 	createDbSchema(db)
 }
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
-qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",...)
+qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
 {
 	anno<-read.csv(metaFile)
 	##associate the anno with gating set and save them in db
-	gsid<-saveToDB(db,gs,gs.name,anno,fcs.colname)
+	gsid<-saveToDB(db,gs,gs.name,anno,fcs.colname,date.colname)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
@@ -145,7 +145,7 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name")
+saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name",date.colname=NULL)
 {
 	#####load sample info from xls
 	if(missing(annoData))
@@ -157,6 +157,18 @@ saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name")
 	#rename the fcs filename column so that it can be fit into flowSet pData slot
 	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
+	#format date columns
+	
+	if(!is.null(date.colname))
+	{
+		if(!date.colname%in%colnames(annoData))
+			warning("date column not found in annotation data!")
+		else
+			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x)as.character(as.Date(as.character(x),"%m/%d/%y")))
+					
+	}
+	
+	
 	#do some filtering for annoData
 	annoData<-subset(annoData,name%in%getSamples(G))
 	
