@@ -17,7 +17,7 @@ createDbSchema <- function(db)
 	#outlier table
 	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
 	#stats table
-	db$stats<-data.frame(sid=integer() #statesID:unique for each stat entry
+	db$stats<-data.frame(sid=integer() #statsID:unique for each stat entry
 							,id=integer()#fileID:unique for each FCS
 							,gsid=integer()#gatignSetID:unique fore each gatingSet
 							,population=character()

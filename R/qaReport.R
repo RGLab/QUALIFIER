@@ -9,11 +9,10 @@ setMethod("qaReport", signature=c(obj="list"),
 			if(missing(outDir))
 				stop("outDir has to be specified!")
 			p<-.writeHead(outDir,...)
-			
 			if(missing(subset))
-				qaWrite.list(obj,p,outDir,plotAll,gsid=gsid)
+				qaWrite.list(x=obj,page=p,outDir=outDir,plotAll=plotAll,gsid=gsid)
 			else
-				qaWrite.list(obj,p,outDir,plotAll,gsid=gsid,Subset=substitute(subset))
+				qaWrite.list(x=obj,page=p,outDir=outDir,plotAll=plotAll,gsid=gsid,Subset=substitute(subset))
 		})
 ##generate report for single qaTask 
 setMethod("qaReport", signature=c(obj="qaTask"),
@@ -27,12 +26,15 @@ qaWrite.list<-function(x,page,...){
 			
 			db<-getData(x[[1]])
 			db$objcount<-0
+
+			qaWrite.summary(x,page,...)
 			
 			tasksBylevel<-split(x,unlist(lapply(x,qaLevel)))
 
 			lapply(tasksBylevel,function(curTaskGroup){			
-#				browser()
+#				
 						hwrite(paste(qaLevel(curTaskGroup[[1]]),"Level"),page,heading=1)
+#						browser()
 						lapply(curTaskGroup,qaWrite.task,page,...)
 
 					})
@@ -40,8 +42,58 @@ qaWrite.list<-function(x,page,...){
 			
 			closePage(page, splash=FALSE)
 		}
+		
+qaWrite.summary<-function(x,p,gsid=NULL,...){
+#	browser()
+	hwrite("Summary",p,heading=1)
+	
+	taskTbl<-do.call(rbind,lapply(names(x),function(y)data.frame(qaTask=y,qaID=qaID(x[[y]]))))
+	db<-getData(x[[1]])
+	
+	if(is.null(gsid))
+		gsid<-max(db$gstbl$gsid)
+	curGS<-db$gs[[gsid]]
+	anno<-pData(curGS)
+	
+	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y="sid")
+	m.outResult<-merge(m.outResult,taskTbl,by.x="qaID",by.y="qaID")
+	m.outResult<-merge(m.outResult,anno[,c("id","name")],by.x="id",by.y="id")
+	
+	castResult<-cast(m.outResult,name~qaTask)
+	castResult<-as.data.frame(castResult)
+	castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
+	castResult<-castResult[order(castResult$subTotal,decreasing=T),]
+	castResult$name<-as.character(castResult$name)
+	castResult<-rbind(castResult,c(name="Total",colSums(castResult[,-1])))
+	rownames(castResult)<-NULL#1:nrow(castResult)
+	hwrite(
+			paste(hwrite("hide/show table"#add toggle word
+							,onclick=paste("toggleTable(",db$objcount,")",sep="")
+							,link="#"
+							,class="showtable"
+					)
+					,hwrite(#encapsulate into div in order to have an id
+							hwrite(castResult#output table
+									,row.class="firstline"
+									,col.class=list("name"="firstcolumn",'subTotal'="lastcolumn")
+							)
+							,div=TRUE
+							,style="display: none;"
+							,id=paste("table",db$objcount,sep="_")
+					)
+					
+					,sep=""
+				)
+			,p
+#			,div=TRUE
+#			,style="display: none;"
+#			,id=paste("section",db$objcount,sep="_")
+	
+		)
+#					
+}		
 #TODO:multi-gs is not fully supported in qaReport yet
-qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset){
+qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 #			browser()
 			imageDir<-file.path(outDir,"image")
 			db<-getData(x)
@@ -332,7 +384,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset){
 								plotCallStr$subset[[2]]<-as.symbol(eval(plotCallStr$subset[[2]]))
 								plotCallStr$subset[[3]]<-as.character(eval(plotCallStr$subset[[3]]))
 #								browser()
-								if(!missing(Subset))
+								if(!is.null(Subset))
 									plotCallStr$subset<-as.call(list(as.symbol("&"),plotCallStr$subset,Subset))
 								
 								imageName<-eval(plotCallStr)
@@ -444,7 +496,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset){
 											)
 										)
 					
-					if(!missing(Subset))
+					if(!is.null(Subset))
 						thisCall$subset<-Subset
 					imageName<-eval(thisCall)
 					

@@ -201,6 +201,7 @@ qaCheck(qaTask.list[["spike"]]
 #		,outlierfunc=outlier.t
 #		,z.cutoff=3
 #		,alpha=0.001
+		,isLower=FALSE
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
@@ -226,7 +227,7 @@ qaCheck(qaTask.list[["MNC"]]
 #		,Subset=coresampleid%in%c(11730,8780)
 #		,z.cutoff=1
 )
-
+clearCheck(qaTask.list[["MNC"]])
 plot(qaTask.list[["MNC"]]
 		,proportion~factor(coresampleid)
 #		, factor(coresampleid)~proportion
@@ -293,16 +294,13 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 											)
 
 
-m.outResult<-melt(db$stats,measure.vars="qaTask")
-castResult<-cast(m.outResult,f1
-		,fun.aggregate=length)
-castResult<-as.data.frame(castResult)
+											
 
 
-qaReport(qaTask.list[1]
+qaReport(qaTask.list
 		,outDir="~/rglab/workspace/QUALIFIER/output"
 		,plotAll="none"
-		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
+#		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 		)
 
 

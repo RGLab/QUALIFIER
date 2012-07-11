@@ -96,22 +96,25 @@ outlier.norm <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,
 	if(class(par)=="try-error")
 	{
 #		gettext(par)
-		isOutlier<-rep(FALSE,length(x))
+#		isOutlier<-rep(FALSE,length(x))
+		mu<-median(x)
+		sigma<-mad(x)
 	}else
 	{
 		mu<-par[[1]]
 		sigma<-par[[2]]
-		if(is.null(z.cutoff)){
-			#stardarize x
-#	x1<-(x - mu)/sigma
-			#calculate the cumulative probability of each x value
-			cp<-pnorm(x,mu,sigma)
-		}else{
-			#standardize to z-score
-			cp<-(x-mu)/sigma
-		}
-		isOutlier<-outlierDetection(cp,alpha,z.cutoff,isUpper,isLower)
 	}
+	if(is.null(z.cutoff)){
+		#stardarize x
+#	x1<-(x - mu)/sigma
+		#calculate the cumulative probability of each x value
+		cp<-pnorm(x,mu,sigma)
+	}else{
+		#standardize to z-score
+		cp<-(x-mu)/sigma
+	}
+	isOutlier<-outlierDetection(cp,alpha,z.cutoff,isUpper,isLower)
+
 	
 
 	if(plot)
