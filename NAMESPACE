@@ -10,19 +10,20 @@ importFrom(hwriter, closePage, hwrite, openPage)
 
 exportClasses(qaTask)
 
-export( "saveToDB",qaPreprocess
-                ,"makeQaTask"
-                ,"read.qaTask"
-                ,"proportion.outliers.robust"
-                ,"proportion.outliers.mle"
-                ,"qoutlier"
-                ,"outlier.cutoff"
-                ,"outlier.t"
-                ,"outlier.norm"
-                ,rlm
-                ,initDB
-                ,"clearCheck"
-                )
+export( qaPreprocess
+		,saveToDB
+        ,"makeQaTask"
+        ,"read.qaTask"
+        ,"proportion.outliers.robust"
+        ,"proportion.outliers.mle"
+        ,"qoutlier"
+        ,"outlier.cutoff"
+        ,"outlier.t"
+        ,"outlier.norm"
+        ,rlm
+        ,initDB
+        ,"clearCheck"
+        )
 
 
 exportMethods("plot","qaCheck","getQAStats","queryStats"

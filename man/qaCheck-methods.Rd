@@ -3,6 +3,7 @@
 \alias{qaCheck}
 \alias{qaCheck-methods}
 \alias{qaCheck,qaTask-method}
+\alias{clearCheck}
 \alias{rlm}
 
 \title{Perform the quality assessment for the qaTask object}
@@ -10,11 +11,16 @@
 Perform the quality assessment for a particular QA Task based on the information provided by \code{\link{qaTask}} object. 
 }
 \usage{
-qaCheck(obj,...)}
+qaCheck(obj,...)
+clearCheck(obj,gsid)
+}
 \arguments{
 
 	\item{obj}{a \code{qaTask} object}
 	
+	\item{gsid}{an \code{integer} that uniquely identifies a gating set object.
+				if missing, the latest added gating set is selected.}
+ 	
  	 \item{...}{
  	 			formula:
 		 	 		a \code{formula} describing the variables to be used for QA. When it is omitted or NULL, the formula stored in \code{qaTask} is used. 
@@ -64,10 +70,13 @@ qaCheck(obj,...)}
 			}
 }
 \details{
-The method parses the formula stored in qaTask or explicitly provided by the argument and select
+
+\code{qaCheck} method parses the formula stored in qaTask or explicitly provided by the argument and select
 the appropriate gated population,extract the statistics that is pre-calculated by \code{\link{getQAStats}} 
 and perform the outlier detection within a certain sample groups specified by the conditioning variables or x term in formula.
-Then the outliers detection results are save in database and ready for query or plotting.    
+Then the outliers detection results are save in database and ready for query or plotting.
+
+\code{clearCheck} function removes the outlier results detected by the previous \code{qaCheck} call on a particular gating set.    
 }
 
 \author{

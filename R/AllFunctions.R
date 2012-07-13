@@ -22,9 +22,9 @@ initDB<-function(db=.db){
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
 qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
 {
-	anno<-read.csv(metaFile)
+	
 	##associate the anno with gating set and save them in db
-	gsid<-saveToDB(db,gs,gs.name,anno,fcs.colname,date.colname)
+	gsid<-saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
@@ -145,11 +145,15 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-saveToDB<-function(db=.db,G,gs.name,annoData,fcs.colname="name",date.colname=NULL)
+saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NULL)
 {
+	
+	
 	#####load sample info from xls
-	if(missing(annoData))
+	if(missing(metaFile))
 		annoData<-data.frame(name=getSamples(G))
+	else
+		anno<-read.csv(metaFile)
 	
 	annoData$id<-1:nrow(annoData)
 	if(!fcs.colname%in%colnames(annoData))

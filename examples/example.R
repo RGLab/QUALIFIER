@@ -244,10 +244,10 @@ plot(qaTask.list[["MNC"]]
 #									11730
 									8780
 		)
-		,scatterPlot=TRUE
+#		,scatterPlot=TRUE
 		,scatterPar=list(xbin=128
 						,stat=T)
-#		,dest="image"
+		,dest="image"
 		,plotAll=TRUE
 )
 #scatter for one sample

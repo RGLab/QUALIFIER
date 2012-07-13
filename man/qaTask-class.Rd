@@ -15,17 +15,36 @@
 \alias{qpar<-,qaTask,list-method}
 \alias{qpar}
 \alias{qpar<-}
+\alias{scatterPar,qaTask-method}
+\alias{scatterPar<-,qaTask,list-method}
+\alias{htmlReport,qaTask-method}
+\alias{htmlReport<-,qaTask,logical-method}
+\alias{rFunc,qaTask-method}
+\alias{rFunc<-,qaTask,ANY-method}
 \alias{show,qaTask}
+\alias{makeQaTask}
+\alias{read.qaTask}
 
 \title{'qaTask': a class for storing important information of flow cytometry data quality assessment task}
 \description{
 This class stores the meta information, the name of gated cell population associated with the QA task and 
 the formula describing how the QA task is performed.     
 }
+
 \section{Objects from the Class}{
-Objects can be created by using:
-\code{\link{makeQaTask}}
+Objects can be created by using constructor:
+	makeQaTask(db=.db,qaName,description,qaLevel,pop,formula,plotType)
+or 
+	read.qaTask(db=.db,checkListFile)
+
 }
+\arguments{
+  \item{checkListFile}{A character scalar giving the file path, which is a csv spreadsheet contains the 
+  						detailed information of each QA task. It should have the columns:
+  						qaID,qaName,description,qaLevel,pop,formula,plotType. See the slots of \code{\link{qaTask}}
+  						for more details. }
+}
+  						
 \section{Slots}{
   \describe{
     \item{\code{qaID}:}{A integer for the id of qaTask object }
@@ -58,6 +77,12 @@ Objects can be created by using:
    \item{\code{rFunc}:}{A regression function passed to some qa tasks to monitor the long term trend.}
     \item{\code{db}:}{An environment containing the database connection, which stores the gating hierarchy,QA task list,sample information and outliers detection results. .}
   }
+}
+
+\value{
+  
+\code{read.qaTask} returns a list of qaTask objects by reading external csv spreadsheet containing descriptions of each QA task. 
+  
 }
 
 	 

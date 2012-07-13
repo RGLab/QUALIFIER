@@ -41,7 +41,7 @@ setClass("qaTask",
 		
 
 #TODO:to make constructor that record the qaTask into the db table
-makeQaTask<-function(db,qaName,description,qaLevel,pop,formula,plotType)
+makeQaTask<-function(db=.db,qaName,description,qaLevel,pop,formula,plotType)
 {
 	qa<-new("qaTask"
 						,qaID=max(db$qaChecklist)
@@ -53,9 +53,7 @@ makeQaTask<-function(db,qaName,description,qaLevel,pop,formula,plotType)
 						,plotType=curRow["plotType"]
 						,db=db
 				)
-									
-			
-	print(paste("one qaTask created ahd saved in db!"))
+	
 	qa
 }
 
