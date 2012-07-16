@@ -61,7 +61,7 @@ Since we are only interested in the gating strategy (gates defined in the templa
 to skip the actual gating process. \Robject{useInternal} is set as TRUE to use internal structure(c++) for the faster parsing. 
 
 <<parseWorkspace, eval=FALSE, echo=TRUE,results=verbatim>>=
-ws<-openWorkspace("~/QA_MFI_RBC_bounary_eventsV3.xml")
+ws<-openWorkspace("./data/QA_MFI_RBC_bounary_eventsV3.xml")##should replace with your own xml workspace file path
 GT<-parseWorkspace(ws,execute=FALSE,useInternal=TRUE)
 @
 
@@ -77,7 +77,7 @@ and and a list of FCS file names (\Robject{filenames}) that need the quality ass
 The result "G" is the \Robject{GatingSet} that contains the gated data and some of the cell population statistics that can be viewed by \Robject{getPopStats} method.
 <<gh_template, eval=FALSE, echo=TRUE,results=verbatim>>=
 ##datapath is the path where FCS files stores
-G<-GatingSet(gh_template,filenames,path=datapath)
+G<-GatingSet(gh_template,filenames,path="./data")
 getPopStats(G[[1]])
 @
 Optionally,\Robject{isNcdf} can be set as TRUE to support netCDF storage of large flow datasets when memory resource is limited. 
@@ -95,7 +95,7 @@ speficifying FCS file names.
 db<-new.env()
 initDB(db)
 qaPreprocess(db=db,gs=G
-			,metaFile=metaFile
+			,metaFile="./data/FCS_File_mapping.csv" #should replace with your own FCS meta data file path
 			,fcs.colname="FCS_Files"
 			,date.colname=c("RecdDt","AnalysisDt")
 	)
