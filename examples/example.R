@@ -122,12 +122,12 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 ##			,subset=population=="margin"
 #			)
 
-qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(proportion) ~ RecdDt | name
-		,outlierfunc=outlier.cutoff
-		,uBound=0.0003
-		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-)
+#qaCheck(qaTask.list[["BoundaryEvents"]]
+#		,sum(proportion) ~ RecdDt | name
+#		,outlierfunc=outlier.cutoff
+#		,uBound=0.0003
+##		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
+#)
 
 
 clearCheck(qaTask.list[["BoundaryEvents"]])
@@ -154,6 +154,16 @@ plot(qaTask.list[["BoundaryEvents"]]
 #		,dest="image"
 )
 
+addStats(qaTask.list[["BoundaryEvents"]]
+		,definition=sum(proportion)~RecdDt|id
+		,statName="sum.prop")
+
+qaCheck(qaTask.list[["BoundaryEvents"]]
+		,sum.prop ~ RecdDt 
+		,outlierfunc=outlier.cutoff
+		,uBound=0.0003
+#		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
+)
 
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm

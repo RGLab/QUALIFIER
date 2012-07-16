@@ -87,7 +87,10 @@ After flow data is gated,the statistics of the gated data need to be extracted a
 \Robject{db} is an environment that serves as a container storing all the QA data and results.
 Firsly ,\Rfunction{initDB} function initializes and creates the data structures for QA. 
 Then \Rfunction{qaPreprocess} is a convenient wrapper that calls underlining routines (\Rfunction{getQAStats},\Rfunction{saveToDB})
-to calculates/extracts statistics of gated cell populations and save them along with the gating set and the extra FCS meta data.
+to calculates/extracts statistics of gated cell populations and save them along with the gating set and the FCS meta data.
+\Robject{metaFile} is a csv file that contains the extra annoations about each FCS file.It should at least have one column
+speficifying FCS file names.
+
 <<getQAStats, eval=FALSE ,echo=true, results=verbatim>>=
 db<-new.env()
 initDB(db)
@@ -332,7 +335,8 @@ scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 @
 
-The complete example of the report can be viewed at http://mikejiang.github.com/QUALIFIER/qaReport/new/index.html. 
+The complete example of the report can be viewed from:
+http://mikejiang.github.com/QUALIFIER/qaReport/new/index.html 
  
 \section{Conclusion}
 By the formula-based \Rfunction{qaCheck} and \Rfunction{plot} methods,different QA tasks 
