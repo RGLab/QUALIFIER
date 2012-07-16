@@ -16,7 +16,6 @@ Collate: AllGenerics.R
 		qaCheck.R 
 		qaPlot.R 
 		qaTask-accessor-Methods.R 
-		getBoundary.R 
 		getQAStats.R
 		addStats.R
 		qaReport.R
