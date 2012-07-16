@@ -78,7 +78,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 data("ITNQASTUDY")
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-makeQaTask(db,checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile)
 
 #using formula to summing up the percentage of boundary events of each channel
 #using the cutoff function to detect the FCS files that has the higher percentage of boundary events
@@ -98,9 +98,10 @@ plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel)
 #using Interquartile Range based outlier detection function
 #to find the outliers that has significant variance of MNC cell population among aliquots
 #here the formula is implicitly provided by qaTask object
+
 qaCheck(qaTask.list[["MNC"]],outlierfunc=qoutlier,alpha=1.5)
 
-plot(qaTask.list[["MNC"]],dest="image")
+plot(qaTask.list[["MNC"]])
 }
 }
 

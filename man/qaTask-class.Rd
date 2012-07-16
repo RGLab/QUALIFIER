@@ -15,11 +15,17 @@
 \alias{qpar<-,qaTask,list-method}
 \alias{qpar}
 \alias{qpar<-}
+\alias{scatterPar}
+\alias{scatterPar<-}
 \alias{scatterPar,qaTask-method}
 \alias{scatterPar<-,qaTask,list-method}
+\alias{htmlReport}
+\alias{htmlReport<-}
 \alias{htmlReport,qaTask-method}
 \alias{htmlReport<-,qaTask,logical-method}
 \alias{rFunc,qaTask-method}
+\alias{rFunc}
+\alias{rFunc<-}
 \alias{rFunc<-,qaTask,ANY-method}
 \alias{show,qaTask}
 \alias{makeQaTask}

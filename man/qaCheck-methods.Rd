@@ -3,6 +3,9 @@
 \alias{qaCheck}
 \alias{qaCheck-methods}
 \alias{qaCheck,qaTask-method}
+\alias{queryStats}
+\alias{queryStats-method}
+\alias{queryStats,qaTask-method}
 \alias{clearCheck}
 \alias{rlm}
 
@@ -94,7 +97,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 data("ITNQASTUDY")
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-makeQaTask(db,checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile)
 
 
 #using t-distribution based outlier detection function  

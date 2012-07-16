@@ -26,7 +26,7 @@ Some preprocessing steps before the QA check and plot.
 \usage{
 
 initDB(db=.db)
-saveToDB(db=.db,G,gs.name="default gatingSet",annoData,fcs.colname="name",date.colname=NULL)
+saveToDB(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 getQAStats(obj,...) 
 qaPreprocess(db=.db,gs,gs.name,metaFile,fcs.colname,date.colname,...)
 }
@@ -34,7 +34,7 @@ qaPreprocess(db=.db,gs,gs.name,metaFile,fcs.colname,date.colname,...)
   
   \item{db}{ An environment storing all the QA data. By default it is an hidden global environment \code{.db}.}
   
-  \item{G}{A \code{\link[=GatingSet-class]{GatingSet}} containing multiple \code{gating hierarchies}}
+  \item{gs}{A \code{\link[=GatingSet-class]{GatingSet}} containing multiple \code{gating hierarchies}}
 
   \item{gs.name}{A character scalar giving the name of the GatingSet.}
 	  
@@ -91,17 +91,32 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 \examples{
 \dontrun{
-load(file="gatingHierarchy/GS.Rda")
-saveToDB(db,G,anno)##append the annotation  and Gating set to db 
+#prepare the data environment
+db<-new.env()
+initDB(db)
+
+metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
+##append the annotation  and Gating set to db
+metaFile<-"FCS_File_mapping.csv"
+saveToDB(db=db,gs=G
+		,metaFile=metaFile
+		,fcs.colname="FCS_Files"
+		,date.colname=c("RecdDt","AnalysisDt")
+	) 
 getQAStats(G[[1]])#extract stats from a gating hierarchy
 getQAStats(G)#from a gating set
-getQAStats(db,nslaves=10)#from an environment that contains a gating set
+getQAStats(db)#from an environment that contains a gating set
 
-
+##or use the wrapper qaPreprocess that does saveToDB and getQAStats together in one call
+qaPreprocess(db=db,gs=G
+			,metaFile=metaFile
+			,fcs.colname="FCS_Files"
+			,date.colname=c("RecdDt","AnalysisDt")
+			)
+#load QA check list
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-makeQaTask(db,checkListFile)
-metaFile<-"FCS_File_mapping.csv"
-qaPreprocess(db,G,metaFile,checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile)
+
 }
 }
 \keyword{methods}

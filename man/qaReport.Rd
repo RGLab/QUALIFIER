@@ -56,7 +56,7 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 
 data("ITNQASTUDY")#load stats from disk
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-makeQaTask(db,checkListFile)
+qaTask.list<-read.qaTask(db,checkListFile)
 qaReport(qaTask.list[[1]],outDir="~/output")
 qaReport(qaTask.list[2:3],outDir="~/output")
 

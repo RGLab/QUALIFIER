@@ -2,6 +2,7 @@ importFrom(MASS, huber, rlm)
 
 importFrom(stats4, plot)
 
+importFrom(lattice,standard.theme)
 
 importFrom(RSVGTipsDevice, devSVGTips, setSVGShapeToolTip,
            setSVGShapeURL)
