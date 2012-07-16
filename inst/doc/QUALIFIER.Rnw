@@ -66,7 +66,7 @@ GT<-parseWorkspace(ws,execute=FALSE,useInternal=TRUE)
 @
 
 \section{Apply the gating template to the data}
-Then gating hierarchy \Robject{gh_template} containing the actual template gates is extracted
+Then gating hierarchy \Robject{gh\_template} containing the actual template gates is extracted
 from the result \Robject{GatingSet} "\Robject{GT}". 
 <<gh_template, eval=FALSE, echo=TRUE,results=verbatim>>=
 gh_template<-GT[[1]]					
@@ -99,9 +99,10 @@ qaPreprocess(db=db,gs=G
 @
 \Robject{fcs.colname} and \Robject{date.colname} are the arguments to identify the columns in the meta data (the flat table stored as a csv)
 that specifies the FCS filenames and the dates (to be formatted as to "\%m/\%d/\%y"). 
-\Robject{stats} in the data environment is the data frame that stores the statitics. 
+\Robject{stats} in the data environment is the data frame that stores the statitics.
+ 
 <<viewStats, eval=FALSE ,echo=true, results=verbatim>>=
-head(db$stats)
+head(get("stats",envir=db))
 @
 
 Once the preprocessing steps are finished,the data are ready for quality assessments. 
