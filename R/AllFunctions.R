@@ -145,17 +145,18 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NULL)
+saveToDB<-function(db=.db,gs,gs.name="default",metaFile,fcs.colname="name",date.colname=NULL)
 {
 	
-	
+
 	#####load sample info from xls
 	if(missing(metaFile))
-		annoData<-data.frame(name=getSamples(G))
+		annoData<-data.frame(name=getSamples(gs))
 	else
-		anno<-read.csv(metaFile)
+		annoData<-read.csv(metaFile)
 	
 	annoData$id<-1:nrow(annoData)
+#		browser()
 	if(!fcs.colname%in%colnames(annoData))
 		stop("column that specify FCS file names is missing in annotation data!")
 	#rename the fcs filename column so that it can be fit into flowSet pData slot
@@ -165,7 +166,7 @@ saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NUL
 	
 	if(!is.null(date.colname))
 	{
-		if(!date.colname%in%colnames(annoData))
+		if(!all(date.colname%in%colnames(annoData)))
 			warning("date column not found in annotation data!")
 		else
 			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x)as.Date(as.character(x),"%m/%d/%y"))
@@ -174,15 +175,15 @@ saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NUL
 	
 	
 	#do some filtering for annoData
-	annoData<-subset(annoData,name%in%getSamples(G))
+	annoData<-subset(annoData,name%in%getSamples(gs))
 	
 		
 	##fit it into GatingSet(or flowSet)
 	rownames(annoData)<-annoData$name
 	
-	G<-G[which(getSamples(G)%in%annoData$name)]
+	gs<-gs[which(getSamples(gs)%in%annoData$name)]
 	
-	annoData<-annoData[getSamples(G),]	#sort by sample order in gh
+	annoData<-annoData[getSamples(gs),]	#sort by sample order in gh
 
 	##extract tubeID from filename by stripping the first two prefix (presummably date and fileid on each tube)
 	annoData$tubeID<-unlist(lapply(annoData$name,function(x){
@@ -193,12 +194,12 @@ saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NUL
 					}))
 
 
-	pData(G)<-annoData
+	pData(gs)<-annoData
 	#do the filtering for Gating set
 	
 	
 	###append the data to db
-	result<-try(colnames(getData(G[[1]])),silent=TRUE)
+	result<-try(colnames(getData(gs[[1]])),silent=TRUE)
 	if(!inherits(result,"try-error")){
 		db$params<-result
 	}
@@ -210,7 +211,7 @@ saveToDB<-function(db=.db,G,gs.name,metaFile,fcs.colname="name",date.colname=NUL
 		gsid<-max(db$gstbl$gsid)+1
 	db$gstbl<-rbind(db$gstbl,data.frame(gsid=gsid,gsname=gs.name))
 #	browser()	
-	db$gs[[gsid]]<-G
+	db$gs[[gsid]]<-gs
 	gsid
 }
 

@@ -48,6 +48,12 @@ qaPreprocess(db=db,gs=G
 		,nslave=6
 		,type="SOCK"
 )
+
+#saveToDB(db=db,gs=G
+#		,metaFile=metaFile
+#		,fcs.colname="FCS_Files"
+#		,date.colname=c("RecdDt","AnalysisDt")
+#	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
