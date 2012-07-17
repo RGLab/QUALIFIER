@@ -35,7 +35,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 #	browser()
 	#extract flowFrame and gate from each gating hierarchy
 	frlist<-apply(df,1,function(curRow){
-#		browser()
+
 		#get the parent population for the scatter plot
 				
 		gsid<-as.integer(curRow[["gsid"]])
@@ -43,6 +43,13 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		curSampleInd<-which(getSamples(curGS)%in%curRow["name"])
 		curGh<-curGS[[curSampleInd]]
 		curNode<-as.character(curRow["node"])
+#				browser()
+		
+#		if(is.na(curNode))
+#		{
+#			curPop<-curRow["population"]
+#			
+#		}	
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
 		parentNodeInd<-which(getNodes(curGh)%in%parentNode)

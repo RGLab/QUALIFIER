@@ -73,7 +73,8 @@ matchStatType<-function(db,formuRes)
 			break
 		}
 	}
-	
+	if(is.null(statsType))
+		stop("formula does not contain valid stats type!")
 	return(statsType)
 }
 #TODO:refere to latticeParseFormula for more generic parser
@@ -268,7 +269,7 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 ##API to query stats entries from db by qaTask object and formula
 setMethod("queryStats", signature=c(x="qaTask"),
 		function(x,y,subset,pop,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
-#			browser()
+			
 			if(missing(y))
 				y<-getFormula(x)
 			db<-getData(x)
@@ -277,7 +278,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			statsType<-matchStatType(db,formuRes)
 			if(missing(pop))
 				pop<-getPop(x)
-			
+#			browser()
 			if(missing(subset))
 				res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
 			else
@@ -357,21 +358,6 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	}
 #		browser()
 	
-	##apply the function to value in each group
-#	if(!is.null(func))
-#	{
-#		factors<-lapply(groupBy,function(x){
-#
-#					eval(substitute(ret$v,list(v=x)))
-#				})
-##					browser()		
-#		ret<-by(ret,factors,function(x){
-##							browser()
-#					x$value<-eval(substitute(f(x$value),list(f=func)))
-#					x
-#				})
-#		ret<-do.call("rbind",ret)
-#	}
 	
 	ret
 	

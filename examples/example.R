@@ -49,11 +49,11 @@ qaPreprocess(db=db,gs=G
 		,type="SOCK"
 )
 
-saveToDB(db=db,gs=G
-		,metaFile=metaFile
-		,fcs.colname="FCS_Files"
-		,date.colname=c("RecdDt","AnalysisDt")
-	)
+#saveToDB(db=db,gs=G
+#		,metaFile=metaFile
+#		,fcs.colname="FCS_Files"
+#		,date.colname=c("RecdDt","AnalysisDt")
+#	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
@@ -139,17 +139,17 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 
 plot(qaTask.list[["BoundaryEvents"]]
 		,sum.prop ~ RecdDt 
-		,subset=channel=="PE-A"
-				&id==806
-		,ylab="percent"
-		,scatterPlot=T
+#		,subset=channel=="PE-A"
+#				&id==806
+		,ylab="sum(percent)"
+#		,scatterPlot=T
 #		,scatterPar=list(
 #						xlog=T
 #						,stat=T
 #						)
 		,scales=list(format="%m/%d/%y")
-##		,plotAll=F
-#		,dest="image"
+		,plotAll="none"
+		,dest="image"
 )
 
 #plot(qaTask.list[["BoundaryEvents"]]
@@ -182,10 +182,10 @@ plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('PE-Cy7-A')
 #				&stain=="CD3"
-				&id==806
+#				&id==806
 		,rFunc=rlm
 		,scales=list(format="%m/%d/%y")
-		,scatterPlot=TRUE
+#		,scatterPlot=TRUE
 		,scatterPar=list(xlog=F)
 #		,dest="image"
 
@@ -204,17 +204,19 @@ subset(
 		,outlier==TRUE)
 
 plot(qaTask.list[["RBCLysis"]]
-		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #				&id%in%c(270)
 #		, RecdDt~proportion | Tube
+		,scales=list(format="%m/%d/%y")
 		,ylab="percent"
 #		,scatterPlot=T
 		,scatterPar=list(stat=T
 						,xbin=128)
 #		,horiz=T
 		,dest="image"
-#		,highlight="coresampleid"
-#	,plotAll="none"
+		,highlight="coresampleid"
+#		,plotAll="none"
+		,width=27,height=13
 )	
 
 clearCheck(qaTask.list[["RBCLysis"]])
@@ -250,7 +252,7 @@ qaCheck(qaTask.list[["MNC"]]
 #		,Subset=coresampleid%in%c(11730,8780)
 #		,z.cutoff=1
 )
-clearCheck(qaTask.list[["MNC"]])
+
 plot(qaTask.list[["MNC"]]
 		,proportion~factor(coresampleid)
 #		, factor(coresampleid)~proportion
@@ -277,6 +279,8 @@ plot(qaTask.list[["MNC"]]
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
 		,subset=coresampleid==11730&id==245)
+
+clearCheck(qaTask.list[["MNC"]])
 
 qaCheck(qaTask.list[["RedundantStain"]]
 #			,gOutlierfunc=qoutlier
@@ -322,7 +326,7 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 
 qaReport(qaTask.list
 		,outDir="~/rglab/workspace/QUALIFIER/output"
-		,plotAll="none"
+		,plotAll=FALSE
 #		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 		)
 
