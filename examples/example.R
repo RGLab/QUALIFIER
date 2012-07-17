@@ -313,6 +313,7 @@ plot(qaTask.list[["RedundantStain"]]
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 
+highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
 scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
 scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)

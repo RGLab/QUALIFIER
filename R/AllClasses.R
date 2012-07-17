@@ -15,6 +15,7 @@ setClass("qaTask",
 						,scatterPar="list"#arguments for indivdiual plot
 						,htmlReport="logical"#decide wether to plot even without outliers detected
 						,rFunc="ANY"
+						,highlight="character"#argument to determine level on which the dot will be higtlighted when hoverover in svg plot(like FCS,or sampleID ,should be the column name in the meta data) 
 						,db="ANY"
 						),
 		prototype=list(qaID=integer(0)
@@ -34,6 +35,7 @@ setClass("qaTask",
 										,stat=TRUE)
 						,htmlReport=FALSE
 						,rFunc=NULL
+						,highlight="id"
 						,db="ANY"
 						)
 		)
