@@ -163,13 +163,17 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
-	
+#	browser()
 	if(!is.null(date.colname))
 	{
 		if(!all(date.colname%in%colnames(annoData)))
 			warning("date column not found in annotation data!")
 		else
-			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x)as.Date(as.character(x),"%m/%d/%y"))
+			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x){
+#																			browser()
+																			as.Date(as.character(x),"%m/%d/%y")
+																		}
+											,simplify=FALSE)
 					
 	}
 	
@@ -264,6 +268,7 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 ##API to query stats entries from db by qaTask object and formula
 setMethod("queryStats", signature=c(x="qaTask"),
 		function(x,y,subset,pop,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
+#			browser()
 			if(missing(y))
 				y<-getFormula(x)
 			db<-getData(x)

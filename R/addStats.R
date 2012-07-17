@@ -32,8 +32,8 @@
 #})
 
 
-##this routine is use case specific for marginal events 
-addStats<-function(x,definition,statName){
+##this routine is currently use-case-specific for the marginal events 
+addStats<-function(x,definition,pop,statName){
 	formuRes<-.formulaParser(definition)
 	db<-getData(x)
 	statsType<-matchStatType(db,formuRes)
@@ -42,48 +42,47 @@ addStats<-function(x,definition,statName){
 	df<-queryStats(x)
 	
 	
-	browser()
+#	browser()
 	
-#			if(!is.null(formuRes$xfunc))
-#				df<-applyFunc(df,as.character(formuRes$xTerm),formuRes$xfunc,formuRes$groupBy)
 	if(!is.null(formuRes$yfunc))
 	{
-		df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
-	}
-#		df<-df[,colnames(db$stats)]
-	df1$gsid<-1
-#	nrow(df1)
-#	nrow(df)
-	df1$stats<-statName
+		
+		df1<-aggregate(df[,"value",drop=FALSE],by=df[,formuRes$groupBy],FUN=formuRes$yfunc)
+		
+#		df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
+	}else
+		stop("no aggregation function provided!")
+
+	df1$stats<-factor(statName)
 	df1$sid<-1:nrow(df1)+max(db$stats$sid)
 	df1$channel<-NA
-	df1$population<-NA
+	df1$population<-factor(pop)
 	df1$node<-NA
 	db$stats<-rbind(df1[,colnames(db$stats)],db$stats)
 	
 }
 
-#
+
 #
 ##this routine add new entries for the new statsType
-applyFunc2<-function(data,term,func,groupBy)
-{
-#			browser()
-	factors<-lapply(groupBy,function(x){
-				
-				eval(substitute(data$v,list(v=x)))
-			})
-	#					browser()
-	
-	
-	res<-eval(
-			substitute(aggregate(value~x,data=data,FUN=f),list(f=func,x=as.symbol(groupBy)))
-	)	
-#	data<-by(data,factors,function(x){
-##				browser()
-#				eval(substitute(f(x$stats),list(f=func,stats=term)))
+#applyFunc2<-function(data,term,func,groupBy)
+#{
+#
+#	factors<-lapply(groupBy,function(x){
 #				
+#				eval(substitute(data$v,list(v=x)))
 #			})
-#	do.call("rbind",data)
-	res
-}
+#						
+#			browser()	
+#	by1<-paste(groupBy,collapse="+")
+#	res<-eval(
+#			substitute(aggregate(value~x,data=data,FUN=f),list(f=func,x=as.symbol(by1)))
+#	)	
+##	data<-by(data,factors,function(x){
+###				browser()
+##				eval(substitute(f(x$stats),list(f=func,stats=term)))
+##				
+##			})
+##	do.call("rbind",data)
+#	res
+#}

@@ -49,18 +49,18 @@ qaPreprocess(db=db,gs=G
 		,type="SOCK"
 )
 
-#saveToDB(db=db,gs=G
-#		,metaFile=metaFile
-#		,fcs.colname="FCS_Files"
-#		,date.colname=c("RecdDt","AnalysisDt")
-#	)
+saveToDB(db=db,gs=G
+		,metaFile=metaFile
+		,fcs.colname="FCS_Files"
+		,date.colname=c("RecdDt","AnalysisDt")
+	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
-save(db,file="db_500.rda")
+
 pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt)
 
 #read pre-determined events number for tubes from csv file
@@ -116,55 +116,62 @@ plot(qaTask.list[["NumberOfEvents"]]
 clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
-#addStats(db,definition=sum(proportion)~RecdDt|name
-#			,statName="sum.prop"
-#			,pop="margin"
-##			,subset=population=="margin"
-#			)
-
-#qaCheck(qaTask.list[["BoundaryEvents"]]
-#		,sum(proportion) ~ RecdDt | name
-#		,outlierfunc=outlier.cutoff
-#		,uBound=0.0003
-##		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-#)
-
-
-clearCheck(qaTask.list[["BoundaryEvents"]])
+##add new aggregated stats
+addStats(qaTask.list[["BoundaryEvents"]]
+		,definition=sum(proportion)~RecdDt|id+gsid
+		,pop="/root/MNC/margin"
+		,statName="sum.prop")
 
 head(subset(
 				queryStats(qaTask.list[["BoundaryEvents"]]
-						,proportion ~ RecdDt |channel
-						,subset=channel=="PE-A"&value>0&id==806
-						)
-			,outlier==TRUE)
-	)
+							,y=sum.prop ~ RecdDt 
+							,pop="margin"
+							,subset=value>0&id==806
+							)
+				,outlier==TRUE)
+)
+#check on the new stats
+qaCheck(qaTask.list[["BoundaryEvents"]]
+		,sum.prop ~ RecdDt 
+		,outlierfunc=outlier.cutoff
+		,uBound=0.0003
+		)
+
 plot(qaTask.list[["BoundaryEvents"]]
-		,proportion ~ RecdDt |channel
+		,sum.prop ~ RecdDt 
 		,subset=channel=="PE-A"
-#				&id==806
+				&id==806
 		,ylab="percent"
-#		,scatterPlot=T
-		,scatterPar=list(
-						xlog=T
-						,stat=T
-						)
+		,scatterPlot=T
+#		,scatterPar=list(
+#						xlog=T
+#						,stat=T
+#						)
 		,scales=list(format="%m/%d/%y")
 ##		,plotAll=F
 #		,dest="image"
 )
 
-addStats(qaTask.list[["BoundaryEvents"]]
-		,definition=sum(proportion)~RecdDt|id
-		,statName="sum.prop")
+#plot(qaTask.list[["BoundaryEvents"]]
+#		,proportion ~ RecdDt|channel 
+##		,subset=channel=="PE-A"
+##				&id==806
+#		,ylab="percent"
+##		,scatterPlot=T
+##		,scatterPar=list(
+##						xlog=T
+##						,stat=T
+##						)
+#		,scales=list(format="%m/%d/%y")
+###		,plotAll=F
+##		,dest="image"
+#)
 
-qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum.prop ~ RecdDt 
-		,outlierfunc=outlier.cutoff
-		,uBound=0.0003
-#		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-)
-
+clearCheck(qaTask.list[["BoundaryEvents"]])
+		
+		
+		
+		
 qaCheck(qaTask.list[["MFIOverTime"]]
 #		,outlierfunc=outlier.norm
 		,rFunc=rlm
