@@ -350,7 +350,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 							xyplot(x=formula1
 									,data=res
 									,groups=outlier
-									,panel=panel.xyplotEx
+									,panel=panel.xyplot.qa
 									,df=res
 									,dest=dest
 									,plotObjs=plotObjs

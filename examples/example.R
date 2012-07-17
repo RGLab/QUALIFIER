@@ -1,12 +1,12 @@
 
 library(QUALIFIER)
 library(flowWorkspace)
-unloadNamespace("QUALIFIER")
-unloadNamespace("flowWorkspace")
+#unloadNamespace("QUALIFIER")
+#unloadNamespace("flowWorkspace")
 
-localDir<-"~/rglab"
-outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
-dest<-file.path(outDir,"trellis_plot/")
+
+#outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
+#dest<-file.path(outDir,"trellis_plot/")
 
 ###############################################################################
 #1.parse gating template
@@ -31,6 +31,7 @@ G<-GatingSet(gh_template
 			,newSamples
 			,path=datapath
 			,isNcdf=FALSE
+			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
 
@@ -178,10 +179,11 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 #		,Subset=channel%in%c('PE-Cy7-A')
 		,z.cutoff=10
 )
+
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
-		,subset=channel%in%c('PE-Cy7-A')
-#				&stain=="CD3"
+		,subset=channel%in%c('APC-A')
+				&stain=="Va24"
 #				&id==806
 		,rFunc=rlm
 		,scales=list(format="%m/%d/%y")
@@ -190,6 +192,7 @@ plot(qaTask.list[["MFIOverTime"]]
 #		,dest="image"
 
 )
+
 clearCheck(qaTask.list[["MFIOverTime"]])
 
 
@@ -317,9 +320,7 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
 scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
 scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
-qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
-#											,layout=c(2,NA,1)
-											)
+qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 
 											

@@ -80,7 +80,7 @@ panel.xyplotEx <-
 				,scatterPar=scatterPar
 				,highlight=highlight
 				,db=db
-				,rFunc=rFunc
+#				,rFunc=rFunc
 				,...
 				,type = type
 				,pch = pch
@@ -244,55 +244,7 @@ panel.xyplotEx <-
 					col.line = col.line,
 					...)
 		
-		#if regression function is supplied, then plot the regression line
-		if(!is.null(rFunc))
-		{
-			
-#											x1<-as.Date(x,"%m/%d/%y")
-			reg.res<-try(rFunc(y~x),silent=TRUE)
-			if(all(class(reg.res)!="try-error"))
-			{
-				sumry<-summary(reg.res)
-				if(class(sumry)=="summary.rlm"){
-					coefs<-coef(sumry)
-					t.value<-coefs[,"t value"]
-					slope<-coefs[2,"Value"]
-					intercept<-coefs[1,"Value"]
-					df<-summary(reg.res)$df
-					pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
-					intercept.p<-pvalues[1]
-					slope.p<-pvalues[2]
-				}else if (class(sumry)=="summary.lm"){
-					pvalues<-coefficients(sumry)[,4]
-					slope<-coefficients(sumry)[2,1]
-					intercept.p<-pvalues[1]
-					slope.p<-pvalues[2]
-					
-				}	
-				if(any(pvalues<0.05))
-				{
-					regLine.col<-"red"
-				}else
-				{
-					regLine.col<-"black"
-				}
-				curVp<-current.viewport()
-				
-
-				panel.text(x=mean(curVp$xscale)
-						,y=quantile(curVp$yscale)[4]
-						,labels=paste("s=",format(slope*30,digits=2)
-								#														," v=",format(var(y),digits=2)
-								,"\np=",paste(format(slope.p,digits=2),collapse=",")
-						)
-						,cex=0.5
-				#										,col="white"		
-				)
-				
-				panel.abline(reg.res,col=regLine.col,lty="dashed")
-			
-			}
-		}
+	
 		
 	}
 	
@@ -300,6 +252,59 @@ panel.xyplotEx <-
 	
 }
 
+panel.xyplot.qa<-function(x,y,rFunc=NULL,...){
+#	browser()
+	panel.xyplotEx(x=x,y=y,...) 
+	#if regression function is supplied, then plot the regression line
+	if(!is.null(rFunc))
+	{
+		
+#											x1<-as.Date(x,"%m/%d/%y")
+		reg.res<-try(rFunc(y~x),silent=TRUE)
+		if(all(class(reg.res)!="try-error"))
+		{
+			sumry<-summary(reg.res)
+			if(class(sumry)=="summary.rlm"){
+				coefs<-coef(sumry)
+				t.value<-coefs[,"t value"]
+				slope<-coefs[2,"Value"]
+				intercept<-coefs[1,"Value"]
+				df<-summary(reg.res)$df
+				pvalues<-pt(abs(t.value),df=df[1],lower.tail=FALSE)
+				intercept.p<-pvalues[1]
+				slope.p<-pvalues[2]
+			}else if (class(sumry)=="summary.lm"){
+				pvalues<-coefficients(sumry)[,4]
+				slope<-coefficients(sumry)[2,1]
+				intercept.p<-pvalues[1]
+				slope.p<-pvalues[2]
+				
+			}	
+			if(any(pvalues<0.05))
+			{
+				regLine.col<-"red"
+			}else
+			{
+				regLine.col<-"black"
+			}
+			curVp<-current.viewport()
+			
+			
+			panel.text(x=mean(curVp$xscale)
+					,y=quantile(curVp$yscale)[4]
+					,labels=paste("s=",format(slope*30,digits=2)
+							#														," v=",format(var(y),digits=2)
+							,"\np=",paste(format(slope.p,digits=2),collapse=",")
+					)
+					,cex=0.5
+			#										,col="white"		
+			)
+			
+			panel.abline(reg.res,col=regLine.col,lty="dashed")
+			
+		}
+	}
+}
 ##add svg anno to the original panel function for boxplot of lattice package
 panel.bwplotEx <-
 		function(x, y, box.ratio = 1, box.width = box.ratio / (1 + box.ratio),
