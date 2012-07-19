@@ -7,6 +7,11 @@ importFrom(lattice,standard.theme)
 importFrom(RSVGTipsDevice, devSVGTips, setSVGShapeToolTip,
            setSVGShapeURL)
 
+import(reshape)
+import(flowCore)
+import(flowWorkspace)
+import(flowViz)
+
 importFrom(hwriter, closePage, hwrite, openPage)
 
 exportClasses(qaTask)
