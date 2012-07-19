@@ -53,13 +53,13 @@ Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 \seealso{\code{\link{qaCheck}},\code{\link[QUALIFIER:plot]{plot}}}
 
 \examples{
-
+\dontrun{
 data("ITNQASTUDY")#load stats from disk
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list<-read.qaTask(db,checkListFile)
 qaReport(qaTask.list[[1]],outDir="~/output")
 qaReport(qaTask.list[2:3],outDir="~/output")
-
+}
 }
 \keyword{methods}
 

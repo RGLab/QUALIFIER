@@ -310,7 +310,7 @@ hyperlinks of densityplot for each individual FCS file.
 
 <<qa.report,eval=FALSE, echo=true, results=verbatim>>=
 qaReport(qaTask.list
-		,outDir="~/tempTemp"
+		,outDir="~/temp"
 		,plotAll=FALSE
 		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 		)

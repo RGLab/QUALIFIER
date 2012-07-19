@@ -326,9 +326,9 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 											
 
 
-qaReport(qaTask.list
+qaReport(qaTask.list[1]
 		,outDir="~/rglab/workspace/QUALIFIER/output"
-		,plotAll=FALSE
+		,plotAll="none"
 #		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
 		)
 
