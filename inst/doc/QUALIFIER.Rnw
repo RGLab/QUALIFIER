@@ -101,12 +101,6 @@ qaPreprocess(db=db,gs=G
 @
 \Robject{fcs.colname} and \Robject{date.colname} are the arguments to identify the columns in the meta data (the flat table stored as a csv file)
 that specifies the FCS filenames and the dates (to be formatted as to "\%m/\%d/\%y"). 
-\Robject{stats} in the data environment is the data frame that stores the statistics.
- 
-<<viewStats, eval=FALSE ,echo=true, results=verbatim>>=
-head(get("stats",envir=db))
-@
-
 Once the preprocessing steps are finished, the data are ready for quality assessments. 
 
 \section{Defining qaTasks} 
@@ -165,13 +159,13 @@ Here "outlier.cutoff" is used and threshold "lBound" is specified ("less than", 
 
 After the outliers are called, the results can be plotted by \Rfunction{plot} method.
 <<plot-RBCLysis, fig=true, results=verbatim>>=
-plot(qaTask.list[["RBCLysis"]])
+plot(qaTask.list[["RBCLysis"]],xlab="Record Date",ylab="percent")
 @
 
 By default all the data are plotted, argument "subset" can be used to visualize a small subset.
  
 <<plot-RBCLysis-subset, fig=true, results=verbatim>>=
-plot(qaTask.list[["RBCLysis"]],subset=Tube=='CD8/CD25/CD4/CD3/CD62L')
+plot(qaTask.list[["RBCLysis"]],subset=Tube=='CD8/CD25/CD4/CD3/CD62L',xlab="Record Date",ylab="percent")
 @
 
 \Rfunction{clearCheck} is the method to removes the outlier results detected by the previous \Rfunction{qaCheck} call for the specific qaTask.
@@ -201,12 +195,12 @@ qaCheck(qaTask.list[["MNC"]],z.cutoff=1.5)
 Interquartile Range based outlier detection function is used to detect outliers
 
 <<plot-MNC, fig=true, results=verbatim>>=
-plot(qaTask.list[["MNC"]],proportion~factor(coresampleid))
+plot(qaTask.list[["MNC"]],proportion~factor(coresampleid),xlab="Sample ID",ylab="percent")
 @
 
 The red circles in the boxplot indicate the possible outlier samples and the box of red color indicates the entire sample group
-has significant variance and is marked as the group outlier. The formula supplied here in the plot method can overwrite the one stored 
-in the qaTask object thus change the way of viewing the data.
+has significant variance and is marked as the group outlier. The formula supplied here in the plot method overwrites the one stored 
+in the qaTask object, thus change the way of viewing the data.
 
 Again, with \Robject{scatterPlot} and \Robject{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,
 <<plot-MNC-scatter, fig=true, results=verbatim,eval=FALSE>>=
@@ -236,7 +230,7 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 @
 And we still can visualize the results chanel by chanel.
 <<plot-BoundaryEvents, fig=true, results=verbatim>>=		
-plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel)
+plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel,xlab="Record Date",ylab="percent")
 @
 
  
@@ -253,11 +247,12 @@ plot(qaTask.list[["MFIOverTime"]]
 		,subset=channel%in%c('FITC-A')
 		,rFunc=rlm
 		,scales=list(y=c(relation="free"))
+		,xlab="Record Date"
 	)
 @
 Note that the robust linear regression is applied in each group in order to capture the significant MFI change over time.
 The individual outliers within each group are detected based on the residue.
-All the lattice options (like \Robject{scales} here in this example) can be passed to control the appearance of trellis plot.
+All the lattice options (like \Robject{scales} here in this example) can be passed to control the appearance of trellis plot,see the documentation of \Rpackage{lattice} for more details.
 
 <<plot-spike, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["spike"]]
@@ -266,6 +261,7 @@ qaCheck(qaTask.list[["spike"]]
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')
+		,xlab="Record Date"
 	)
 
 @
@@ -274,6 +270,11 @@ When monitoring the total number of events for each tube, a pre-determined event
 <<tubesEvents, results=hide,echo=FALSE>>=
 tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
 tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
+@
+\Robject{tubesEvents} pass to the argument of \Rfunction{qaCheck} could be a one-column data frame or a named list/vector. 
+Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
+<<tubesEvents, results=verbatim>>=
+tubesEvents
 @
 
 <<plot-NumberOfEvents, fig=true, results=verbatim>>=
@@ -284,20 +285,20 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 		)
 plot(qaTask.list[["NumberOfEvents"]]
 		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,xlab="Record Date"
+		,ylab="Cell counts"
 	)
 @
 
-\Robject{tubesEvents} could be a one-column data frame or a named list/vector. 
-Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
-<<tubesEvents, results=verbatim>>=
-tubesEvents
-@
 
 <<plot-RedundantStain, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["RedundantStain"]],z.cutoff=1)
 plot(qaTask.list[["RedundantStain"]]
 		,y=proportion~factor(coresampleid)|channel:stain
 		,subset=stain%in%c('CD8')
+		,scales=list(x=list(cex=0.5))
+		,xlab="Sample ID"
+		,ylab="percent"
 	)
 @
 
@@ -323,7 +324,7 @@ Note that if there is need to adjust the QA plot for each indivdiual qaTask in t
 If there is no outlier is detected, the qaTask is not plotted by default. In order to change this setting, \Rfunction{htmlReport} can be set as TRUE to plot the qaTask regardlessly.      
 This is particually useful for the task that tracks the longitudinal trend instead of the individual outliers.
 Besides the lattice arguments that can be configured by \Rfunction{qpar} (for the summary xyplot and bwplot) and \Rfunction{scatterPar} (for the individual FCS xyplot).
-xlog(ylog) flag can be set for scatter plot to transform the flow data to log scale for the proper display of the stained channels.
+\Robject{xlog},\Robject{ylog} flag can be set for scatter plot to transform the flow data to log scale for the proper display of the stained channels.
 <<qa.report,eval=FALSE, echo=true, results=verbatim>>=
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
@@ -333,8 +334,8 @@ scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 @
 
-The complete example of the report can be viewed at:
-http://mikejiang.github.com/QUALIFIER/qaReport/new/index.html 
+Here is the \href{http://mikejiang.github.com/QUALIFIER/qaReport/new/index.html}{example} of the QA report.
+ 
  
 \section{Conclusion}
 By the formula-based \Rfunction{qaCheck} and \Rfunction{plot} methods, different QA tasks 

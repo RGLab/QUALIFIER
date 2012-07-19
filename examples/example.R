@@ -25,13 +25,13 @@ getPopStats(gh_template)[,2:3]
 ###############################################################################
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
-newSamples<-list.files(datapath)[1:1]
+newSamples<-list.files(datapath)[1:500]
 
 G<-GatingSet(gh_template
 			,newSamples
 			,path=datapath
-			,isNcdf=FALSE
-			,dMode=4
+#			,isNcdf=FALSE
+#			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
 
@@ -50,11 +50,11 @@ qaPreprocess(db=db,gs=G
 #		,type="SOCK"
 )
 search()
-#saveToDB(db=db,gs=G
-#		,metaFile=metaFile
-#		,fcs.colname="FCS_Files"
-#		,date.colname=c("RecdDt","AnalysisDt")
-#	)
+saveToDB(db=db,gs=G
+		,metaFile=metaFile
+		,fcs.colname="FCS_Files"
+		,date.colname=c("RecdDt","AnalysisDt")
+	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
