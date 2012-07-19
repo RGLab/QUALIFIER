@@ -41,7 +41,7 @@
 \noindent \textbf{Background}
   The current \Rpackage{flowQ} package does the quality assessment on the ungated FCM data. However, there is a need to
   identify deviant samples by monitoring the consistencies of the underlying statistical properties of different gated cell 
-  populations (such as white blood cells, lymphacytes, monocytes etc). The current package was also not designed for dealing with
+  populations (such as white blood cells, lymphacytes, monocytes etc). The \Rpackage{flowQ} package was also not designed for dealing with
   large datasets. To meet these needs, We developed \Rpackage{QUALIFIER} package using the gating template created in flowJo and performing
   QA checks on different gated populations. It divides the data preprocessing from the actual outlier detection process so that the statistics
   are calcuated all at once and the outlier detection and visualization can be done more efficiently and interactively.
@@ -59,7 +59,7 @@ library(QUALIFIER)
 \Rfunction{parseWorkspace} function from \Rpackage{flowWorkspace} package is used to parse the flowJo workspace.
 Since we are only interested in the gating strategy (gates defined in the template),\Robject{execute} can be set as FALSE  
 to skip the actual gating process. \Robject{useInternal} is set as TRUE to use internal structure (c++) for faster parsing. 
-
+Please see the documentation of \Rpackage{flowWorkspace} package for more details regarding how to use \Rfunction{parseWorkspace} function. 
 <<parseWorkspace, eval=FALSE, echo=TRUE,results=verbatim>>=
 ws<-openWorkspace("./data/QA_MFI_RBC_bounary_eventsV3.xml")##should replace with your own xml workspace file path
 GT<-parseWorkspace(ws,execute=FALSE,useInternal=TRUE)
@@ -147,7 +147,7 @@ qaTask.list[["RBCLysis"]]
 @
 
 According to the formula stored in \Rclass{qaTask}, it uses the statistical property "proportion" and groups 
-the data by "Tube" (or staining panel). "RecdDt" is reserved for plotting purpose. Cell population is defined as "WBC\_perct"
+the data by "Tube" (or staining panel). "RecdDt" is only for the plotting purpose (specifing the x-axis). Cell population is defined as "WBC\_perct"
 <<qaCheck-RBCLysis, results=verbatim>>=
 qaCheck(qaTask.list[["RBCLysis"]],outlierfunc=outlier.cutoff,lBound=0.8)
 @
@@ -155,7 +155,7 @@ qaCheck(qaTask.list[["RBCLysis"]],outlierfunc=outlier.cutoff,lBound=0.8)
 \Rfunction{qaCheck} reads all the necessary information about the gated data from \Rclass{qaTask} object.
 Users only needs to specificy how the outliers are called. This is done by 
 providing an outlier detection function \Rfunction{outlierfunc} that takes a numeric vector as input and returns a logical vector as the output.
-Here "outlier.cutoff" is used and threshold "lBound" is specified ("less than", use uBound for "larger than"). 
+Here \Rfunction{outlier.cutoff} provided by the package is used and threshold "lBound" is specified ("less than", use uBound for "larger than"). 
 
 After the outliers are called, the results can be plotted by \Rfunction{plot} method.
 <<plot-RBCLysis, fig=true, results=verbatim>>=
@@ -199,16 +199,18 @@ plot(qaTask.list[["MNC"]],proportion~factor(coresampleid),xlab="Sample ID",ylab=
 @
 
 The red circles in the boxplot indicate the possible outlier samples and the box of red color indicates the entire sample group
-has significant variance and is marked as the group outlier. The formula supplied here in the plot method overwrites the one stored 
-in the qaTask object, thus change the way of viewing the data.
+has significant variance and is marked as the group outlier. By default \Rfunction{qaCheck} uses normal-distribution-based outlier function to detect group outliers.  
+User-defined function can also supplied through \Robject{gOutlierfunc} argument.Again the function should take a numeric vector as input and returns a logical vector as the output.
+The formula supplied here in the plot method overwrites the one stored in the qaTask object, thus change the way of viewing the data.
 
-Again, with \Robject{scatterPlot} and \Robject{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,
+With \Robject{scatterPlot} and \Robject{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,
 <<plot-MNC-scatter, fig=true, results=verbatim,eval=FALSE>>=
 
 plot(qaTask.list[["MNC"]]
 		,scatterPlot=TRUE
 		,subset=coresampleid==11730)
 @
+
 \includegraphics{QUALIFIER-plot-MNC-scatter}	
 		
 We can also apply simple aggregation to the statisics through the formula.
@@ -228,6 +230,7 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 		,uBound=0.0003
 		)
 @
+
 And we still can visualize the results chanel by chanel.
 <<plot-BoundaryEvents, fig=true, results=verbatim>>=		
 plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel,xlab="Record Date",ylab="percent")
@@ -250,7 +253,8 @@ plot(qaTask.list[["MFIOverTime"]]
 		,xlab="Record Date"
 	)
 @
-Note that the robust linear regression is applied in each group in order to capture the significant MFI change over time.
+
+Note that the robust linear regression is applied in each group in order to capture the significant MFI change (highlighted in red color,if pvalues<0.05) over time.
 The individual outliers within each group are detected based on the residue.
 All the lattice options (like \Robject{scales} here in this example) can be passed to control the appearance of trellis plot,see the documentation of \Rpackage{lattice} for more details.
 
@@ -316,6 +320,7 @@ qaReport(qaTask.list
 		)
 
 @
+
 \Robject{plotAll} is the argument to control the plotting of the individual scatter plot for each FCS file. If TRUE, scatter plots for all the FCS files are generated. 
 If FALSE, only the FCS files marked as outliers will be plotted. When it is set to "none", no scatter plot will be generated, which is helpful to provide a quick preview of the html report.
 \Robject{subset} is the filter to only generate the report on a subset of flow data.
