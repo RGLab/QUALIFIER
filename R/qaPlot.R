@@ -321,26 +321,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 #	browser()
 	plotObjs=new.env()
 	if(scatterPlot)
-	{
-		##if scatterPlot flag is true then just plot the scatter plot
-#		
-#		if(statsType=="spike"||(statsType=="count"&&res$population[1]=="/root"))
-#		{
-##			browser()
-#			thisCall<-lapply(1:nrow(res),function(i)
-#			{
-##						browser()
-#						qa.singlePlot(db,res[i,,drop=FALSE],statsType,QUALIFIER:::scatterPar(qaObj))
-#			})
-#			
-#			
-#		}else
-#		{
 			thisCall<-qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
-#		}
-		
-		
-	}else
+	else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 				
 		if(plotType(qaObj)=="xyplot")
@@ -386,14 +368,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		}
 
 			
-#		browser()
 
-#			if(is.null(xlab))
-#				par$xlab<-groupBy.Panel
-#			if(is.null(ylab))
-#				par$ylab<-statsType
-#			if(is.null(main))
-#				par$main<-paste(description(qaObj),curGroup,sep=":")	
 
 			thisCall<-quote(bwplot(x=formula1
 									,data=res ##this argument does not get passed to panel function

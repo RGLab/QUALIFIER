@@ -1,11 +1,10 @@
 # preprocessing
 ###############################################################################
 library(QUALIFIER)
-library(flowWorkspace)
 
 ###############################################################################
 #1.parse gating template
-###############################################################################
+#--------------------------------------------------------------------------------
 ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
 GT<-parseWorkspace(ws
 		,name=2
@@ -16,10 +15,10 @@ GT<-parseWorkspace(ws
 gh_template<-GT[[1]]					
 ###############################################################################
 #2.apply gating template to new data
-###############################################################################
+#--------------------------------------------------------------------------------
 
 datapath<-"/loc/no-backup/mike/ITN029ST/"
-newSamples<-list.files(datapath)[1:500]
+newSamples<-list.files(datapath,pattern=".fcs")[1:1000]
 G<-GatingSet(gh_template
 		,newSamples
 		,path=datapath
@@ -29,31 +28,31 @@ G<-GatingSet(gh_template
 
 ################################################################################  
 #3.extract stats
-###############################################################################
-library(parallel)
-db<-new.env()
-initDB(db)
+#--------------------------------------------------------------------------------
+##meta info about FCS files such as pid,sampleID,visit number, staining panel(or Tube)
+##not that pid is mandatory (to be displayed in tool tips of boxplot later (we may add
+#extra argument to pass the colmns to tooltip instead of hardcoded the colnames)
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
-#6 minutes for 500 samples
-system.time(
-qaPreprocess(db=db,gs=G
+
+
+qaPreprocess(gs=G
 			,metaFile=metaFile
 			,fcs.colname="FCS_Files"
 			,date.colname=c("RecdDt","AnalysisDt")
 			)
-)
+
+
 ################################################################################  
 #4.load QA check list
-###############################################################################
-setwd("QUALIFIER/output")
+#--------------------------------------------------------------------------------
 
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
+qaTask.list<-read.qaTask(checkListFile=checkListFile)
 
 
 ################################################################################  
 # 5 .QA check 
-###############################################################################
+#--------------------------------------------------------------------------------
 
 
 qaCheck(qaTask.list[["BoundaryEvents"]]
@@ -64,12 +63,12 @@ qaCheck(qaTask.list[["BoundaryEvents"]]
 
 
 
-qaCheck(qaTask.list[["MFIOverTime"]]
-#		,outlierfunc=outlier.norm
-		,rFunc=rlm
-#		,Subset=channel%in%c('PE-Cy7-A')
-		,z.cutoff=10
-)
+#qaCheck(qaTask.list[["MFIOverTime"]]
+##		,outlierfunc=outlier.norm
+#		,rFunc=rlm
+##		,Subset=channel%in%c('PE-Cy7-A')
+#		,z.cutoff=10
+#)
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
@@ -134,11 +133,12 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 #4.qa report in html format 
 #set plotAll=TRUE to generate the scatter plots for all the individual FCS files 
 #otherwise only plots for outliers are generated.
-###############################################################################
+#--------------------------------------------------------------------------------
 
 ##customerize some of the task before pass them to report method
 htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
+qpar(qaTask.list[["MFIOverTime"]])<-list(horiz=FALSE,scales=list(x=NULL,y=NULL))
 scatterPar(qaTask.list[["BoundaryEvents"]])<-list(type="xyplot",xlog=TRUE)
 scatterPar(qaTask.list[["RedundantStain"]])<-list(type="xyplot",xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
@@ -146,10 +146,177 @@ qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
 #											,layout=c(2,NA,1)
 )
 
-undebug(QUALIFIER:::qaWrite.task)
+
 qaReport(qaTask.list
 		,outDir="~/rglab/workspace/QUALIFIER/output"
+		,plotAll=FALSE
+)
+
+################################################################################  
+#5.interactive plot 
+#--------------------------------------------------------------------------------
+
+plot(qaTask.list[["NumberOfEvents"]]
+#		,count ~ RecdDt
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#,dest="image"
+#		,scales=list(x=list(rot=45
+#							,cex=0.5
+#							))
+#		,pch=19
+)
+
+
+plot(qaTask.list[["MFIOverTime"]]
+		,y=MFI~RecdDt|stain
+		,subset=channel%in%c('APC-A')
+#				&stain=="CD123"
+#				&id==806
+		,rFunc=rlm
+		,scales=list(format="%m/%d/%y")
+#		,scatterPlot=TRUE
+		,scatterPar=list(xlog=F)
+#		,dest="image"
+#		,plotAll="none"
+
+)
+
+
+
+plot(qaTask.list[["RBCLysis"]]
+#		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#				&id%in%c(270)
+#		, RecdDt~proportion | Tube
+		,scales=list(format="%m/%d/%y")
+		,ylab="percent"
+#		,scatterPlot=T
+		,scatterPar=list(stat=T
+				,xbin=128)
+#		,horiz=T
+#		,dest="image"
+		,highlight="coresampleid"
+#		,plotAll="none"
+		,width=27,height=13
+)	
+
+
+
+
+plot(qaTask.list[["spike"]]
+		,y=spike~RecdDt|channel
+		,subset=Tube=='CD11c/CD80/DUMP/HLADr/CD123'
+#	,dest="image"
+#	,plotAll=T
+)
+
+plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
+		,subset=channel=='FITC-A'
+#					&id%in%c(245,119)
+#		,scatterPlot=TRUE
+		,scatterPar=list(ylog=T
+				,xlim=c(0,100)
+#						,xbin=128
+		)
+#		,dest="image"
 #		,plotAll="none"
 )
 
+
+plot(qaTask.list[["MNC"]]
+		,proportion~factor(coresampleid)
+#		, factor(coresampleid)~proportion
+#		,par=list(horiz=TRUE)
+)
+
+#scatter plot for a sample group	
+plot(qaTask.list[["MNC"]]
+		,proportion~factor(coresampleid)
+#		,par=list(xlab="coresampleid")
+#		, coresampleid ~proportion
+#		,par=list(horiz=TRUE)
+		,subset=coresampleid%in%c(
+#									11730
+				8780
+		)
+#		,scatterPlot=TRUE
+		,scatterPar=list(xbin=128
+				,stat=T)
+		,dest="image"
+		,plotAll=TRUE
+)
+
+#scatter for one sample
+plot(qaTask.list[["MNC"]]
+		,scatterPlot=TRUE
+		,subset=coresampleid==11730&id==245)
+
+
+##example of passing lattice arguments		
+plot(qaTask.list[["RedundantStain"]]
+		,subset=channel=='APC-A'
+#				&stain%in%c('CD123','CD3')
+#				&coresampleid==11730
+		,y=proportion~factor(coresampleid)|channel:stain
+#		,scatterPlot=T
+		,scatterPar=list(xlog=F
+				,stat=T
+		)
+		,scales=list(x=list(relation="free"))
+#		,layout=c(2,NA,1)
+#		,dest="image"
+)
+
+################################################################################  
+#6.clear or query check results 
+#--------------------------------------------------------------------------------
+clearCheck(qaTask.list[["MNC"]])
+
+clearCheck(qaTask.list[["MFIOverTime"]])
+
+clearCheck(qaTask.list[["RBCLysis"]])
+
+subset(
+		queryStats(qaTask.list[["RBCLysis"]],subset=Tube=='CD8/CD25/CD4/CD3/CD62L')
+		,outlier==TRUE
+		)
+
+
+################################################################################  
+#7.add new aggregated stats 
+#--------------------------------------------------------------------------------
+
+QUALIFIER:::addStats(qaTask.list[["BoundaryEvents"]]
+		,definition=sum(proportion)~RecdDt|id+gsid
+		,pop="/root/MNC/margin"
+		,statName="sum.prop")
+
+head(subset(
+				queryStats(qaTask.list[["BoundaryEvents"]]
+						,y=sum.prop ~ RecdDt 
+						,pop="margin"
+						,subset=value>0
+				)
+				,outlier==TRUE)
+)
+#check on the new stats
+qaCheck(qaTask.list[["BoundaryEvents"]]
+		,sum.prop ~ RecdDt 
+		,outlierfunc=outlier.cutoff
+		,uBound=0.0003
+)
+
+plot(qaTask.list[["BoundaryEvents"]]
+		,sum.prop ~ RecdDt 
+#		,subset=channel=="PE-A"
+#				&id==806
+		,ylab="sum(percent)"
+#		,scatterPlot=T
+#		,scatterPar=list(
+#						xlog=T
+#						,stat=T
+#						)
+		,scales=list(format="%m/%d/%y")
+#		,plotAll="none"
+#		,dest="image"
+)
 

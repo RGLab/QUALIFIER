@@ -36,7 +36,7 @@ G<-GatingSet(gh_template
 getPopStats(G[[1]])[,2:3]
 
 ################################################################################  
-#3.extract stats
+#3.extract stats (6 min for 500 samples, 12 min for 1k samples)
 ###############################################################################
 #library(parallel)
 db<-new.env()
@@ -49,12 +49,14 @@ qaPreprocess(db=db,gs=G
 #		,nslave=6
 #		,type="SOCK"
 )
-search()
-saveToDB(db=db,gs=G
-		,metaFile=metaFile
-		,fcs.colname="FCS_Files"
-		,date.colname=c("RecdDt","AnalysisDt")
-	)
+
+
+
+#saveToDB(db=db,gs=G
+#		,metaFile=metaFile
+#		,fcs.colname="FCS_Files"
+#		,date.colname=c("RecdDt","AnalysisDt")
+#	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################

@@ -41,7 +41,7 @@ createDbSchema <- function(db)
 	myColorPal<-RColorBrewer::brewer.pal(7, "Set1")
 	.db$lattice<-list(par.settings=lattice:::updateList(standard.theme()
 														,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
-															,strip.text=list(lines=2)
+#															,strip.text=list(lines=2)#not sure why this argument is not working ,we have to use par.strip.text outside of par.setting list
 															,background=list(col="white")
 															,plot.symbol=list(pch=19
 																			,col=myColorPal[2])
@@ -58,6 +58,7 @@ createDbSchema <- function(db)
 																				
 														)
 						,scales=list(x=list(rot=45))
+						,par.strip.text=list(lines=2)
 						)
 																				
 }

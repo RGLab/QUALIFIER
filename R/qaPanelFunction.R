@@ -414,7 +414,7 @@ panel.bwplotEx <-
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
 			population<-as.character(curGroup$population[1])
 #			stats<-as.character(curGroup$stats[1])
-			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
+			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
 			if(!is.null(dest))
@@ -613,7 +613,7 @@ panel.bwplotEx <-
 			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
 			population<-as.character(curGroup$population[1])
 #			stats<-as.character(curGroup$stats[1])
-			groupTips<-paste("participantid=",curGroup$participantid[1], " ",groupBy,"=",curGroupID
+			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
 			if(!is.null(dest))
