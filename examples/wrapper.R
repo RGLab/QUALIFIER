@@ -34,6 +34,14 @@ G<-GatingSet(gh_template
 #extra argument to pass the colmns to tooltip instead of hardcoded the colnames)
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 
+db<-QUALIFIER:::.db
+pd<-pData(db$gs[[1]])
+participantid<-sort(unique(pd$participantid))
+pid_map<-data.frame(pid=1:length(participantid),participantid=participantid)
+pd<-merge(pd,pid_map,by.x="participantid",by.y="participantid")
+pd$participantid<-NULL
+pData(db$gs[[1]])<-pd
+
 
 qaPreprocess(gs=G
 			,metaFile=metaFile
@@ -145,7 +153,7 @@ qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
 		,scales=list(x=list(relation="free"))
 #											,layout=c(2,NA,1)
 )
-
+highlight(qaTask.list[["RBCLysis"]])<-"coresampleid"
 
 qaReport(qaTask.list
 		,outDir="~/rglab/workspace/QUALIFIER/output"
