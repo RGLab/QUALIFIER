@@ -28,6 +28,8 @@ export( qaPreprocess
         ,"outlier.norm"
         ,rlm
         ,initDB
+        ,loadDB
+        ,dumpDB
         ,"clearCheck"
         )
 
