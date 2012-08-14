@@ -1,22 +1,27 @@
 library(QUALIFIER)
-library(Rlabkey)
+
 
 ################################################################################  
 #1.load db from labkey
 #--------------------------------------------------------------------------------
-s<- getSession(baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
-.db<-loadDB(s)
+#.db<-new.env()
+#initDB(.db)
+#loadStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
 
 ################################################################################  
 #2.load QA check list
 #--------------------------------------------------------------------------------
 
 checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
-qaTask.list<-read.qaTask(checkListFile=checkListFile)
-
+qaTask.list<-read.qaTask(.db,checkListFile=checkListFile)
 
 ################################################################################  
-#3.QA check 
+#3.write QA check list to db
+#--------------------------------------------------------------------------------
+
+writeTask(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+################################################################################  
+#4.outlier detection 
 #--------------------------------------------------------------------------------
 
 
@@ -95,6 +100,6 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 )
 
 ################################################################################  
-#4.dump db to labkey
+#5.dump db to labkey
 #--------------------------------------------------------------------------------
-writeResults(db,s)
+writeQAResults(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")

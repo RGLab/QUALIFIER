@@ -67,7 +67,7 @@ matchStatType<-function(db,formuRes)
 	for(CurTerm in c("xTerm","yTerm"))
 	{
 		strTerm<-as.character(formuRes[[CurTerm]])
-		if(!is.na(match(strTerm,levels(db$stats$stats))))
+		if(!is.na(match(strTerm,unique(db$stats$stats))))
 		{
 			statsType=strTerm
 			break

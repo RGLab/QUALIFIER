@@ -62,7 +62,7 @@ makeQaTask<-function(db=.db,qaName,description,qaLevel,pop,formula,plotType)
 read.qaTask<-function(db=.db,checkListFile)
 {
 	qaCheckList<-read.csv(checkListFile)
-	
+	db$qaTaskTbl<-qaCheckList
 	qaTask.list<-apply(qaCheckList,1,function(curRow,db){
 #browser()			
 				curQa<-new("qaTask"

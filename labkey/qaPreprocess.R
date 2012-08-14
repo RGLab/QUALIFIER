@@ -16,7 +16,7 @@ gh_template<-GT[[1]]
 #--------------------------------------------------------------------------------
 
 datapath<-"/loc/no-backup/mike/ITN029ST/"
-newSamples<-list.files(datapath,pattern=".fcs")[1:1000]
+newSamples<-list.files(datapath,pattern=".fcs")[1:500]
 G<-GatingSet(gh_template
 		,newSamples
 		,path=datapath
@@ -31,9 +31,9 @@ G<-GatingSet(gh_template
 ##not that pid is mandatory (to be displayed in tool tips of boxplot later (we may add
 #extra argument to pass the colmns to tooltip instead of hardcoded the colnames)
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
-
-db<-QUALIFIER:::.db
-pd<-pData(db$gs[[1]])
+.db<-new.env()
+initDB(.db)
+pd<-pData(.db$gs[[1]])
 participantid<-sort(unique(pd$participantid))
 pid_map<-data.frame(pid=1:length(participantid),participantid=participantid)
 pd<-merge(pd,pid_map,by.x="participantid",by.y="participantid")
@@ -50,5 +50,5 @@ qaPreprocess(gs=G
 ################################################################################  
 #4.dump db to labkey
 #--------------------------------------------------------------------------------
-s<- getSession(baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
-writeQAResults(db,s)
+writeGStbl(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+writeStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")

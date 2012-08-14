@@ -6,13 +6,14 @@
 createDbSchema <- function(db)
 {
 	#qaTask table
-	db$qaTaskList<-data.frame(qaID=integer()
+	db$qaTaskTbl<-data.frame(qaID=integer()
 								,qaName=character()
-								,desciption=character()
+								,description=character()
 								,qaLevel=character()
 								,pop=character()
 								,formula=character()
 								,plotType=character()
+								,stringsAsFactors=F
 							)
 	#outlier table
 	db$GroupOutlierResult<-db$outlierResult<-data.frame(sid=integer(),qaID=integer(),stringsAsFactors=F)
@@ -25,10 +26,13 @@ createDbSchema <- function(db)
 							,node=character()
 							,channel=character()
 							,value=numeric()
+							,stringsAsFactors=F
 					)
 	#gating set table
 	db$gstbl<-data.frame(gsid=integer()
 						,gsname=character()
+						,objlink=character()
+						,stringsAsFactors=F
 						)
 	db$gs<-list()
 }

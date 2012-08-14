@@ -3,8 +3,8 @@ library(QUALIFIER)
 ################################################################################  
 #1.load db from labkey
 #--------------------------------------------------------------------------------
-s<- getSession(baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
-.db<-loadDB(s)
+#.db<-new.env()
+#loadDB(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
 
 ################################################################################  
 #qa report in html format 
@@ -25,6 +25,6 @@ qpar(qaTask.list[["RedundantStain"]])<-list(horiz=FALSE
 highlight(qaTask.list[["RBCLysis"]])<-"coresampleid"
 
 outDir<-tempdir()
-qaReport(qaTask.list,outDir=outDir,plotAll="none")
+qaReport(qaTask.list[1],outDir=outDir,plotAll="none")
 
 outDir

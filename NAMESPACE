@@ -29,8 +29,13 @@ export( qaPreprocess
         ,rlm
         ,initDB
         ,loadDB
-        ,dumpDB
+        ,loadStats
+        ,writeTask
+        ,writeGStbl
+        ,writeStats
+        ,writeQAResults
         ,"clearCheck"
+        
         )
 
 
