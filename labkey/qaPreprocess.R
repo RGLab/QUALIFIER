@@ -38,7 +38,7 @@ participantid<-sort(unique(pd$participantid))
 pid_map<-data.frame(pid=1:length(participantid),participantid=participantid)
 pd<-merge(pd,pid_map,by.x="participantid",by.y="participantid")
 pd$participantid<-NULL
-pData(db$gs[[1]])<-pd
+pData(.db$gs[[1]])<-pd
 
 
 qaPreprocess(gs=G
