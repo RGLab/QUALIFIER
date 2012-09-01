@@ -1,4 +1,4 @@
-library(Rlabkey)
+
 loadStats<-function(db,...){
 
 #	browser()

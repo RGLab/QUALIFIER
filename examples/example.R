@@ -11,10 +11,10 @@ library(flowWorkspace)
 ###############################################################################
 #1.parse gating template
 ###############################################################################
-ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
+ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_template.xml")
 GT<-parseWorkspace(ws
 					,name=2
-					,execute=F
+					,execute=T
 					,subset=1
 					,useInternal=T
 					)
@@ -25,16 +25,17 @@ getPopStats(gh_template)[,2:3]
 ###############################################################################
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
-newSamples<-list.files(datapath)[1:500]
+newSamples<-getSample(gh_template)
+#newSamples<-list.files(datapath)[1:500]
 
 G<-GatingSet(gh_template
 			,newSamples
 			,path=datapath
 #			,isNcdf=FALSE
-#			,dMode=4
+			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
-
+plotGate(G[[1]],merge=F)
 ################################################################################  
 #3.extract stats (6 min for 500 samples, 12 min for 1k samples)
 ###############################################################################
@@ -319,9 +320,9 @@ htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 
 highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
-scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
-scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
-scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 

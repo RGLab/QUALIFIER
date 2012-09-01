@@ -96,6 +96,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
+#			browser()
 			#check if data is gated
 			params<-try(parameters(getData(obj))$name,silent=TRUE)
 			if(inherits(params,"try-error"))
@@ -130,6 +131,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 #				if(curPopName%in%c("margin","MFI"))
 				if(!is.null(params)&&!QUALIFIER:::.isRoot(obj,curNode))#&&!is.na(curGate)
 				{
+#					browser()
 					chnl<-parameters(curGate)
 					#only 1D gate needs to save channel info
 					if(length(chnl)>1)
