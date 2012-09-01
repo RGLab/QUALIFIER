@@ -52,3 +52,4 @@ qaPreprocess(gs=G
 #--------------------------------------------------------------------------------
 writeGStbl(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
 writeStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+writeProjections(G,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/NHLBI B Cells",schemaName="opencytopreprocess")

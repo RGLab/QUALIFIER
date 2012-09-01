@@ -67,4 +67,31 @@ writeQAResults<-function(db,...){
 	deletedRow <- labkey.deleteRows(queryName="GroupOutlierResult", toDelete=db$GroupOutlierResult,...)
 	insertedRow <- labkey.insertRows(queryName="GroupOutlierResult", toInsert=db$GroupOutlierResult,...)
 }
-
+writeProjections<-function(G,...){
+	gh<-G[[1]]
+	popNames<-getNodes(gh,isPath=T)
+	nodeNames<-getNodes(gh)
+	res<-lapply(1:length(popNames),function(i){
+#				print(i)
+				curPop<-popNames[i]
+				curpNode<-nodeNames[i]
+				curChildrens<-getChildren(gh,curpNode)
+				if(length(curChildrens)>0)
+				{
+					prjlist<-lapply(curChildrens,function(curChildren){
+								g<-getGate(gh,curChildren)
+								parameters(g)
+							})
+					prj<-do.call(rbind,prjlist)
+					prj<-unique(prj)
+					prj<-as.data.frame(prj)
+					colnames(prj)<-c("Xaxis","Yaxis")
+					cbind(Parentpopulation=curPop,prj)	
+				}
+				
+				
+			})
+	
+	toInsert<-do.call(rbind,res)
+	insertedRow <- labkey.insertRows(queryName="projections",toInsert=toInsert,...)
+}
