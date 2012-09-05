@@ -71,10 +71,11 @@ writeProjections<-function(G,...){
 	gh<-G[[1]]
 	popNames<-getNodes(gh,isPath=T)
 	nodeNames<-getNodes(gh)
-	res<-lapply(1:length(popNames),function(i){
+	res<-lapply(1:length(nodeNames),function(i){
 #				print(i)
 				curPop<-popNames[i]
 				curpNode<-nodeNames[i]
+				#store the children gate projections 
 				curChildrens<-getChildren(gh,curpNode)
 				if(length(curChildrens)>0)
 				{
@@ -86,12 +87,23 @@ writeProjections<-function(G,...){
 					prj<-unique(prj)
 					prj<-as.data.frame(prj)
 					colnames(prj)<-c("Xaxis","Yaxis")
-					cbind(Parentpopulation=curPop,prj)	
+					cbind(name=curpNode,path=curPop,prj)	
 				}
+#				else
+#				{
+#					#for leaf nodes,store the gate projetion of itself
+#					g<-getGate(gh,curpNode)
+#					prj<-parameters(g)
+#					prj<-as.data.frame(prj)
+#					colnames(prj)<-c("Xaxis","Yaxis")
+#					cbind(Parentpopulation=curPop,prj)
+#					
+#				}
 				
 				
 			})
 	
 	toInsert<-do.call(rbind,res)
+#	browser()
 	insertedRow <- labkey.insertRows(queryName="projections",toInsert=toInsert,...)
 }
