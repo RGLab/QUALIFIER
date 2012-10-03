@@ -3,7 +3,7 @@ library(QUALIFIER)
 ###############################################################################
 #1.parse gating template
 #--------------------------------------------------------------------------------
-ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
+ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_template.xml")
 GT<-parseWorkspace(ws
 		,name=2
 		,execute=F

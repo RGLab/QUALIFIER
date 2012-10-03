@@ -67,43 +67,40 @@ writeQAResults<-function(db,...){
 	deletedRow <- labkey.deleteRows(queryName="GroupOutlierResult", toDelete=db$GroupOutlierResult,...)
 	insertedRow <- labkey.insertRows(queryName="GroupOutlierResult", toInsert=db$GroupOutlierResult,...)
 }
-writeProjections<-function(G,...){
-	gh<-G[[1]]
-	popNames<-getNodes(gh,isPath=T)
-	nodeNames<-getNodes(gh)
-	res<-lapply(1:length(nodeNames),function(i){
-#				print(i)
-				curPop<-popNames[i]
-				curpNode<-nodeNames[i]
-				#store the children gate projections 
-				curChildrens<-getChildren(gh,curpNode)
-				if(length(curChildrens)>0)
+writeProjections <- function(G,...){
+	gh <- G[[1]];
+	popNames <- getNodes( gh, isPath = T )
+	nodeNames <- getNodes( gh )
+	res <- lapply( 1:length(nodeNames), function(i) {
+				curPop <- popNames[i]
+				curpNode <- nodeNames[i]
+				
+				#store the children gate projections
+				curChildrens <- getChildren(gh,curpNode)
+				if( length( curChildrens ) > 0 )
 				{
-					prjlist<-lapply(curChildrens,function(curChildren){
-								g<-getGate(gh,curChildren)
-								parameters(g)
+					prjlist <- lapply( curChildrens, function(curChildren) {
+								g <- getGate( gh, curChildren )
+								if ( class(g) == "BooleanGate" ){
+									return( NULL );
+								}else {
+									param<-parameters(g)
+									if(length(param)==1)
+										param<-c(param,"SSC-A")
+									return( param );
+								}
 							})
-					prj<-do.call(rbind,prjlist)
-					prj<-unique(prj)
-					prj<-as.data.frame(prj)
-					colnames(prj)<-c("Xaxis","Yaxis")
-					cbind(name=curpNode,path=curPop,prj)	
+					prj <- do.call(rbind, prjlist)
+					prj <- unique(prj)
+					prj <- as.data.frame(prj)
+					
+					colnames(prj) <- c('x_axis', 'y_axis')
+					cbind( name = curpNode, path = curPop, prj )
+				} else {
+					
 				}
-#				else
-#				{
-#					#for leaf nodes,store the gate projetion of itself
-#					g<-getGate(gh,curpNode)
-#					prj<-parameters(g)
-#					prj<-as.data.frame(prj)
-#					colnames(prj)<-c("Xaxis","Yaxis")
-#					cbind(Parentpopulation=curPop,prj)
-#					
-#				}
-				
-				
 			})
 	
-	toInsert<-do.call(rbind,res)
-#	browser()
-	insertedRow <- labkey.insertRows(queryName="projections",toInsert=toInsert,...)
+	toInsert <- do.call( rbind, res )
+	insertedRow <- labkey.insertRows( queryName = 'projections', toInsert = toInsert, ...)
 }
