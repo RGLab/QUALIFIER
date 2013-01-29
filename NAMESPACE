@@ -28,14 +28,7 @@ export( qaPreprocess
         ,"outlier.norm"
         ,rlm
         ,initDB
-        ,loadDB
-        ,loadStats
-        ,writeTask
-        ,writeGStbl
-        ,writeStats
-        ,writeQAResults
         ,"clearCheck"
-        
         )
 
 
