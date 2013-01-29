@@ -66,6 +66,7 @@ qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
 
 pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt)
+.parseTubeID(db)#parse TubeID from FCS filenames
 
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
