@@ -191,14 +191,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	annoData<-annoData[getSamples(gs),]	#sort by sample order in gh
 
 	
-	##extract tubeID from filename by stripping the first two prefix (presummably date and fileid on each tube)
-	annoData$tubeID<-unlist(lapply(annoData$name,function(x){
-#			
-						strsplit(
-								paste(strsplit(as.character(x),"_")[[1]][c(-1,-2)],collapse="_")
-								,"\\.")[[1]][[1]]
-					}))
-#	browser()
+	
 
 	pData(gs)<-annoData
 	#do the filtering for Gating set
