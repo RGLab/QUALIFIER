@@ -138,7 +138,8 @@ matchStatType<-function(db,formuRes)
 }
 .isRoot<-function(gh,node)
 {
-	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
+#	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
+	node=="root"
 }
 
 
