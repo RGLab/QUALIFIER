@@ -327,20 +327,20 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	ret<-merge(ret_stats,ret_anno,by.x=c("gsid","id"),by.y=c("gsid","id"))
 	
 	##add stain column from tube and channel
-	ret$stain<-apply(ret,1,function(x){
-				curChannel<-as.character(x["channel"])
-#									browser()
-				
-				if(is.na(curChannel)||curChannel%in%db$params[1:2])
-				{	
-					curStain<-NA
-				}else
-				{
-					chnlInd<-which(db$params[3:7]==curChannel)
-					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
-				}
-				curStain
-			})
+#	ret$stain<-apply(ret,1,function(x){
+#				curChannel<-as.character(x["channel"])
+##									browser()
+#				
+#				if(is.na(curChannel)||curChannel%in%db$params[1:2])
+#				{	
+#					curStain<-NA
+#				}else
+#				{
+#					chnlInd<-which(db$params[3:7]==curChannel)
+#					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
+#				}
+#				curStain
+#			})
 
 #	browser()
 	#filter by subset 
