@@ -93,7 +93,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			
 		})
 ##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,...){
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI=TRUE,isSpike=TRUE,...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
 #			browser()
@@ -114,6 +114,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			statsOfGh<-NULL
 #			browser()
 			fdata<-getData(obj)
+			pd<-pData(parameters(fdata))
 			for(i in 1:nNodes)
 			{
 				curPopName<-nodePaths[i]
@@ -133,9 +134,9 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 				{
 #					browser()
 					chnl<-parameters(curGate)
-					#only 1D gate needs to save channel info
-					if(length(chnl)>1)
-						chnl<-NA
+#					
+#					if(length(chnl)>1)
+#						chnl<-NA
 				}else
 				{
 					chnl<-NA
@@ -149,13 +150,19 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 					stats_prop<-statsOfNode$flowJo.freq
 					stats_count<-statsOfNode$flowJo.count
 				}
-				
-				statsOfNode<-data.frame(channel=chnl,stats=c("proportion","count")
+
+				if(is.na(chnl))
+					stain<-NA
+				else
+				{
+					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
+				}
+				statsOfNode<-data.frame(channel=chnl,stain=stain,stats=c("proportion","count")
 										,value=c(stats_prop,stats_count)
 										,row.names=NULL)
-				
+#				browser()
 				#get spikes meatures for each channel at root level
-				if(!is.null(params)&&.isRoot(obj,curNode))
+				if(!is.null(params)&&.isRoot(obj,curNode)&&isSpike)
 				{
 
 #					browser()
@@ -165,17 +172,18 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 					if(!(time %in% colnames(expr)))
 						stop("Invalid name of variable (", time, ") recording the ",
 								"\ntime domain specified as 'time' argument.", call.=FALSE)
+					nonTimeChnls<-params[!params%in%time]
+					stain<-unname(pd[match(nonTimeChnls,pd[,"name"]),"desc"])
 					
-					spikes<-unlist(lapply(params[!params%in%time],.timelineplot,x=fdata, binSize=50))
+					spikes<-unlist(lapply(nonTimeChnls,.timelineplot,x=fdata, binSize=50))
 					
-					statsOfNode<-rbind(statsOfNode,data.frame(channel=params[!params%in%time],stats="spike",value=spikes))
-					chnls<-params[!params%in%time] #select channel at root level
+					statsOfNode<-rbind(statsOfNode,data.frame(channel=nonTimeChnls,stain=stain,stats="spike",value=spikes))
 					
 				}
 
 
 				#get MIF meatures
-				if(!is.na(chnl))
+				if(!is.na(chnl)&&isMFI)
 				{
 #					browser()
 					mat<-exprs(curData)[,chnl,drop=FALSE]
@@ -183,7 +191,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 					MFI<-rowMedians(t(mat))#using rowMedian to speed up
 #					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
 					if(all(!is.na(MFI)))
-						statsOfNode<-rbind(statsOfNode,data.frame(channel=chnames,stats="MFI",value=MFI))
+						statsOfNode<-rbind(statsOfNode,data.frame(channel=chnames,stain=stain,stats="MFI",value=MFI))
 				}
 				##append the rows
 				

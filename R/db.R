@@ -1,4 +1,7 @@
-
+############################################
+#these are labkey db specific routines
+#to be extended to more generic DB operations
+############################################
 loadStats<-function(db,...){
 
 #	browser()

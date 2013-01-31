@@ -51,7 +51,7 @@ qaPreprocess(db=db,gs=G
 #		,type="SOCK"
 )
 
-
+getQAStats(G[[1]],isMFI=F,isSpike=F)
 
 #saveToDB(db=db,gs=G
 #		,metaFile=metaFile

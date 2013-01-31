@@ -25,6 +25,7 @@ createDbSchema <- function(db)
 							,stats=character()
 							,node=character()
 							,channel=character()
+							,stain=character()
 							,value=numeric()
 							,stringsAsFactors=F
 					)
