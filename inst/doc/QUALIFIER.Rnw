@@ -272,6 +272,7 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 When monitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
 <<tubesEvents, results=hide,echo=FALSE>>=
+QUALIFIER:::.parseTubeID(db)
 tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
 tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
 @
