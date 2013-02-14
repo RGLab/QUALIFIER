@@ -112,12 +112,12 @@ plot(qaTask.list[["NumberOfEvents"]]
 #		,pch=19
 )
 
-
+qaTask.list[["NumberOfEvents"]]@formula<-count ~ `RecdDt` | `t/Tube`:`t/PTID`
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,subset=id=='245'
-		,scatterPlot=TRUE
-		,scatterPar=list(stat=T)
+#		,subset=id=='245'
+#		,scatterPlot=TRUE
+#		,scatterPar=list(stat=T)
 )
 clearCheck(qaTask.list[["NumberOfEvents"]])
 
