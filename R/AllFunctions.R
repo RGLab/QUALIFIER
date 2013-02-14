@@ -29,7 +29,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
 	
-	getQAStats(db,gsid,...)
+#	getQAStats(db,gsid,...)
 	
 	
 	ls(db)
@@ -150,19 +150,25 @@ matchStatType<-function(db,formuRes)
 saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 {
 	
-
-	#####load sample info from xls
-	if(missing(metaFile))
-		annoData<-data.frame(name=getSamples(gs))
-	else
-		annoData<-read.csv(metaFile)
+	
+	
+	annoData<-pData(gs)
+	if(is.na(match("name",colnames(annoData))))
+		stop("'name' column is missing from pData of GatingSet!")
+		
+	if(!missing(metaFile))
+	{
+		annoData_csv<-read.csv(metaFile)
+		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
+	}
+		
 	
 	annoData$id<-1:nrow(annoData)
 #		browser()
-	if(!fcs.colname%in%colnames(annoData))
-		stop("column that specify FCS file names is missing in annotation data!")
-	#rename the fcs filename column so that it can be fit into flowSet pData slot
-	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
+#	if(!fcs.colname%in%colnames(annoData))
+#		stop("column that specify FCS file names is missing in annotation data!")
+#	#rename the fcs filename column so that it can be fit into flowSet pData slot
+#	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
 #	browser()
