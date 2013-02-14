@@ -11,10 +11,10 @@ library(flowWorkspace)
 ###############################################################################
 #1.parse gating template
 ###############################################################################
-ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_MFI_RBC_bounary_eventsV3.xml")
+ws<-openWorkspace("/loc/no-backup/mike/ITN029ST/QA_template.xml")
 GT<-parseWorkspace(ws
 					,name=2
-					,execute=F
+					,execute=T
 					,subset=1
 					,useInternal=T
 					)
@@ -25,18 +25,19 @@ getPopStats(gh_template)[,2:3]
 ###############################################################################
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
-newSamples<-list.files(datapath)[1:500]
+newSamples<-getSample(gh_template)
+newSamples<-list.files(datapath)[1:2]
 
 G<-GatingSet(gh_template
 			,newSamples
 			,path=datapath
 #			,isNcdf=FALSE
-#			,dMode=4
+			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
-
+plotGate(G[[1]],merge=F)
 ################################################################################  
-#3.extract stats
+#3.extract stats (6 min for 500 samples, 12 min for 1k samples)
 ###############################################################################
 #library(parallel)
 db<-new.env()
@@ -45,16 +46,19 @@ metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 qaPreprocess(db=db,gs=G
 		,metaFile=metaFile
 		,fcs.colname="FCS_Files"
-		,date.colname=c("RecdDt","AnalysisDt")
+#		,date.colname=c("RecdDt","AnalysisDt")
 #		,nslave=6
 #		,type="SOCK"
 )
-search()
-saveToDB(db=db,gs=G
-		,metaFile=metaFile
-		,fcs.colname="FCS_Files"
-		,date.colname=c("RecdDt","AnalysisDt")
-	)
+pData(db$gs[[1]])
+pData(G)
+getQAStats(G[[1]],isMFI=F,isSpike=F)
+
+#saveToDB(db=db,gs=G
+#		,metaFile=metaFile
+#		,fcs.colname="FCS_Files"
+#		,date.colname=c("RecdDt","AnalysisDt")
+#	)
 ################################################################################  
 #4.load QA check list
 ###############################################################################
@@ -63,6 +67,7 @@ qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
 
 
 pData(db$gs[[1]])$RecdDt<-as.Date(pData(db$gs[[1]])$RecdDt)
+.parseTubeID(db)#parse TubeID from FCS filenames
 
 #read pre-determined events number for tubes from csv file
 ##pannel name should be in place of tube name since the entire package is using pannel name 
@@ -317,9 +322,9 @@ htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
 rFunc(qaTask.list[["MFIOverTime"]])<-rlm
 
 highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
-scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
-scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
-scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
+#scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 

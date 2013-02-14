@@ -29,7 +29,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
 	
-	getQAStats(db,gsid,...)
+#	getQAStats(db,gsid,...)
 	
 	
 	ls(db)
@@ -67,7 +67,7 @@ matchStatType<-function(db,formuRes)
 	for(CurTerm in c("xTerm","yTerm"))
 	{
 		strTerm<-as.character(formuRes[[CurTerm]])
-		if(!is.na(match(strTerm,levels(db$stats$stats))))
+		if(!is.na(match(strTerm,unique(db$stats$stats))))
 		{
 			statsType=strTerm
 			break
@@ -138,7 +138,8 @@ matchStatType<-function(db,formuRes)
 }
 .isRoot<-function(gh,node)
 {
-	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
+#	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
+	node=="root"
 }
 
 
@@ -149,19 +150,25 @@ matchStatType<-function(db,formuRes)
 saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 {
 	
-
-	#####load sample info from xls
-	if(missing(metaFile))
-		annoData<-data.frame(name=getSamples(gs))
-	else
-		annoData<-read.csv(metaFile)
+	
+	
+	annoData<-pData(gs)
+	if(is.na(match("name",colnames(annoData))))
+		stop("'name' column is missing from pData of GatingSet!")
+		
+	if(!missing(metaFile))
+	{
+		annoData_csv<-read.csv(metaFile)
+		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
+	}
+		
 	
 	annoData$id<-1:nrow(annoData)
 #		browser()
-	if(!fcs.colname%in%colnames(annoData))
-		stop("column that specify FCS file names is missing in annotation data!")
-	#rename the fcs filename column so that it can be fit into flowSet pData slot
-	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
+#	if(!fcs.colname%in%colnames(annoData))
+#		stop("column that specify FCS file names is missing in annotation data!")
+#	#rename the fcs filename column so that it can be fit into flowSet pData slot
+#	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
 #	browser()
@@ -181,7 +188,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	
 	#do some filtering for annoData
 	annoData<-subset(annoData,name%in%getSamples(gs))
-	
+	annoData<-droplevels(annoData)
 		
 	##fit it into GatingSet(or flowSet)
 	rownames(annoData)<-annoData$name
@@ -190,14 +197,8 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	
 	annoData<-annoData[getSamples(gs),]	#sort by sample order in gh
 
-	##extract tubeID from filename by stripping the first two prefix (presummably date and fileid on each tube)
-	annoData$tubeID<-unlist(lapply(annoData$name,function(x){
-#			browser()
-						strsplit(
-								paste(strsplit(as.character(x),"_")[[1]][c(-1,-2)],collapse="_")
-								,"\\.")[[1]][[1]]
-					}))
-
+	
+	
 
 	pData(gs)<-annoData
 	#do the filtering for Gating set
@@ -332,20 +333,20 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	ret<-merge(ret_stats,ret_anno,by.x=c("gsid","id"),by.y=c("gsid","id"))
 	
 	##add stain column from tube and channel
-	ret$stain<-apply(ret,1,function(x){
-				curChannel<-as.character(x["channel"])
-#									browser()
-				
-				if(is.na(curChannel)||curChannel%in%db$params[1:2])
-				{	
-					curStain<-NA
-				}else
-				{
-					chnlInd<-which(db$params[3:7]==curChannel)
-					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
-				}
-				curStain
-			})
+#	ret$stain<-apply(ret,1,function(x){
+#				curChannel<-as.character(x["channel"])
+##									browser()
+#				
+#				if(is.na(curChannel)||curChannel%in%db$params[1:2])
+#				{	
+#					curStain<-NA
+#				}else
+#				{
+#					chnlInd<-which(db$params[3:7]==curChannel)
+#					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
+#				}
+#				curStain
+#			})
 
 #	browser()
 	#filter by subset 

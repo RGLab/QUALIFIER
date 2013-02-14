@@ -31,7 +31,6 @@
 \alias{rFunc}
 \alias{rFunc<-}
 \alias{rFunc<-,qaTask,ANY-method}
-\alias{rFunc<-,qaTask-method}
 \alias{show,qaTask}
 \alias{makeQaTask}
 \alias{read.qaTask}
