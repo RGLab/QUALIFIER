@@ -145,8 +145,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		return("empty subsets!")
 	}
 		
-	yy<-cast(yy,...~stats)
-		
+#	yy<-cast(yy,...~stats)
+	yy<-reshape::rename(yy,c("value"=statsType))		
 #	browser()
 	##apply the function to xTerm and yTerm in each group
 	if(!is.null(formuRes$xfunc))
