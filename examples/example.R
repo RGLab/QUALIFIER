@@ -3,7 +3,7 @@ library(QUALIFIER)
 library(flowWorkspace)
 #unloadNamespace("QUALIFIER")
 #unloadNamespace("flowWorkspace")
-
+lapply(list.files("QUALIFIER/R",pattern=".R",full=T),source)
 
 #outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
 #dest<-file.path(outDir,"trellis_plot/")
@@ -44,11 +44,12 @@ db<-new.env()
 initDB(db)
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 qaPreprocess(db=db,gs=G
-		,metaFile=metaFile
-		,fcs.colname="FCS_Files"
+#		,metaFile=metaFile
+#		,fcs.colname="FCS_Files"
 #		,date.colname=c("RecdDt","AnalysisDt")
 #		,nslave=6
 #		,type="SOCK"
+		,isMFI=F,isSpike=F
 )
 pData(db$gs[[1]])
 pData(G)
@@ -112,12 +113,12 @@ plot(qaTask.list[["NumberOfEvents"]]
 #		,pch=19
 )
 
-
+qaTask.list[["NumberOfEvents"]]@formula<-count ~ `RecdDt` | `t/Tube`:`t/PTID`
 
 plot(qaTask.list[["NumberOfEvents"]]
-		,subset=id=='245'
-		,scatterPlot=TRUE
-		,scatterPar=list(stat=T)
+#		,subset=id=='245'
+#		,scatterPlot=TRUE
+#		,scatterPar=list(stat=T)
 )
 clearCheck(qaTask.list[["NumberOfEvents"]])
 
@@ -262,7 +263,7 @@ qaCheck(qaTask.list[["MNC"]]
 )
 
 plot(qaTask.list[["MNC"]]
-		,proportion~factor(coresampleid)
+		,proportion~`coresampleid`|`Tube`
 #		, factor(coresampleid)~proportion
 #		,par=list(horiz=TRUE)
 )

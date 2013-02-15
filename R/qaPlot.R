@@ -297,9 +297,11 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 	#append the outlier flag
 	res$outlier<-res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
 	res$gOutlier<-res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
-	
+#	browser()
 	#reshape the data to include the column of the statType which can be passed to lattice	as it is
-	res<-as.data.frame(cast(res,...~stats))
+#	res<-as.data.frame(cast(res,...~stats))
+	res<-reshape::rename(res,c("value"=statsType))
+	
 
 	if(!highlight%in%colnames(res))
 		stop(paste(highlight,"not found in the data"))

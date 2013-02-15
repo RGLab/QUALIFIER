@@ -355,7 +355,7 @@ panel.bwplotEx <-
 	rowIds<-subscripts
 	df<-df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
 	
-	dataGroups<-split(df,f=eval(parse(text=paste("df$",groupBy,sep=""))),drop=TRUE)
+	dataGroups<-split(df,f=df[,groupBy],drop=TRUE)
 	nGroups<-length(dataGroups)	
 #	browser()
 	if (horizontal)
@@ -411,7 +411,7 @@ panel.bwplotEx <-
 #			browser()
 			
 			curGroup<-dataGroups[[i]]
-			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
+			curGroupID<-curGroup[1,groupBy]
 			population<-as.character(curGroup$population[1])
 #			stats<-as.character(curGroup$stats[1])
 			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
@@ -610,9 +610,8 @@ panel.bwplotEx <-
 #			browser()
 			
 			curGroup<-dataGroups[[i]]
-			curGroupID<-eval(parse(text=paste("curGroup$",groupBy,"[1]",sep="")))
+			curGroupID<-curGroup[1,groupBy]
 			population<-as.character(curGroup$population[1])
-#			stats<-as.character(curGroup$stats[1])
 			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)

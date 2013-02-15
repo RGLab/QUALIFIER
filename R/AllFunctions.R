@@ -29,7 +29,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
 	
-#	getQAStats(db,gsid,...)
+	getQAStats(db,gsid,...)
 	
 	
 	ls(db)
@@ -77,7 +77,35 @@ matchStatType<-function(db,formuRes)
 		stop("formula does not contain valid stats type!")
 	return(statsType)
 }
-#TODO:refere to latticeParseFormula for more generic parser
+
+##recursively parsing conditional variables
+.parseCond<-function(cond){
+#			browser()
+	groupBy<-NULL
+	if(length(cond)==1)
+		groupBy<-as.character(cond)
+	else
+	{
+		for(i in 1:length(cond))
+		{
+			curCond<-cond[[i]]
+#				browser()
+			if(length(curCond)==3)
+			{
+				res<-.parseCond(curCond)
+				groupBy<-c(res,groupBy)
+			}else
+			{
+				curCond<-as.character(curCond)
+				if(!curCond%in%c(":","*","+"))
+					groupBy<-c(groupBy,curCond)	
+			}
+			
+		}	
+	}
+	
+	groupBy
+}
 
 .formulaParser<-function(formula)
 {
@@ -98,14 +126,10 @@ matchStatType<-function(db,formuRes)
 	##parse the conditional variable
 	if(!is.null(cond))
 	{
-		if(length(cond)>1)
-			groupBy<-as.character(cond)[-1]
-		else
-			groupBy<-as.character(cond)	
+		groupBy<-.parseCond(cond)
 		
 	}else
 	{
-		
 		groupBy<-NULL
 	}
 	
