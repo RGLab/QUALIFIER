@@ -257,12 +257,21 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 		return(pattern==nodePath)
 #	browser()
 #get the positions of the parttern matched in the gate path
-	if(isTerminal)
-		grepl(pattern,basename(as.character(nodePath)),fixed=fixed)
+	if(isTerminal){
+		if(fixed) {
+			basename(as.character(nodePath))%in%pattern
+		} else {
+			grepl(pattern,basename(as.character(nodePath)),fixed=fixed)
+		}
 #		posList<-gregexpr(pattern,nodePath,fixed=fixed)
-	else
-		grepl(pattern,nodePath,fixed=fixed)
-	
+	} else {
+		if(fixed){
+			pattern%in%nodePath
+		}else{
+			grepl(pattern,nodePath,fixed=fixed)
+		     }
+}
+       	
 #	unlist(lapply(1:length(posList),function(i){
 #				pos<-posList[[i]]
 #				curNode<-as.character(nodePath[[i]])
