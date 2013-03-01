@@ -39,9 +39,9 @@ export( qaPreprocess
 
 exportMethods(plot,qaCheck,getQAStats,queryStats
 			,qaReport
-			,qpar,qpar<-
-			,scatterPar,scatterPar<-
-			,rFunc,rFunc<-
-			,htmlReport,htmlReport<-
+			,qpar,'qpar<-'
+			,scatterPar,'scatterPar<-'
+			,rFunc,'rFunc<-'
+			,htmlReport,'htmlReport<-'
 			)          
 
