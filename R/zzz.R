@@ -29,12 +29,6 @@ createDbSchema <- function(db)
 							,value=numeric()
 							,stringsAsFactors=F
 					)
-	#gating set table
-	db$gstbl<-data.frame(gsid=integer()
-						,gsname=character()
-						,objlink=character()
-						,stringsAsFactors=F
-						)
 	db$gs<-list()
 }
 

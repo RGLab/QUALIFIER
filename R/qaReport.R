@@ -43,15 +43,13 @@ qaWrite.list<-function(x,page,...){
 			closePage(page, splash=FALSE)
 		}
 		
-qaWrite.summary<-function(x,p,gsid=NULL,...){
+qaWrite.summary<-function(x,p,gsid,...){
 #	browser()
 	hwrite("Summary",p,heading=1)
 	
 	taskTbl<-do.call(rbind,lapply(names(x),function(y)data.frame(qaTask=y,qaID=qaID(x[[y]]))))
 	db<-getData(x[[1]])
 	
-	if(is.null(gsid))
-		gsid<-max(db$gstbl$gsid)
 	curGS<-db$gs[[gsid]]
 	anno<-pData(curGS)
 	
@@ -97,8 +95,6 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 #			browser()
 			imageDir<-file.path(outDir,"image")
 			db<-getData(x)
-			if(is.null(gsid))
-				gsid<-max(db$gstbl$gsid)
 			curGS<-db$gs[[gsid]]
 			anno<-pData(curGS)
 			curQaID<-qaID(x)

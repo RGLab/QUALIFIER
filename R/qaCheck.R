@@ -5,8 +5,6 @@
 clearCheck<-function(obj,gsid)
 {
 #	browser()
-	if(missing(gsid))
-		gsid<-max(db$gstbl$gsid)
 	db<-getData(obj)
 	ind<-db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
 	db$outlierResult<-db$outlierResult[!ind,]

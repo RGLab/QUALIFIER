@@ -1,12 +1,11 @@
 library(QUALIFIER)
 
-
 ################################################################################  
 #1.load db from labkey
 #--------------------------------------------------------------------------------
 #.db<-new.env()
 #initDB(.db)
-#loadStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+#loadStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
 
 ################################################################################  
 #2.load QA check list
@@ -19,7 +18,7 @@ qaTask.list<-read.qaTask(.db,checkListFile=checkListFile)
 #3.write QA check list to db
 #--------------------------------------------------------------------------------
 
-writeTask(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+writeTask(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
 ################################################################################  
 #4.outlier detection 
 #--------------------------------------------------------------------------------
@@ -102,4 +101,4 @@ qaCheck(qaTask.list[["NumberOfEvents"]]
 ################################################################################  
 #5.dump db to labkey
 #--------------------------------------------------------------------------------
-writeQAResults(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+writeQAResults(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")

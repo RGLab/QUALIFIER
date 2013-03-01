@@ -2,108 +2,103 @@
 #these are labkey db specific routines
 #to be extended to more generic DB operations
 ############################################
-loadStats<-function(db,...){
+loadStats <- function( db, ... ){
+	db$stats <- labkey.selectRows(
+		  queryName 	= 'stats'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
 
-#	browser()
-	db$stats<-labkey.selectRows(queryName="stats",...)
-	db$stats$channel[db$stats$channel=="NA"]<-NA
-	db$gstbl<-labkey.selectRows(queryName="gstbl",...)
-				
-}
-loadDB<-function(db,...){
-#	browser()
-	db$qaTaskList<-labkey.selectRows(queryName="qaTaskList",...)	
-	db$GroupOutlierResult<-labkey.selectRows(queryName="GroupOutlierResult",...)
-	db$outlierResult<-labkey.selectRows(queryName="outlierResult",...)
-	loadStats(db,...)	
-					
-}
+	db$stats$channel[db$stats$channel=='NA'] <- NA;
+};
 
-writeTask<-function(db,...){
-#	browser()
-	sql<-"select max(qaID) as max_qaid from qatasklist"
-	max_qaid <- labkey.executeSql(sql = sql,showHidden=TRUE,colNameOpt='caption',...)[1,]
+loadDB <- function( db, ... ){
+	db$qaTaskList <- labkey.selectRows(
+		  queryName 	= 'qaTaskList'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
+
+	db$GroupOutlierResult <- labkey.selectRows(
+		  queryName	= 'GroupOutlierResult'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
+
+	db$outlierResult <- labkey.selectRows(
+		  queryName	= 'outlierResult'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
+	loadStats( db, ... );
+};
+
+writeTask <- function( db, ... ){
+	sql <- 'SELECT MAX(qaID) AS max_qaid FROM qatasklist';
+
+	max_qaid <- labkey.executeSql(
+		  sql 		= sql
+		, showHidden	= T
+		, colNameOpt	= 'caption'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	)[1,];
+
 	if(is.na(max_qaid))
-		max_qaid<-0
-	db$qaTaskTbl$qaID<-db$qaTaskTbl$qaID+max_qaid
-	
-	toInsert<-db$qaTaskTbl
-	
-	insertedRow <- labkey.insertRows(queryName="qatasklist",toInsert=toInsert,...)
-}
+		max_qaid <- 1;
 
-writeGStbl<-function(db,...){
-	##convert the sid to global one before append them to labkey db
-	sql<-"select max(gsid) as max_gsid from gstbl"
-	max_gsid <- labkey.executeSql(sql = sql,showHidden=TRUE,colNameOpt='caption',...)[1,]
-	if(is.na(max_gsid))
-		max_gsid<-0
-	db$gstbl$sid<-db$gstbl$gsid+max_gsid
+	db$qaTaskTbl$qaID <- db$qaTaskTbl$qaID + max_qaid;
 	
-	toInsert<-db$gstbl
-	toInsert$objlink="~/gatingSet"
-	insertedRow <- labkey.insertRows(queryName="gstbl",toInsert=toInsert,...)
-}
-
-writeStats<-function(db,...){
+	toInsert <- db$qaTaskTbl;
 	
-	sql<-"select max(sid) as max_sid from stats"
+	insertedRow <- labkey.insertRows(
+		  toInsert	= toInsert
+		, queryName	= 'qaTaskList'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
+};
 
-	max_sid <- labkey.executeSql(sql = sql,showHidden=TRUE,colNameOpt='caption',...)[1,]
+writeStats <- function( db, ... ){
+	sql <- 'SELECT MAX(sid) AS max_sid FROM stats';
+
+	max_sid <- labkey.executeSql(
+		  sql 		= sql
+		, showHidden 	= T
+		, colNameOpt 	= 'caption'
+		, schemaName	= 'opencyto_quality_control'
+		, ...)[1,];
+
 	if(is.na(max_sid))
-		max_sid<-0
+		max_sid <- 1;
 	
-	db$stats$sid<-db$stats$sid+max_sid
-	toInsert<-db$stats
+	db$stats$sid <- db$stats$sid + max_sid;
+	toInsert <- db$stats;
 
-	##insert new stats
-	insertedRow <- labkey.insertRows(queryName="stats",toInsert=toInsert,...)
-					
-}
+	insertedRow <- labkey.insertRows(
+		  toInsert	= toInsert
+		, queryName 	= 'stats'
+		, schemaName	= 'opencyto_quality_control'
+		, ...
+	);
+};
 
-writeQAResults<-function(db,...){
-	
-#browser()
-	##insert new QA results
-	deletedRow<-labkey.deleteRows(queryName="outlierResult", toDelete=db$outlierResult,...)
-	insertedRow <- labkey.insertRows(queryName="outlierResult", toInsert=db$outlierResult,...)
-	deletedRow <- labkey.deleteRows(queryName="GroupOutlierResult", toDelete=db$GroupOutlierResult,...)
-	insertedRow <- labkey.insertRows(queryName="GroupOutlierResult", toInsert=db$GroupOutlierResult,...)
-}
-writeProjections <- function(G,...){
-	gh <- G[[1]];
-	popNames <- getNodes( gh, isPath = T )
-	nodeNames <- getNodes( gh )
-	res <- lapply( 1:length(nodeNames), function(i) {
-				curPop <- popNames[i]
-				curpNode <- nodeNames[i]
-				
-				#store the children gate projections
-				curChildrens <- getChildren(gh,curpNode)
-				if( length( curChildrens ) > 0 )
-				{
-					prjlist <- lapply( curChildrens, function(curChildren) {
-								g <- getGate( gh, curChildren )
-								if ( class(g) == "BooleanGate" ){
-									return( NULL );
-								}else {
-									param<-parameters(g)
-									if(length(param)==1)
-										param<-c(param,"SSC-A")
-									return( param );
-								}
-							})
-					prj <- do.call(rbind, prjlist)
-					prj <- unique(prj)
-					prj <- as.data.frame(prj)
-					
-					colnames(prj) <- c('x_axis', 'y_axis')
-					cbind( name = curpNode, path = curPop, prj )
-				} else {
-					
-				}
-			})
-	
-	toInsert <- do.call( rbind, res )
-	insertedRow <- labkey.insertRows( queryName = 'projections', toInsert = toInsert, ...)
-}
+writeQAResults <- function( db, ... ){
+	if ( nrow( db$outlierResult ) > 0 ){
+		insertedRow	<- labkey.insertRows(
+			  toInsert	= db$outlierResult
+			, queryName	= 'outlierResult'
+			, ...
+		);
+	}
+
+
+	if ( nrow( db$GroupOutlierResult ) > 0 ){
+		insertedRow	<- labkey.insertRows(
+			  toInsert	= db$GroupOutlierResult
+			, queryName	= 'GroupOutlierResult'
+			, ...
+		);
+	}
+};
+

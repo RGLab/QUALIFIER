@@ -50,6 +50,47 @@ qaPreprocess(gs=G
 ################################################################################  
 #4.dump db to labkey
 #--------------------------------------------------------------------------------
-writeGStbl(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
-writeStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
-writeProjections(G,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/NHLBI B Cells",schemaName="opencytopreprocess")
+
+##############################################################
+# write gating set info to its table (called from a WebPart) #
+# need to have the following parameter variables available,
+# passed from the UI front-end:
+# analysisName, gatingSetPath, analysisDescription, xmlPath, and sampleGroupName
+
+            sql <- 'SELECT MAX(gsid) AS max_gsid FROM gstbl';
+
+            max_gsid <- labkey.executeSql(
+                  sql           = sql
+                , showHidden    = TRUE
+                , colNameOpt    = 'caption'
+                , baseUrl       = labkey.url.base
+                , folderPath    = labkey.url.path
+                , schemaName    = 'opencyto_preprocessing'
+            )[1,];
+
+            if ( is.na(max_gsid) ){
+                max_gsid <- 1;
+            } else {
+                max_gsid <- max_gsid + 1;
+            }
+
+            toInsert <- data.frame(
+                  gsid            = max_gsid
+                , gsname          = analysisName
+                , objlink         = gatingSetPath
+                , gsdescription   = analysisDescription
+                , xmlpath         = xmlPath
+                , samplegroup     = sampleGroupName
+            );
+
+            insertedRow <- labkey.insertRows(
+                  queryName     = 'gstbl'
+                , toInsert      = toInsert
+                , baseUrl       = labkey.url.base
+                , folderPath    = labkey.url.path
+                , schemaName    = 'opencyto_preprocessing'
+            );
+##############################################################
+
+writeStats(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
+

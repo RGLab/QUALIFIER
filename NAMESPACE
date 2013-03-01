@@ -31,7 +31,6 @@ export( qaPreprocess
         ,loadDB
         ,loadStats
         ,writeTask
-        ,writeGStbl
         ,writeStats
         ,writeQAResults
         ,"clearCheck"

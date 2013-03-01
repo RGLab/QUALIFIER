@@ -4,7 +4,7 @@ library(QUALIFIER)
 #1.load db from labkey
 #--------------------------------------------------------------------------------
 #.db<-new.env()
-#loadDB(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT",schemaName="qualifier")
+#loadDB(.db,baseUrl="http://dhcp157039.fhcrc.org:8080/labkey", folderPath="/FlowGraph PROJECT")
 
 ################################################################################  
 #qa report in html format 

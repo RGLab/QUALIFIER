@@ -20,17 +20,15 @@ initDB<-function(db=.db){
 	createDbSchema(db)
 }
 #the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
-qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
+qaPreprocess<-function(db=.db,gs,gsid,metaFile,fcs.colname="name",date.colname=NULL,...)
 {
-	
 	##associate the anno with gating set and save them in db
-	gsid<-saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
+	saveToDB(db,gs,gsid,metaFile,fcs.colname,date.colname)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
 	
 	getQAStats(db,gsid,...)
-	
 	
 	ls(db)
 }
@@ -171,11 +169,8 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
+saveToDB<-function(db=.db,gs,gsid,metaFile,fcs.colname="name",date.colname=NULL)
 {
-	
-	
-	
 	annoData<-pData(gs)
 	if(is.na(match("name",colnames(annoData))))
 		stop("'name' column is missing from pData of GatingSet!")
@@ -185,17 +180,13 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		annoData_csv<-read.csv(metaFile)
 		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
 	}
-		
 	
-	annoData$id<-1:nrow(annoData)
-#		browser()
 #	if(!fcs.colname%in%colnames(annoData))
 #		stop("column that specify FCS file names is missing in annotation data!")
 #	#rename the fcs filename column so that it can be fit into flowSet pData slot
 #	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
-#	browser()
 	if(!is.null(date.colname))
 	{
 		if(!all(date.colname%in%colnames(annoData)))
@@ -206,9 +197,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 																			as.Date(as.character(x),"%m/%d/%y")
 																		}
 											,simplify=FALSE)
-					
 	}
-	
 	
 	#do some filtering for annoData
 	annoData<-subset(annoData,name%in%getSamples(gs))
@@ -220,8 +209,6 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	gs<-gs[which(getSamples(gs)%in%annoData$name)]
 	
 	annoData<-annoData[getSamples(gs),]	#sort by sample order in gh
-
-	
 	
 
 	pData(gs)<-annoData
@@ -235,14 +222,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	}
 	
 
-	if(nrow(db$gstbl)==0)
-		gsid<-1
-	else
-		gsid<-max(db$gstbl$gsid)+1
-	db$gstbl<-rbind(db$gstbl,data.frame(gsid=gsid,gsname=gs.name))
-#	browser()	
 	db$gs[[gsid]]<-gs
-	gsid
 }
 
 
