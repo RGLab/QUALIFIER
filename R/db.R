@@ -45,7 +45,7 @@ writeTask <- function( db, ... ){
 	)[1,];
 
 	if(is.na(max_qaid))
-		max_qaid <- 1;
+		max_qaid <- 0;
 
 	db$qaTaskTbl$qaID <- db$qaTaskTbl$qaID + max_qaid;
 	
@@ -70,7 +70,7 @@ writeStats <- function( db, ... ){
 		, ...)[1,];
 
 	if(is.na(max_sid))
-		max_sid <- 1;
+		max_sid <- 0;
 	
 	db$stats$sid <- db$stats$sid + max_sid;
 	toInsert <- db$stats;

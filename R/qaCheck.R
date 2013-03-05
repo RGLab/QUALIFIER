@@ -4,15 +4,13 @@
 ###############################################################################
 clearCheck<-function(obj,gsid)
 {
-#	browser()
 	db<-getData(obj)
 	ind<-db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
 	db$outlierResult<-db$outlierResult[!ind,]
-	
 }
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,...){
-			
+		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
+
 			call.f<-match.call(expand.dots = F)
 
 			#replace subset with Subset
@@ -23,7 +21,6 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			}
 
 			argname<-names(list(...))
-#			browser()		
 			##try to run the qa for each individual cutoff value if multiple values are provided 
 			##through lbound or rbound arugments
 			if(!is.null(argname))
