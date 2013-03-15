@@ -26,7 +26,7 @@ getPopStats(gh_template)[,2:3]
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
 newSamples<-getSample(gh_template)
-newSamples<-list.files(datapath)[1:2]
+newSamples<-list.files(datapath)[1:20]
 
 G<-GatingSet(gh_template
 			,newSamples
