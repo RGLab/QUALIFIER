@@ -26,7 +26,7 @@ getPopStats(gh_template)[,2:3]
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
 newSamples<-getSample(gh_template)
-newSamples<-list.files(datapath)[1:2]
+newSamples<-list.files(datapath)[1:20]
 
 G<-GatingSet(gh_template
 			,newSamples
@@ -44,9 +44,9 @@ db<-new.env()
 initDB(db)
 metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
 qaPreprocess(db=db,gs=G
-#		,metaFile=metaFile
-#		,fcs.colname="FCS_Files"
-#		,date.colname=c("RecdDt","AnalysisDt")
+		,metaFile=metaFile
+		,fcs.colname="FCS_Files"
+		,date.colname=c("RecdDt","AnalysisDt")
 #		,nslave=6
 #		,type="SOCK"
 		,isMFI=F,isSpike=F

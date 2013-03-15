@@ -170,25 +170,28 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			gOutlierfunc<-outlier.norm
 			message("outlier.norm is used for group outlier detection.")
 		}
+#        browser() 
+        if(length(factors)>0){
+          groupOutSids<-by(yy,factors,function(x){
+                
+#                   browser()                               
+                
+                curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
+                
+                IQRs<-tapply(x[,statsType],curFactor,IQR)
+                
+                #log transform for between groups outlier call
+#                   browser()
+                curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
+                
+                curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
+                curOutSids<-x[curFactor%in%curOutGroupID,]$sid
+                if(length(curOutSids)>0)
+                  curOutSids
+              })
+          groupOutSids<-unlist(groupOutSids)  
+        }
 		
-		groupOutSids<-by(yy,factors,function(x){
-											
-#					browser()								
-					
-					curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
-
-					IQRs<-tapply(x[,statsType],curFactor,IQR)
-					
-					#log transform for between groups outlier call
-#					browser()
-					curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
-					
-					curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
-					curOutSids<-x[curFactor%in%curOutGroupID,]$sid
-					if(length(curOutSids)>0)
-						curOutSids
-					})
-		groupOutSids<-unlist(groupOutSids)
 	}
 	
 	
