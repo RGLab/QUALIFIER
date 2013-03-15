@@ -17,10 +17,10 @@ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,...){
 			
 			
 			statsOfGS<-lapply(names(statsOfGS),function(curID){
-												curStats<-statsOfGS[[curID]]
-												curStats$id<-as.integer(curID)
-												curStats
-											})
+									curStats<-statsOfGS[[curID]]
+									curStats$fileid<-as.integer(curID)
+									curStats
+									})
 			statsOfGS<-do.call("rbind",statsOfGS)
 			
 
@@ -48,7 +48,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			print("extracting stats...")
 			
 			glist<-obj@set
-			IDs<-pData(obj)[getSamples(obj),"id"]
+			IDs<-pData(obj)[getSamples(obj),'fileid']
 			if(is.null(IDs)||length(IDs)!=length(glist))
 			{
 				stop("Not all IDs for the current sample set are found in meta data of this GatingSet!")	

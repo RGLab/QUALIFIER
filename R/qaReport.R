@@ -55,7 +55,7 @@ qaWrite.summary<-function(x,p,gsid,...){
 	
 	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y="sid")
 	m.outResult<-merge(m.outResult,taskTbl,by.x="qaID",by.y="qaID")
-	m.outResult<-merge(m.outResult,anno[,c("id","name")],by.x="id",by.y="id")
+	m.outResult<-merge( m.outResult, anno[ , c( 'fileid', 'name' ) ], by.x = 'fileid', by.y = 'fileid' )
 	
 	castResult<-cast(m.outResult,name~qaTask)
 	castResult<-as.data.frame(castResult)
@@ -100,7 +100,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 			curQaID<-qaID(x)
 #			browser()
 			outResult<-base::subset(db$outlierResult,qaID==curQaID)
-			outResult<-merge(outResult,db$stats[,c("sid","id","channel")])
+			outResult<-merge( outResult, db$stats[ , c( 'sid', 'fileid', 'channel' ) ] )
 			outResult<-merge(outResult,anno)
 
 			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
@@ -320,7 +320,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 					by(yy,factors,function(sub2,x,groupBy,Subset){
 								
 #											browser()
-								#find the outliers of the current pannael
+								#find the outliers of the current panel
 								#matching sid 
 								curOut<-outResult[outResult$sid%in%sub2$sid,]
 								curgOut<-gOutResult[gOutResult$sid%in%sub2$sid,]
@@ -347,7 +347,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 #														,hwrite(length(unique(sub2$name)),class='count')
 												,ifelse(nrow(curOut)>0	
 														,paste(
-																hwrite(length(unique(curOut$id)),class='count')					
+																hwrite(length(unique(curOut$fileid)),class='count')					
 																," FCS files "
 														)
 														,"")

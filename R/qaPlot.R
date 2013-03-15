@@ -218,7 +218,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 						,scatterPar=list()
 						,isTerminal=TRUE,fixed=FALSE
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
-						,scatterPlot=FALSE,gsid=NULL,highlight="id"
+						,scatterPlot=FALSE,gsid=NULL, highlight = 'fileid'
 						,horiz=FALSE
 						,...)
 {

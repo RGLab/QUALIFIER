@@ -343,7 +343,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	if(!is.null(statsType))
 		ret_stats<-subset(ret_stats,stats%in%statsType)
 	
-	ret<-merge(ret_stats,ret_anno,by.x=c("gsid","id"),by.y=c("gsid","id"))
+	ret<-merge(ret_stats,ret_anno,by.x=c("gsid",'fileid'),by.y=c("gsid",'fileid'))
 	
 	##add stain column from tube and channel
 #	ret$stain<-apply(ret,1,function(x){

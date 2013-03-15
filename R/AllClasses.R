@@ -35,7 +35,7 @@ setClass("qaTask",
 										,stat=TRUE)
 						,htmlReport=FALSE
 						,rFunc=NULL
-						,highlight="id"
+						,highlight = 'fileid'
 						,db="ANY"
 						)
 		)
