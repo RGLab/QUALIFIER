@@ -158,7 +158,10 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	factors<-lapply(groupBy,function(x){
 				eval(substitute(factor(yy$v),list(v=x)))
 			})
-	
+    #make a summy factor since the tapply of the latest R doesn't like empty list any more         
+    if(length(factors) == 0){
+      factors <- list(rep(1,nrow(yy)))
+    }
 	##detect group outlier if boxplot
 	groupOutSids<-NULL
 	if(plotType(obj)=="bwplot")
@@ -171,26 +174,27 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			message("outlier.norm is used for group outlier detection.")
 		}
 #        browser() 
-        if(length(factors)>0){
-          groupOutSids<-by(yy,factors,function(x){
-                
+        
+          
+        groupOutSids<-by(yy,factors,function(x){
+              
 #                   browser()                               
-                
-                curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
-                
-                IQRs<-tapply(x[,statsType],curFactor,IQR)
-                
-                #log transform for between groups outlier call
+              
+              curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
+              
+              IQRs<-tapply(x[,statsType],curFactor,IQR)
+              
+              #log transform for between groups outlier call
 #                   browser()
-                curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
-                
-                curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
-                curOutSids<-x[curFactor%in%curOutGroupID,]$sid
-                if(length(curOutSids)>0)
-                  curOutSids
-              })
-          groupOutSids<-unlist(groupOutSids)  
-        }
+              curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
+              
+              curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
+              curOutSids<-x[curFactor%in%curOutGroupID,]$sid
+              if(length(curOutSids)>0)
+                curOutSids
+            })
+        groupOutSids<-unlist(groupOutSids)  
+      
 		
 	}
 	
