@@ -195,7 +195,7 @@ qaCheck(qaTask.list[["MNC"]],z.cutoff=1.5)
 Interquartile Range based outlier detection function is used to detect outliers
 
 <<plot-MNC, fig=true, results=verbatim>>=
-plot(qaTask.list[["MNC"]],proportion~factor(coresampleid),xlab="Sample ID",ylab="percent")
+plot(qaTask.list[["MNC"]],proportion~factor(coresampleid),xlab="Sample ID",ylab="percent",scales=list(x=list(rot=45))
 @
 
 The red circles in the boxplot indicate the possible outlier samples and the box of red color indicates the entire sample group
@@ -300,7 +300,7 @@ qaCheck(qaTask.list[["RedundantStain"]],z.cutoff=1)
 plot(qaTask.list[["RedundantStain"]]
 		,y=proportion~factor(coresampleid)|channel:stain
 		,subset=stain%in%c('CD8')
-		,scales=list(x=list(cex=0.5))
+		,scales=list(x=list(cex=0.5,rot=45))
 		,xlab="Sample ID"
 		,ylab="percent"
 	)

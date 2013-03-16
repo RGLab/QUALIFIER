@@ -26,13 +26,13 @@ getPopStats(gh_template)[,2:3]
 			
 datapath<-"/loc/no-backup/mike/ITN029ST/"
 newSamples<-getSample(gh_template)
-newSamples<-list.files(datapath)[1:20]
-
+newSamples<-list.files(datapath)[1:500]
+length(newSamples)
 G<-GatingSet(gh_template
 			,newSamples
 			,path=datapath
 #			,isNcdf=FALSE
-			,dMode=4
+#			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
 plotGate(G[[1]],merge=F)
@@ -47,9 +47,9 @@ qaPreprocess(db=db,gs=G
 		,metaFile=metaFile
 		,fcs.colname="FCS_Files"
 		,date.colname=c("RecdDt","AnalysisDt")
-#		,nslave=6
+		,nslave=1
 #		,type="SOCK"
-		,isMFI=F,isSpike=F
+#		,isMFI=F,isSpike=F
 )
 pData(db$gs[[1]])
 pData(G)
@@ -113,7 +113,7 @@ plot(qaTask.list[["NumberOfEvents"]]
 #		,pch=19
 )
 
-qaTask.list[["NumberOfEvents"]]@formula<-count ~ `RecdDt` | `t/Tube`:`t/PTID`
+#qaTask.list[["NumberOfEvents"]]@formula<-count ~ `RecdDt` | `t/Tube`:`t/PTID`
 
 plot(qaTask.list[["NumberOfEvents"]]
 #		,subset=id=='245'
@@ -139,24 +139,24 @@ head(subset(
 )
 #check on the new stats
 qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum.prop ~ RecdDt 
+#		,sum.prop ~ RecdDt 
 		,outlierfunc=outlier.cutoff
 		,uBound=0.0003
 		)
 
 plot(qaTask.list[["BoundaryEvents"]]
-		,sum.prop ~ RecdDt 
+#		,sum.prop ~ RecdDt 
 #		,subset=channel=="PE-A"
 #				&id==806
-		,ylab="sum(percent)"
+#		,ylab="sum(percent)"
 #		,scatterPlot=T
 #		,scatterPar=list(
 #						xlog=T
 #						,stat=T
 #						)
 		,scales=list(format="%m/%d/%y")
-		,plotAll="none"
-		,dest="image"
+#		,plotAll="none"
+#		,dest="image"
 )
 
 #plot(qaTask.list[["BoundaryEvents"]]
@@ -189,7 +189,7 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 plot(qaTask.list[["MFIOverTime"]]
 		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('APC-A')
-				&stain=="Va24"
+#				&stain=="Va24"
 #				&id==806
 		,rFunc=rlm
 		,scales=list(format="%m/%d/%y")
@@ -222,7 +222,7 @@ plot(qaTask.list[["RBCLysis"]]
 		,scatterPar=list(stat=T
 						,xbin=128)
 #		,horiz=T
-		,dest="image"
+#		,dest="image"
 		,highlight="coresampleid"
 #		,plotAll="none"
 		,width=27,height=13
@@ -263,7 +263,7 @@ qaCheck(qaTask.list[["MNC"]]
 )
 
 plot(qaTask.list[["MNC"]]
-		,proportion~`coresampleid`|`Tube`
+		,proportion~`coresampleid`
 #		, factor(coresampleid)~proportion
 #		,par=list(horiz=TRUE)
 )
@@ -281,8 +281,8 @@ plot(qaTask.list[["MNC"]]
 #		,scatterPlot=TRUE
 		,scatterPar=list(xbin=128
 						,stat=T)
-		,dest="image"
-		,plotAll=TRUE
+#		,dest="image"
+#		,plotAll=TRUE
 )
 #scatter for one sample
 plot(qaTask.list[["MNC"]]
