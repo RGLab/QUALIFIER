@@ -42,8 +42,13 @@ createDbSchema <- function(db)
 
 .onLoad <- function(libname, pkgname) 
 {
+	lib <- library
+	lib(RColorBrewer)
+	lib(lattice)
+	lib(grDevices)
+
 	createDbSchema(.db)
-	myColorPal<-RColorBrewer::brewer.pal(7, "Set1")
+	myColorPal<-brewer.pal(7, "Set1")
 	.db$lattice<-list(par.settings=lattice:::updateList(standard.theme()
 														,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
 #															,strip.text=list(lines=2)#not sure why this argument is not working ,we have to use par.strip.text outside of par.setting list
