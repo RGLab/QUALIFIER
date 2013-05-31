@@ -3,7 +3,8 @@
 # Author: wjiang2
 ###############################################################################
 ##TODO:to append the stats to the current table
-setMethod("getQAStats",signature=c("environment"),function(obj,gsid,...){
+
+.getQAStats.env <- function(obj,gsid,...){
 			if(missing(gsid))
 				stop("missing gsid!")
 			
@@ -39,8 +40,10 @@ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,...){
 			obj$stats<-rbind(obj$stats[!ind,],statsOfGS[,colnames(obj$stats)])
 			print("stats saved!")
 			
-		})
-
+		}
+ setMethod("getQAStats",signature=c("environment"),function(obj,gsid,...){
+       .getQAStats.env(obj,gsid,...)
+      })
 
 setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PSOCK",...){
 			
