@@ -93,7 +93,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			
 		})
 ##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI=TRUE,isSpike=TRUE,...){
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI=TRUE,isSpike=TRUE,pops = NULL,...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
 #			browser()
@@ -104,6 +104,15 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
+            #subset the nodes
+            if(!is.null(pops)){
+              if(is.numeric(pops)){
+                nodes <- nodes[pops]  
+              }else{
+                nodes <- nodes[match(pops,nodes)]
+              }
+              
+            }
 			nodePaths<-getNodes(obj,isPath=T)
 			#convert to QUALIFIER's path
 			nodePaths[1]<-paste("/",nodePaths[1],sep="")
