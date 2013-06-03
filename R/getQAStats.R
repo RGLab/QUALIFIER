@@ -214,7 +214,13 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			
 			
 		})
-
+setMethod("getQAStats",signature("GatingSetList"),function(obj,...){
+      res <- lapply(obj,function(gs){
+            getQAStats(gs,...)
+          })
+      
+      unlist(res,recursive = FALSE)
+    })
 ##copy from timelineplot of flowViz, add the plot flag
 .timelineplot <- function(x, channel, binSize, varCut=1, ...)#add plot flag to enable spike score computing without plots
 {
