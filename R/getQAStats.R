@@ -142,7 +142,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 				##get count and proportion
 				statsOfNode<-subset(statsPop,node==curNode)
 #				if(curPopName%in%c("margin","MFI"))
-				if(!is.null(params)&&!.isRoot(obj,curNode)&&class(curGate)!="BooleanGate")#&&!is.na(curGate)
+				if(!is.null(params)&&!.isRoot(obj,curNode)&&!.isBoolGate(curGate))#&&!is.na(curGate)
 				{
 #					browser()
 					chnl<-parameters(curGate)
