@@ -81,15 +81,15 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #			browser()
 			#if single scalar, then call the qacheck function directly
 			if(missing(subset))
-				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, isTerminal =isTerminal, fixed=fixed,...)
 			else
-				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc,...)
+				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, isTerminal =isTerminal, fixed=fixed,,...)
 			
 			
 		})
 
 .qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
-#	browser()
+	
 
 	qaID<-qaID(obj)
 	db<-getData(obj)

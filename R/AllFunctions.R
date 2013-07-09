@@ -235,7 +235,7 @@ matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
 	if(substr(pattern,1,1)=="/")
 		return(pattern==nodePath)
-#	browser()
+	
 #get the positions of the parttern matched in the gate path
 	if(isTerminal){
 		if(fixed) {
