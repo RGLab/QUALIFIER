@@ -220,6 +220,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
 						,scatterPlot=FALSE,gsid=NULL,highlight="id"
 						,horiz=FALSE
+                        ,panel = NULL
 						,...)
 {
 #	browser()
@@ -240,7 +241,10 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		width<-QUALIFIER:::width(qaObj)
 	if(missing(height))
 		height<-QUALIFIER:::height(qaObj)
-	lattice.options(print.function=plot.trellisEx)
+    if(is.null(panel)){
+      lattice.options(print.function=plot.trellisEx)  
+    }  
+	
 
 	db<-getData(qaObj)
 	##query db
@@ -330,11 +334,14 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		if(plotType(qaObj)=="xyplot")
 		{
 #			browser()
+            if(is.null(panel)){
+              panel <- panel.xyplot.qa
+            }
 			thisCall<-quote(
 							xyplot(x=formula1
 									,data=res
 									,groups=outlier
-									,panel=panel.xyplot.qa
+									,panel= panel
 									,df=res
 									,dest=dest
 									,plotObjs=plotObjs
@@ -370,11 +377,13 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		}
 
 			
-
+          if(is.null(panel)){
+            panel <- panel.bwplotEx
+          }
 
 			thisCall<-quote(bwplot(x=formula1
 									,data=res ##this argument does not get passed to panel function
-									,panel=panel.bwplotEx
+									,panel=panel
 									,df=res#arguments from this are passed to panel function
 									,groupBy=groupBy.Panel
 									,dest=dest
