@@ -96,7 +96,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			
 		})
 ##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI=TRUE,isSpike=TRUE,pops = NULL,...){
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE,pops = NULL,...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
 #			browser()
@@ -107,19 +107,25 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			
 			statsPop<-getPopStats(obj)
 			nodes<-getNodes(obj)
+            nodePaths<-getNodes(obj,isPath=T)
+            #convert to QUALIFIER's path
+            nodePaths[1]<-paste("/",nodePaths[1],sep="")
+            nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
+            
             #subset the nodes
+      
             if(!is.null(pops)){
               if(is.numeric(pops)){
-                nodes <- nodes[pops]  
+                nodes <- nodes[pops]
+                nodePaths <- nodePaths[pops]
               }else{
                 nodes <- nodes[match(pops,nodes)]
+                nodePaths <- nodePaths[match(pops,nodes)]
               }
               
             }
-			nodePaths<-getNodes(obj,isPath=T)
-			#convert to QUALIFIER's path
-			nodePaths[1]<-paste("/",nodePaths[1],sep="")
-			nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
+            
+            
 			nParam<-length(params)-1 #minus time channel
 			nNodes<-length(nodes)
 #					
@@ -127,14 +133,16 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 #			browser()
 			fdata<-getData(obj)
 			pd<-pData(parameters(fdata))
+            
 			for(i in 1:nNodes)
 			{
+#              browser()
 				curPopName<-nodePaths[i]
 				curNode<-nodes[i]
 #				print(curNode)
 				if(!is.null(params))
 				{
-					curData<-getData(obj,curNode)
+					
 					curGate<-getGate(obj,curNode)
 				}
 				
@@ -197,6 +205,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 				#get MIF meatures
 				if(!is.na(chnl)&&isMFI)
 				{
+                    curData<-getData(obj,curNode)
 #					browser()
 					mat<-exprs(curData)[,chnl,drop=FALSE]
 					chnames<-colnames(mat)
