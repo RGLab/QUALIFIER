@@ -59,12 +59,19 @@ makeQaTask<-function(db=.db,qaName,description,qaLevel,pop,formula,plotType)
 	qa
 }
 
-read.qaTask<-function(db=.db,checkListFile)
+read.qaTask <-function(checkListFile, ...)
 {
-	qaCheckList<-read.csv(checkListFile)
-	db$qaTaskTbl<-qaCheckList
-	qaTask.list<-apply(qaCheckList,1,function(curRow,db){
-#browser()			
+  df<-read.csv(checkListFile)
+  .read.qaTask(df,...)
+}
+
+#' construct qatask from a data.frame
+.read.qaTask<-function(df,db=.db)
+{
+	
+	db$qaTaskTbl<-df
+	qaTask.list<-apply(df,1,function(curRow,db){
+		
 				curQa<-new("qaTask"
 						,qaID=as.integer(curRow["qaID"])
 						,qaName=curRow["qaName"]
@@ -77,8 +84,8 @@ read.qaTask<-function(db=.db,checkListFile)
 				)
 				curQa					
 			},db)
-	names(qaTask.list)<-qaCheckList$qaName
+	names(qaTask.list)<-df$qaName
 	db$qaTaskList<-qaTask.list
-	print(paste(nrow(qaCheckList),"qaTask created ahd saved in db!"))
+	print(paste(nrow(df),"qaTask created ahd saved in db!"))
 	qaTask.list
 }
