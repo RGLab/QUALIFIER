@@ -206,23 +206,23 @@ reScaleData<-function(fs,fres,channel,logScale)
 }
 
 setMethod("plot", signature=c(x="qaTask"),
-		function(x,y,...){
-#browser()
-			#assign null to formula if it is missing
-			if(missing(y))
-				y<-getFormula(x)
-			plot.qaTask(qaObj=x,formula1=y,...)
+		function(x,...){
+			plot.qaTask(qaObj=x,...)
 		})
 
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
+plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
-						,isTerminal=TRUE,fixed=FALSE
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
 						,scatterPlot=FALSE,gsid=NULL,highlight="id"
 						,horiz=FALSE
                         ,panel = NULL
 						,...)
 {
+  #assign null to formula if it is missing
+  if(missing(y))
+    formula1 <- getFormula(qaObj)
+  else
+    formula1 <- y
 #	browser()
 	par<-.db$lattice
 	par<-lattice:::updateList(par,list(main=description(qaObj)))
@@ -258,6 +258,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		
 	
 	#parse the formula
+
 	formuRes<-.formulaParser(formula1)
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 	
@@ -267,9 +268,9 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		
 	
 	if(missing(subset))
-		res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
 	else
-		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
 	if(nrow(res)==0)
 	{
 		return("no samples are matched!")

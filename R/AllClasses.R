@@ -8,6 +8,7 @@ setClass("qaTask",
 						,qaLevel="character"
 						,pop="character"
 						,formula="ANY"
+                        ,type="character" # indicate how pop is matched
 						,plotType="character"
 						,width="numeric"
 						,height="numeric"
@@ -24,6 +25,7 @@ setClass("qaTask",
 						,qaLevel=character(0)
 						,pop=character(0)
 						,formula="ANY"
+                        ,type = "popName"
 						,plotType="xyplot"
 						,width=10
 						,height=10
@@ -43,16 +45,17 @@ setClass("qaTask",
 		
 
 #TODO:to make constructor that record the qaTask into the db table
-makeQaTask<-function(db=.db,qaName,description,qaLevel,pop,formula,plotType)
+makeQaTask<-function(db=.db,qaName,description,qaLevel,pop,formula, type, plotType)
 {
 	qa<-new("qaTask"
 						,qaID=max(db$qaChecklist)
-						,qaName=curRow["qaName"]
-						,description=curRow["description"]
-						,qaLevel=curRow["qaLevel"]
-						,pop=curRow["pop"]
-						,formula=as.formula(curRow["formula"])
-						,plotType=curRow["plotType"]
+						,qaName=qaName
+						,description=description
+						,qaLevel=qaLevel
+						,pop=pop
+						,formula=as.formula(formula)
+                        ,type=type
+						,plotType=plotType
 						,db=db
 				)
 	
@@ -79,6 +82,7 @@ read.qaTask <-function(checkListFile, ...)
 						,qaLevel=curRow["qaLevel"]
 						,pop=curRow["pop"]
 						,formula=as.formula(curRow["formula"])
+                        ,type=curRow["type"]
 						,plotType=curRow["plotType"]
 						,db=db
 				)
