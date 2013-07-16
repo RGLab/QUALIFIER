@@ -9,6 +9,7 @@ setClass("qaTask",
 						,pop="character"
 						,formula="ANY"
                         ,type="character" # indicate how pop is matched
+                        ,subset = "ANY"
 						,plotType="character"
 						,width="numeric"
 						,height="numeric"
@@ -26,6 +27,7 @@ setClass("qaTask",
 						,pop=character(0)
 						,formula="ANY"
                         ,type = "popName"
+                        ,subset = "ANY" 
 						,plotType="xyplot"
 						,width=10
 						,height=10
@@ -74,7 +76,9 @@ read.qaTask <-function(checkListFile, ...)
 	
 	db$qaTaskTbl<-df
 	qaTask.list<-apply(df,1,function(curRow,db){
-		
+#          browser()
+          filter <- curRow["subset"]
+          filter <- parse(text = filter)
 				curQa<-new("qaTask"
 						,qaID=as.integer(curRow["qaID"])
 						,qaName=curRow["qaName"]
@@ -83,6 +87,7 @@ read.qaTask <-function(checkListFile, ...)
 						,pop=curRow["pop"]
 						,formula=as.formula(curRow["formula"])
                         ,type=curRow["type"]
+                        ,subset = filter
 						,plotType=curRow["plotType"]
 						,db=db
 				)

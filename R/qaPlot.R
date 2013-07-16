@@ -266,9 +266,13 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 	if(missing(pop))
 		pop<-getPop(qaObj)
 		
-	
-	if(missing(subset))
-		res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
+#	browser()
+    if(missing(subset))
+      subset <- qaObj@subset
+    subset <- substitute(subset)
+    ##query db
+    if(length(subset) == 0)
+    	res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
 	else
 		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
 	if(nrow(res)==0)
