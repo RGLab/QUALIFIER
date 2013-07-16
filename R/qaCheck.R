@@ -129,8 +129,10 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	
 	statsType<-matchStatType(db,formuRes)
 #	browser()
+    if(missing(Subset))
+      Subset <- obj@subset
 	##query db
-	if(missing(Subset))
+	if(length(Subset) == 0)
 	{		
 		yy<-.queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
 		
