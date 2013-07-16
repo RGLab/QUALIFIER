@@ -108,8 +108,8 @@ setMethod("getPop", signature=c(x="qaTask"),
 			x@pop
 		})
 
-setMethod("getData", signature=c(obj="qaTask"),
-		function(obj){
+setMethod("getData", signature=c(obj="qaTask",y = "missing"),
+		function(obj,...){
 			obj@db
 		})
 

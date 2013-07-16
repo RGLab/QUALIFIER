@@ -9,8 +9,7 @@ clearCheck<-function(obj,gsid)
 	db$outlierResult<-db$outlierResult[!ind,]
 }
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,...){
-
+		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL, ...){
 			call.f<-match.call(expand.dots = F)
 
 			#replace subset with Subset
@@ -81,14 +80,14 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #			browser()
 			#if single scalar, then call the qacheck function directly
 			if(missing(subset))
-				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, isTerminal =isTerminal, fixed=fixed,...)
+				.qaCheck(obj,formula=formula,outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, ...)
 			else
-				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, isTerminal =isTerminal, fixed=fixed,,...)
+				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, ...)
 			
 			
 		})
 
-.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
+.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,gsid=NULL,...){
 	
 
 	qaID<-qaID(obj)
@@ -127,11 +126,11 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	##query db
 	if(missing(Subset))
 	{		
-		yy<-.queryStats(db,statsType=statsType,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		yy<-.queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
 		
 	}else
 	{
-		yy<-.queryStats(db,statsType=statsType,Subset,pop=getPop(obj),isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		yy<-.queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
 		
 	}
 #		browser()	

@@ -226,63 +226,36 @@ saveToDB<-function(db=.db,gs,gsid,metaFile,fcs.colname="name",date.colname=NULL)
 }
 
 
-
-
-
-matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
+#' @param type character specifing how the pattern is matched
+#' "regExpr", passes it as a regular expression to grepl (fixed = FALSE), it is flexible enough for the advance users to define any type of qa tasks. (e.g. "/(4|8)\+$" for "4+" and "8+", but not "CD154+" )
+#' for the users who don't know about regular expressions, type can be set to one of the following three options
+#' "popName" interprets the pattern as the exact population name character and do the strict matching with terminal node, (e.g. "L" for lymph populations but not live/dead "Lv")
+#' "subPath" will do the partial path match (e.g. "4+ for "4+" and all its downstream children: "4+/TNFa+", "4+/IL2+" etc... )
+#' "fullPath" will do the full path match (e.g. "/S/Lv/L/3+/Excl/4+" will only be matched to "4+")
+matchNode<-function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath", "popName"))
 {
-#	browser()
+    type <- match.arg(type,c("regExpr", "fullPath", "subPath", "popName"))
+    nodePath <- as.character(nodePath)
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
-	if(substr(pattern,1,1)=="/")
-		return(pattern==nodePath)
-	
-#get the positions of the parttern matched in the gate path
-	if(isTerminal){
-		if(fixed) {
-			basename(as.character(nodePath))%in%pattern
-		} else {
-			grepl(pattern,basename(as.character(nodePath)),fixed=fixed)
-		}
-#		posList<-gregexpr(pattern,nodePath,fixed=fixed)
-	} else {
-		if(fixed){
-			pattern%in%nodePath
-		}else{
-			grepl(pattern,nodePath,fixed=fixed)
-		     }
-}
-
-#	unlist(lapply(1:length(posList),function(i){
-#				pos<-posList[[i]]
-#				curNode<-as.character(nodePath[[i]])
-#				if(length(pos)==1&&pos==-1)
-#					return(FALSE)
-#				else
-#				{
-#					if(isTerminal)#if matched as a terminal node,do the further check on the slash
-#					{
-#						res<-unlist(lapply(pos,function(x){
-#											#check the existence of slash after the pattern
-#											toMatch<-substring(curNode,x+1,nchar(curNode))
-#											!grepl("/",toMatch)
-#										}))
-#						return(any(res))#return true if any matched instance satifsfy the terminal check
-#					}else
-#					{
-#						return(TRUE) #if mathced as non-terminal node, then return true once it is matched anywhere in the path
-#					}
-#					
-#				}
-#			}))
-	
-	
-	
-	
+	if(type == "fullPath")
+    {
+      nodesToMatch <- nodePath
+      nodesToMatch%in%pattern
+    }else if(type == "subPath"){
+      nodesToMatch <- nodePath
+      grepl(pattern,nodesToMatch, fixed = TRUE)
+    }else if(type == "popName"){
+      nodesToMatch <- basename(nodePath)
+      nodesToMatch%in%pattern
+    }else if (type == "regExpr"){
+        nodesToMatch <- nodePath
+        grepl(pattern,nodesToMatch)  
+     } 
 }
 
 ##API to query stats entries from db by qaTask object and formula
 setMethod("queryStats", signature=c(x="qaTask"),
-		function(x,y,subset,pop,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
+		function(x,y,subset,pop,gsid=NULL,...){
 			
 			if(missing(y))
 				y<-getFormula(x)
@@ -294,9 +267,9 @@ setMethod("queryStats", signature=c(x="qaTask"),
 				pop<-getPop(x)
 #			browser()
 			if(missing(subset))
-				res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, ...)
 			else
-				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, ... )
 			
 			if(nrow(res)!=0)
 			{
@@ -310,8 +283,8 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			
 			res
 		})
-#queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
-.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE,gsid)
+
+.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
 {
 #	browser()
 
@@ -336,7 +309,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		r<-matchNode(pop,ret_stats$population,isTerminal,fixed)
+		r<-matchNode(pop,ret_stats$population, ...)
 		ret_stats <-ret_stats[r,]
 	}
 #	browser()
@@ -345,23 +318,6 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	
 	ret<-merge(ret_stats,ret_anno,by.x=c("gsid",'fileid'),by.y=c("gsid",'fileid'))
 	
-	##add stain column from tube and channel
-#	ret$stain<-apply(ret,1,function(x){
-#				curChannel<-as.character(x["channel"])
-##									browser()
-#				
-#				if(is.na(curChannel)||curChannel%in%db$params[1:2])
-#				{	
-#					curStain<-NA
-#				}else
-#				{
-#					chnlInd<-which(db$params[3:7]==curChannel)
-#					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
-#				}
-#				curStain
-#			})
-
-#	browser()
 	#filter by subset 
 
 	if(!missing(Subset))

@@ -311,7 +311,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 
 
 					yy<-.queryStats(db,statsType=statsType,pop=getPop(x)
-									,isTerminal=T,fixed=F,gsid=gsid)
+									,gsid=gsid, type = x@type)
 
 					factors<-lapply(groupBy,function(x){
 								eval(substitute(yy$v,list(v=x)))
