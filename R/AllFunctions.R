@@ -265,7 +265,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			statsType<-matchStatType(db,formuRes)
 			if(missing(pop))
 				pop<-getPop(x)
-#			browser()
+			
 			if(missing(subset))
 				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, ...)
 			else
@@ -286,7 +286,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 
 .queryStats<-function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
 {
-#	browser()
+	
 
 	if(is.null(gsid))
 	{
@@ -309,15 +309,16 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		r<-matchNode(pop,ret_stats$population, ...)
-		ret_stats <-ret_stats[r,]
+		r <- matchNode(pop,ret_stats$population, ...)
+		ret_stats <- ret_stats[r,]
 	}
 #	browser()
 	if(!is.null(statsType))
-		ret_stats<-subset(ret_stats,stats%in%statsType)
 	
-	ret<-merge(ret_stats,ret_anno,by.x=c("gsid",'fileid'),by.y=c("gsid",'fileid'))
+	ret_stats <- subset(ret_stats,stats%in%statsType)
 	
+	ret <- merge(ret_stats,ret_anno,by=c("gsid","fileid"))
+    
 	#filter by subset 
 
 	if(!missing(Subset))
