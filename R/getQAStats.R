@@ -97,65 +97,57 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
       .getQAStats.gh(obj, ...)    
     })
-
-.getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE,pops = NULL, ...){
+#' @param isFlowCore a \code{logical} flag indicating whether to extract flowCore stats or flowJo stats
+#' @param isMFI a \code{logical} flag indicating whether to calculate MFI which causes the reading of raw data 
+#' @param isSpike a \code{logical} flag indicating whether to calculate spike for each channel which causes the reading of raw data
+#' @param pops a \code{numeric} or \code {character} vector as the population indices specifing a subset of populations to extract stats from
+#' @param isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
+#' it is automatically set to TRUE when isMFI is TRUE
+.getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, ...){
 			
-			message("reading GatingHierarchy:",getSample(obj))
-			
-			#check if data is gated
-			params<-try(parameters(getData(obj))$name,silent=TRUE)
-			if(inherits(params,"try-error"))
-				params<-NULL
-#			browser()
-            
-#			statsPop<-getPopStats(obj)
-            #convert to data.table
-#            rn <- rownames(statsPop)
-#            statsPop <- as.data.table(statsPop)
-#            statsPop[,path:=eval(rn)]
-#            setkey(statsPop,node)
-            
-			nodes<-getNodes(obj)
-            nodePaths<-getNodes(obj,isPath=T)
-            #convert to QUALIFIER's path
-            nodePaths[1]<-paste("/",nodePaths[1],sep="")
-            nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
-            
-            #subset the nodes
-      
-            if(!is.null(pops)){
-              if(is.numeric(pops)){
-                nodes <- nodes[pops]
-                nodePaths <- nodePaths[pops]
-              }else{
-                nodes <- nodes[match(pops,nodes)]
-                nodePaths <- nodePaths[match(pops,nodes)]
-              }
-              
-            }
-            
-            
-			nParam<-length(params)-1 #minus time channel
-			nNodes<-length(nodes)
-#					
-			statsOfGh <- data.table()
-            
-			fdata<-getData(obj, use.exprs = isSpike||isMFI)
-			pd<-pData(parameters(fdata))
-                      
-			statslist <- lapply(1:nNodes,function(i){
-
-  				curPopName<-nodePaths[i]
-  				curNode<-nodes[i]
+    			message("reading GatingHierarchy:",getSample(obj))
+    			if(isMFI){
+                  isChannel <- TRUE
+                }
                 
-
-  				if(!is.null(params))
-  				{
-  					
-  					curGate<-getGate(obj,curNode)
-  				}
-  				
-#                browser()
+    			#check if data is gated
+    			isGated <- obj@flag
+                
+    			nodes<-getNodes(obj)
+                nodePaths<-getNodes(obj,isPath=T)
+                #convert to QUALIFIER's path
+                nodePaths[1]<-paste("/",nodePaths[1],sep="")
+                nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
+                
+                #subset the nodes
+          
+                if(!is.null(pops)){
+                  if(is.numeric(pops)){
+                    nodes <- nodes[pops]
+                    nodePaths <- nodePaths[pops]
+                  }else{
+                    nodes <- nodes[match(pops,nodes)]
+                    nodePaths <- nodePaths[match(pops,nodes)]
+                  }
+                  
+                }
+                
+                
+    			nNodes<-length(nodes)
+                
+                if(isGated&&(isSpike||isMFI||isChannel)){
+                  fdata<-getData(obj, use.exprs = isGated&&(isSpike||isMFI))#only spike and MFI require the actual raw data reading
+                  pd<-pData(parameters(fdata))
+                  params <- pd$name
+  
+                }
+    			
+                          
+    			statslist <- lapply(1:nNodes,function(i){
+    
+    			curPopName<-nodePaths[i]
+    			curNode<-nodes[i]
+                
                 
                 ##############################################
                 #extract channel and stain info
@@ -166,16 +158,20 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                 # or Spike on each channel
                 # Thus not really needed for 2-d gates unless we want to do QA on MFI
                 #######################################################################
-  				if(is.null(params)||.isRoot(obj,curNode)||class(curGate)=="booleanFilter")
+#                browser()
+                chnl <- as.character(NA)   #convert from logical NA to character NA for rbindlist to behave appropriately
+                if(isGated&&!.isRoot(obj,curNode)&&isChannel)
   				{
-                  #set channel to NA for root node or boolean gate
-                  chnl <- as.character(NA) #convert from logical NA to character NA for rbindlist to behave appropriately
-  				}else
-  				{
-                  chnl <- parameters(curGate)
-                  #set channel to NA for 2d gate when isMFI == FALSE
-                  if(!isMFI&&length(chnl)>1)
-                    chnl <- as.character(NA)  
+                    curGate<-getGate(obj,curNode)
+                  #only extract chnl info gates:
+                  #1. non bool gate
+                  #2. MFI is true
+                  #3. or 1d gate
+                  if(class(curGate)!="booleanFilter"){
+                    chnl <- parameters(curGate)
+                    if(!isMFI&&length(chnl)>1)
+                      chnl <- as.character(NA) #reset chnl to NA for 1d Gate when isMFI = FALSE
+                  }
   				}
   				
   
@@ -195,14 +191,22 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                 {
                   statsOfNode<-statsOfNode$flowJo
                 }
-  				statsOfNode <- data.table(channel=chnl
-                                          ,stain=stain
+                #reset chnl for 2d gate since channel are meaningless for counts and % 
+                if(!is.na(chnl)&&length(chnl)>1){
+                  thisChnl <- as.character(NA)
+                  thisStain <- as.character(NA)
+                }else{
+                  thisChnl <- chnl
+                  thisStain <- stain
+                }
+  				statsOfNode <- data.table(channel=thisChnl
+                                          ,stain=thisStain
                                            ,stats= names(statsOfNode)
     										,value = statsOfNode
   										)
   #				browser()
   				#get spikes meatures for each channel at root level
-  				if(!is.null(params)&&.isRoot(obj,curNode)&&isSpike)
+  				if(isGated&&.isRoot(obj,curNode)&&isSpike)
   				{
   
   #					browser()
