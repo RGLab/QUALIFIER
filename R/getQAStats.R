@@ -94,7 +94,11 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			
 		})
 ##extract stats from a gating hierarchy\\
-setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE,pops = NULL,...){
+setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
+      .getQAStats.gh(obj, ...)    
+    })
+
+.getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE,pops = NULL, ...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
 			
@@ -102,13 +106,14 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			params<-try(parameters(getData(obj))$name,silent=TRUE)
 			if(inherits(params,"try-error"))
 				params<-NULL
-			
-			statsPop<-getPopStats(obj)
+#			browser()
+            
+#			statsPop<-getPopStats(obj)
             #convert to data.table
-            rn <- rownames(statsPop)
-            statsPop <- as.data.table(statsPop)
-            statsPop[,path:=eval(rn)]
-            setkey(statsPop,node)
+#            rn <- rownames(statsPop)
+#            statsPop <- as.data.table(statsPop)
+#            statsPop[,path:=eval(rn)]
+#            setkey(statsPop,node)
             
 			nodes<-getNodes(obj)
             nodePaths<-getNodes(obj,isPath=T)
@@ -150,27 +155,29 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
   					curGate<-getGate(obj,curNode)
   				}
   				
-  		
-  				##get count and proportion
-  				statsOfNode<-statsPop[curNode]
-  
-  				if(!is.null(params)&&!.isRoot(obj,curNode)&&class(curGate)!="booleanFilter")
+#                browser()
+                
+                ##############################################
+                #extract channel and stain info
+                #it is mainly used for QA on channel/stain-specific 1d gate
+                #e.g. marginal events for each channel (defined by 1d gate on that channel)
+                # or MFI stability for each stain+channel (defined by 1d gate on each channel)
+                # or redudant staining across aliquots (1d gate on each stain+channel)
+                # or Spike on each channel
+                # Thus not really needed for 2-d gates unless we want to do QA on MFI
+                #######################################################################
+  				if(is.null(params)||.isRoot(obj,curNode)||class(curGate)=="booleanFilter")
   				{
-  
-  					chnl<-parameters(curGate)
+                  #set channel to NA for root node or boolean gate
+                  chnl <- as.character(NA) #convert from logical NA to character NA for rbindlist to behave appropriately
   				}else
   				{
-  					chnl<-as.character(NA) #convert from logical NA to character NA for rbindlist to behave appropriately
+                  chnl <- parameters(curGate)
+                  #set channel to NA for 2d gate when isMFI == FALSE
+                  if(!isMFI&&length(chnl)>1)
+                    chnl <- as.character(NA)  
   				}
-  				if(isFlowCore)
-  				{
-  					stats_prop<-statsOfNode$flowCore.freq
-  					stats_count<-statsOfNode$flowCore.count	
-  				}else
-  				{
-  					stats_prop<-statsOfNode$flowJo.freq
-  					stats_count<-statsOfNode$flowJo.count
-  				}
+  				
   
   				if(all(is.na(chnl)))
   					stain<-as.character(NA)
@@ -178,10 +185,20 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
   				{
   					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
   				}
-  				statsOfNode<-data.table(channel=chnl
-                                        ,stain=stain
-                                         ,stats=c("proportion","count")
-  										,value=c(stats_prop,stats_count)
+                ##get count and proportion
+                statsOfNode <- flowWorkspace:::.getPopStat(obj,curNode)
+                
+                if(isFlowCore)
+                {
+                  statsOfNode <- statsOfNode$flowCore
+                }else
+                {
+                  statsOfNode<-statsOfNode$flowJo
+                }
+  				statsOfNode <- data.table(channel=chnl
+                                          ,stain=stain
+                                           ,stats= names(statsOfNode)
+    										,value = statsOfNode
   										)
   #				browser()
   				#get spikes meatures for each channel at root level
@@ -219,7 +236,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
   					mat<-exprs(curData)[,chnl,drop=FALSE]
   					chnames<-colnames(mat)
   					MFI<-rowMedians(t(mat))#using rowMedian to speed up
-  #					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
+  
   					if(all(!is.na(MFI)))
   						statsOfNode <- rbindlist(list(statsOfNode
                                                         ,data.table(channel=chnames
@@ -230,8 +247,8 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
                                                      )
   				}
                   #append two columns
-                  statsOfNode[,node:= curNode]
-                  statsOfNode[,population:= curPopName]
+                  statsOfNode[, node := curNode]
+                  statsOfNode[, population := curPopName]
                   statsOfNode
   			})
             
@@ -241,7 +258,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			statsOfGh
 			
 			
-		})
+}
 setMethod("getQAStats",signature("GatingSetList"),function(obj,...){
       res <- lapply(obj,function(gs){
             getQAStats(gs,...)
