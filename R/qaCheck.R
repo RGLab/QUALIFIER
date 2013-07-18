@@ -92,6 +92,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			
 			
 		})
+        
 
 .qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,gsid=NULL,...){
 	
@@ -141,7 +142,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		yy<-.queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
 		
 	}
-#		browser()	
+		
 	if(nrow(yy)==0)
 	{
 		return("empty subsets!")
@@ -157,12 +158,51 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		yy<-applyFunc(yy,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
 	
 	
-	factors<-lapply(groupBy,function(x){
-				eval(substitute(factor(yy$v),list(v=x)))
-			})
-    #make a summy factor since the tapply of the latest R doesn't like empty list any more         
-    if(length(factors) == 0){
-      factors <- list(rep(1,nrow(yy)))
+      
+    .funcOutlierGrp <- function(x){
+      
+      curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
+      
+      IQRs <- x[,IQR(.SD[[statsType]]), by = xTerm][,V1]
+      
+      #log transform for between groups outlier call
+      #                   browser()
+      curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
+      
+      curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
+      curOutSids<-x[curFactor%in%curOutGroupID,sid]
+      if(length(curOutSids)>0)
+        curOutSids
+    }
+    .funcOutlier <-function(x){
+      
+      
+      if(is.null(rFunc))
+      {
+        inputVec <- x[[statsType]]
+        
+      }else
+      {
+        #using regression function to fit the data and 
+        #calculate the outliers based on the residuals if applicable
+        f1<-substitute(y~x,list(y=formuRes$yTerm,x=xTerm))
+#                   browser()
+        regResult<-try(rFunc(as.formula(f1),x),silent=TRUE)
+        if(all(class(regResult)!="try-error"))
+        {
+          inputVec<-regResult$residuals
+        }else
+        {
+#                       browser()
+          inputVec<-x[[statsType]]
+        }
+      }
+#               browser()
+      outlierVec<-outlierfunc((inputVec), ...)
+      
+      x[outlierVec,sid]
+      
+      
     }
 	##detect group outlier if boxplot
 	groupOutSids<-NULL
@@ -175,28 +215,8 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			gOutlierfunc<-outlier.norm
 			message("outlier.norm is used for group outlier detection.")
 		}
-#        browser() 
-        
           
-        groupOutSids<-by(yy,factors,function(x){
-              
-#                   browser()                               
-              
-              curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
-              
-              IQRs<-tapply(x[,statsType],curFactor,IQR)
-              
-              #log transform for between groups outlier call
-#                   browser()
-              curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
-              
-              curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
-              curOutSids<-x[curFactor%in%curOutGroupID,]$sid
-              if(length(curOutSids)>0)
-                curOutSids
-            })
-        groupOutSids<-unlist(groupOutSids)  
-      
+        groupOutSids <- yy[,funcOutlierGrp(.SD), by = groupBy][,V1]
 		
 	}
 	
@@ -208,45 +228,9 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	{
 		
 		groupBy<-c(groupBy,as.character(xTerm))
-		factors<-lapply(groupBy,function(x){
-					eval(substitute(yy$v,list(v=x)))
-				})
 	}	
+	stats_list<- yy[,.funcOutlier(.SD), by = groupBy][,V1]
 			
-	stats_list<-by(yy,factors
-			,function(x){
-#				browser()
-				
-				if(is.null(rFunc))
-				{
-					inputVec<-x[,statsType]
-					
-				}else
-				{
-					#using regression function to fit the data and 
-					#calculate the outliers based on the residuals if applicable
-					f1<-substitute(y~x,list(y=formuRes$yTerm,x=xTerm))
-#					browser()
-					regResult<-try(rFunc(as.formula(f1),x),silent=TRUE)
-					if(all(class(regResult)!="try-error"))
-					{
-						inputVec<-regResult$residuals
-					}else
-					{
-#						browser()
-						inputVec<-x[,statsType]
-					}
-				}
-#				browser()
-				outlierVec<-outlierfunc(inputVec,...)
-				
-				x[outlierVec,]$sid
-				
-				
-			})
-	stats_list<-unlist(stats_list,use.names = FALSE)
-#	browser()
-	
 
 #	browser()
 	

@@ -16,13 +16,13 @@
 			statsOfGS<-getQAStats(gs,...)
 			
 			
-			
-			statsOfGS<-lapply(names(statsOfGS),function(curID){
-												curStats<-statsOfGS[[curID]]
-												curStats$id<-as.integer(curID)
-												curStats
-											})
-			statsOfGS<-do.call("rbind",statsOfGS)
+#			browser()
+			for(curID in names(statsOfGS)){
+					
+                    curID <- as.integer(curID)
+                    statsOfGS[[curID]][,id:= curID]
+				}
+			statsOfGS<-rbindlist(statsOfGS)
 			
 
 			##append sid and gsid
@@ -30,14 +30,14 @@
 				msid<-0
 			else
 				msid<-max(obj$stats$sid)
-			statsOfGS$sid<-1:nrow(statsOfGS)+msid
-			statsOfGS$gsid<-gsid
+			statsOfGS[,sid := 1:nrow(statsOfGS)+msid]
+			statsOfGS[,gsid := gsid]
 			
 
 			#save it db (remove the old records with the same gsid
-#			browser()
-			ind<-obj$stats$gsid==gsid
-			obj$stats<-rbind(obj$stats[!ind,],statsOfGS[,colnames(obj$stats)])
+			
+			ind <- obj$stats$gsid == gsid
+			obj$stats<-rbind(obj$stats[!ind,],statsOfGS[,colnames(obj$stats),with=FALSE])
 			print("stats saved!")
 			
 		}
@@ -99,13 +99,19 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE,pops = NULL,...){
 			
 			message("reading GatingHierarchy:",getSample(obj))
-#			browser()
+			
 			#check if data is gated
 			params<-try(parameters(getData(obj))$name,silent=TRUE)
 			if(inherits(params,"try-error"))
 				params<-NULL
 			
 			statsPop<-getPopStats(obj)
+            #convert to data.table
+            rn <- rownames(statsPop)
+            statsPop <- as.data.table(statsPop)
+            statsPop[,path:=eval(rn)]
+            setkey(statsPop,node)
+            
 			nodes<-getNodes(obj)
             nodePaths<-getNodes(obj,isPath=T)
             #convert to QUALIFIER's path
@@ -129,96 +135,111 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj,isFlowCore=TRUE
 			nParam<-length(params)-1 #minus time channel
 			nNodes<-length(nodes)
 #					
-			statsOfGh<-NULL
-#			browser()
-			fdata<-getData(obj)
-			pd<-pData(parameters(fdata))
+			statsOfGh <- data.table()
             
-			for(i in 1:nNodes)
-			{
-#              browser()
-				curPopName<-nodePaths[i]
-				curNode<-nodes[i]
-#				print(curNode)
-				if(!is.null(params))
-				{
-					
-					curGate<-getGate(obj,curNode)
-				}
-				
-		
-				##get count and proportion
-				statsOfNode<-subset(statsPop,node==curNode)
-#				if(curPopName%in%c("margin","MFI"))
-				if(!is.null(params)&&!.isRoot(obj,curNode)&&class(curGate)!="booleanFilter")#&&!is.na(curGate)
-				{
-#					browser()
-					chnl<-parameters(curGate)
-#					
-#					if(length(chnl)>1)
-#						chnl<-NA
-				}else
-				{
-					chnl<-NA
-				}
-				if(isFlowCore)
-				{
-					stats_prop<-statsOfNode$flowCore.freq
-					stats_count<-statsOfNode$flowCore.count	
-				}else
-				{
-					stats_prop<-statsOfNode$flowJo.freq
-					stats_count<-statsOfNode$flowJo.count
-				}
+			fdata<-getData(obj, use.exprs = isSpike||isMFI)
+			pd<-pData(parameters(fdata))
+                      
+			statslist <- lapply(1:nNodes,function(i){
 
-				if(is.na(chnl))
-					stain<-NA
-				else
-				{
-					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
-				}
-				statsOfNode<-data.frame(channel=chnl,stain=stain,stats=c("proportion","count")
-										,value=c(stats_prop,stats_count)
-										,row.names=NULL)
-#				browser()
-				#get spikes meatures for each channel at root level
-				if(!is.null(params)&&.isRoot(obj,curNode)&&isSpike)
-				{
+  				curPopName<-nodePaths[i]
+  				curNode<-nodes[i]
+                
 
-#					browser()
-					expr <- exprs(fdata)
-					
-					time <- flowCore:::findTimeChannel(expr)
-					if(!(time %in% colnames(expr)))
-						stop("Invalid name of variable (", time, ") recording the ",
-								"\ntime domain specified as 'time' argument.", call.=FALSE)
-					nonTimeChnls<-params[!params%in%time]
-					stain<-unname(pd[match(nonTimeChnls,pd[,"name"]),"desc"])
-					
-					spikes<-unlist(lapply(nonTimeChnls,.timelineplot,x=fdata, binSize=50))
-					
-					statsOfNode<-rbind(statsOfNode,data.frame(channel=nonTimeChnls,stain=stain,stats="spike",value=spikes))
-					
-				}
-
-
-				#get MIF meatures
-				if(!is.na(chnl)&&isMFI)
-				{
-                    curData<-getData(obj,curNode)
-#					browser()
-					mat<-exprs(curData)[,chnl,drop=FALSE]
-					chnames<-colnames(mat)
-					MFI<-rowMedians(t(mat))#using rowMedian to speed up
-#					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
-					if(all(!is.na(MFI)))
-						statsOfNode<-rbind(statsOfNode,data.frame(channel=chnames,stain=stain,stats="MFI",value=MFI))
-				}
-				##append the rows
-				
-				statsOfGh<-rbind(statsOfGh,cbind(statsOfNode,node=curNode,population=curPopName,row.names=NULL))
-			}
-		
+  				if(!is.null(params))
+  				{
+  					
+  					curGate<-getGate(obj,curNode)
+  				}
+  				
+  		
+  				##get count and proportion
+  				statsOfNode<-statsPop[curNode]
+  
+  				if(!is.null(params)&&!.isRoot(obj,curNode)&&class(curGate)!="booleanFilter")
+  				{
+  
+  					chnl<-parameters(curGate)
+  				}else
+  				{
+  					chnl<-as.character(NA) #convert from logical NA to character NA for rbindlist to behave appropriately
+  				}
+  				if(isFlowCore)
+  				{
+  					stats_prop<-statsOfNode$flowCore.freq
+  					stats_count<-statsOfNode$flowCore.count	
+  				}else
+  				{
+  					stats_prop<-statsOfNode$flowJo.freq
+  					stats_count<-statsOfNode$flowJo.count
+  				}
+  
+  				if(all(is.na(chnl)))
+  					stain<-as.character(NA)
+  				else
+  				{
+  					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
+  				}
+  				statsOfNode<-data.table(channel=chnl
+                                        ,stain=stain
+                                         ,stats=c("proportion","count")
+  										,value=c(stats_prop,stats_count)
+  										)
+  #				browser()
+  				#get spikes meatures for each channel at root level
+  				if(!is.null(params)&&.isRoot(obj,curNode)&&isSpike)
+  				{
+  
+  #					browser()
+  					expr <- exprs(fdata)
+  					
+  					time <- flowCore:::findTimeChannel(expr)
+  					if(!(time %in% colnames(expr)))
+  						stop("Invalid name of variable (", time, ") recording the ",
+  								"\ntime domain specified as 'time' argument.", call.=FALSE)
+  					nonTimeChnls<-params[!params%in%time]
+  					stain<-unname(pd[match(nonTimeChnls,pd[,"name"]),"desc"])
+  					
+  					spikes <- unlist(lapply(nonTimeChnls,.timelineplot,x=fdata, binSize=50))
+  					
+  					statsOfNode <- rbindlist(list(statsOfNode
+                                                    ,data.table(channel=nonTimeChnls
+                                                                ,stain=stain
+                                                                ,stats="spike"
+                                                                 ,value=spikes)
+                                                    )
+                                              )
+  					
+  				}
+  
+  
+  				#get MIF meatures
+  				if(!is.na(chnl)&&isMFI)
+  				{
+                      curData<-getData(obj,curNode)
+  #					browser()
+  					mat<-exprs(curData)[,chnl,drop=FALSE]
+  					chnames<-colnames(mat)
+  					MFI<-rowMedians(t(mat))#using rowMedian to speed up
+  #					MFI<-colMeans(exprs(curData)[,chnl,drop=FALSE])
+  					if(all(!is.na(MFI)))
+  						statsOfNode <- rbindlist(list(statsOfNode
+                                                        ,data.table(channel=chnames
+                                                                    ,stain=stain
+                                                                    ,stats="MFI"
+                                                                     ,value=MFI)
+                                                         )
+                                                     )
+  				}
+                  #append two columns
+                  statsOfNode[,node:= curNode]
+                  statsOfNode[,population:= curPopName]
+                  statsOfNode
+  			})
+            
+            ##merge to one table
+            statsOfGh<-rbindlist(statslist)
+            
 			statsOfGh
 			
 			
