@@ -18,9 +18,8 @@
 			
 #			browser()
 			for(curID in names(statsOfGS)){
-					
-                    curID <- as.integer(curID)
-                    statsOfGS[[curID]][,id:= curID]
+                    
+                    statsOfGS[[curID]][,id:= as.integer(curID)]
 				}
 			statsOfGS<-rbindlist(statsOfGS)
 			
