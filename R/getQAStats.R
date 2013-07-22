@@ -16,9 +16,8 @@
 			statsOfGS<-getQAStats(gs,...)
 			
 			for(curID in names(statsOfGS)){
-					
-                    curID <- as.integer(curID)
-                    statsOfGS[[curID]][,fileid:= curID]
+                    
+                    statsOfGS[[curID]][,id:= as.integer(curID)]
 				}
 			statsOfGS<-rbindlist(statsOfGS)
 			
