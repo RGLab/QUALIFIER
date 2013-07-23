@@ -134,7 +134,7 @@ panel.xyplotEx <-
 					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
 							,channel=as.character(curOutRow$channel)
 							,stats=statsType)
 					
@@ -513,10 +513,10 @@ panel.bwplotEx <-
 				
 					if(!is.null(dest)&&plotAll!="none")
 					{
-						FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
+						FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
 						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 						#				browser()
-						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
 								,channel=as.character(curOutRow$channel)
 #								,stats=as.character(curOutRow$stats)
 								,stats=statsType
@@ -702,10 +702,10 @@ panel.bwplotEx <-
     				
     				if(!is.null(dest)&&plotAll!="none")
     				{
-    					FileTips<-paste("uniqueID=",curOutRow$id," file=",curOutRow$name,sep="")
+    					FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
     					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
     	#				browser()
-    					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$id,population=as.character(curOutRow$population)
+    					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
     						,channel=as.character(curOutRow$channel)
     #						,stats=as.character(curOutRow$stats)
     						,stats=statsType

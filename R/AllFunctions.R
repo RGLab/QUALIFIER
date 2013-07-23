@@ -341,7 +341,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	if(!is.null(statsType))
 		ret_stats <- subset(ret_stats,stats%in%statsType)
 	
-	ret <- merge(ret_stats,ret_anno,by=c("gsid","id"))
+	ret <- merge(ret_stats,ret_anno,by=c("gsid",qa.par.get("idCol")))
     
 	#filter by subset 
 
