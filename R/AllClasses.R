@@ -76,23 +76,24 @@ read.qaTask <-function(checkListFile, ...)
 	
 	db$qaTaskTbl<-df
 	qaTask.list<-apply(df,1,function(curRow,db){
-#          browser()
-          filter <- curRow["subset"]
-          filter <- parse(text = filter)
-				curQa<-new("qaTask"
-						,qaID=as.integer(curRow["qaID"])
-						,qaName=curRow["qaName"]
-						,description=curRow["description"]
-						,qaLevel=curRow["qaLevel"]
-						,pop=curRow["pop"]
-						,formula=as.formula(curRow["formula"])
-                        ,type=curRow["type"]
-                        ,subset = filter
-						,plotType=curRow["plotType"]
-						,db=db
-				)
-				curQa					
-			},db)
+#                          browser()
+                          filter <- curRow["subset"]
+                          if(!is.na(filter))
+                            filter <- parse(text = filter)
+                    		curQa<-new("qaTask"
+                        				,qaID=as.integer(curRow["qaID"])
+                        				,qaName=curRow["qaName"]
+                        				,description=curRow["description"]
+                        				,qaLevel=curRow["qaLevel"]
+                        				,pop=curRow["pop"]
+                        				,formula=as.formula(curRow["formula"])
+                                        ,type=curRow["type"]
+                                        ,subset = filter
+                        				,plotType=curRow["plotType"]
+                        				,db=db
+                        		    )
+                		  curQa					
+			            } ,db)
 	names(qaTask.list)<-df$qaName
 	db$qaTaskList<-qaTask.list
 	print(paste(nrow(df),"qaTask created ahd saved in db!"))
