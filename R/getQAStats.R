@@ -16,12 +16,12 @@
 			statsOfGS<-getQAStats(gs,...)
 			
 			for(curID in names(statsOfGS)){
-                    
-                    statsOfGS[[curID]][,id:= as.integer(curID)]
+
+                    statsOfGS[[curID]][,eval(qa.par.get("idCol")):= as.integer(curID)]
 				}
 			statsOfGS<-rbindlist(statsOfGS)
 			
-
+                    
 			##append sid and gsid
 			if(nrow(obj$stats)==0)
 				msid<-0
@@ -48,7 +48,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			print("extracting stats...")
 			
 			glist<-obj@set
-			IDs<-pData(obj)[getSamples(obj),'fileid']
+			IDs<-pData(obj)[getSamples(obj),qa.par.get("idCol")]
 			if(is.null(IDs)||length(IDs)!=length(glist))
 			{
 				stop("Not all IDs for the current sample set are found in meta data of this GatingSet!")	

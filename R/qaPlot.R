@@ -215,7 +215,7 @@ setMethod("plot", signature=c(x="qaTask"),
 plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
-						,scatterPlot=FALSE,gsid=NULL,highlight='fileid'
+						,scatterPlot=FALSE,gsid=NULL
 						,horizontal=FALSE
                         ,panel = NULL
 						,...)
@@ -314,7 +314,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 
 	res <- reshape::rename(res,c("value"=statsType))
 	
-
+    highlight <- qaObj@highlight
 	if(!highlight%in%colnames(res))
 		stop(paste(highlight,"not found in the data"))
 #	browser()	

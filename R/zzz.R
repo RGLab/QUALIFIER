@@ -2,7 +2,7 @@
 
 
 .db <- new.env()
-
+.qa.options <- new.env()
 createDbSchema <- function(db)
 {
 	#qaTask table
@@ -29,6 +29,13 @@ createDbSchema <- function(db)
 							,value=numeric()
 							,stringsAsFactors=F
 					)
+    db$stats <- reshape::rename(db$stats,c(id = qa.par.get("idCol")))                    
+	#gating set table
+	db$gstbl<-data.frame(gsid=integer()
+						,gsname=character()
+						,objlink=character()
+						,stringsAsFactors=F
+						)
 	db$gs<-list()
 }
 
@@ -57,11 +64,18 @@ createDbSchema <- function(db)
                                                 )
 }
 
+qa.par.set <- function (name, value){
+  assign(name, value, .qa.options)
+}
+qa.par.get <- function (name, value){
+  get(name, .qa.options)
+}
 .onLoad <- function(libname, pkgname) 
 {
-	createDbSchema(.db)
+	
 	 .setupPlotTheme()
-																				
+     qa.par.set("idCol","fileid")
+     createDbSchema(.db)
 }
 
 

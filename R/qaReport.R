@@ -53,9 +53,9 @@ qaWrite.summary<-function(x,p,gsid,...){
 	curGS<-db$gs[[gsid]]
 	anno<-pData(curGS)
 	
-	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y="sid")
+	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y = idColName)
 	m.outResult<-merge(m.outResult,taskTbl,by.x="qaID",by.y="qaID")
-	m.outResult<-merge( m.outResult, anno[ , c( 'fileid', 'name' ) ], by.x = 'fileid', by.y = 'fileid' )
+	m.outResult<-merge(m.outResult,anno[,c("id","name")],by.x = idColName, by.y = idColName)
 	
 	castResult<-cast(m.outResult,name~qaTask)
 	castResult<-as.data.frame(castResult)
@@ -93,6 +93,7 @@ qaWrite.summary<-function(x,p,gsid,...){
 #TODO:multi-gs is not fully supported in qaReport yet
 qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 #			browser()
+            idColName <- qa.par.get("idCol")
 			imageDir<-file.path(outDir,"image")
 			db<-getData(x)
 			curGS<-db$gs[[gsid]]
@@ -100,7 +101,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 			curQaID<-qaID(x)
 #			browser()
 			outResult<-base::subset(db$outlierResult,qaID==curQaID)
-			outResult<-merge( outResult, db$stats[ , c( 'sid', 'fileid', 'channel' ) ] )
+			outResult<-merge(outResult,db$stats[,c("sid",idColName,"channel")])
 			outResult<-merge(outResult,anno)
 
 			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
@@ -347,7 +348,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 #														,hwrite(length(unique(sub2$name)),class='count')
 												,ifelse(nrow(curOut)>0	
 														,paste(
-																hwrite(length(unique(curOut$fileid)),class='count')					
+																hwrite(length(unique(curOut[,idColName])),class='count')					
 																," FCS files "
 														)
 														,"")

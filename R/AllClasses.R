@@ -38,8 +38,8 @@ setClass("qaTask",
 										,smooth=FALSE
 										,stat=TRUE)
 						,htmlReport=FALSE
-						,rFunc=NULL
-						,highlight = 'fileid'
+						,rFunc = NULL
+						,highlight= NULL
 						,db="ANY"
 						)
 		)
@@ -76,7 +76,7 @@ read.qaTask <-function(checkListFile, ...)
 	
 	db$qaTaskTbl<-df
 	qaTask.list<-apply(df,1,function(curRow,db){
-#                          browser()
+                          
                           filter <- curRow["subset"]
                           if(!is.na(filter))
                             filter <- parse(text = filter)
@@ -90,6 +90,7 @@ read.qaTask <-function(checkListFile, ...)
                                         ,type=curRow["type"]
                                         ,subset = filter
                         				,plotType=curRow["plotType"]
+                                        ,highlight = qa.par.get("idCol")
                         				,db=db
                         		    )
                 		  curQa					
