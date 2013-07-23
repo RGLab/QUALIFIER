@@ -9,7 +9,11 @@ clearCheck<-function(obj,gsid)
 	db$outlierResult<-db$outlierResult[!ind,]
 }
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL, ...){
+		function(obj,formula=NULL,subset
+                  ,outlierfunc = list(func = outlier.norm,args = list())
+                  ,gOutlierfunc=list(func = outlier.norm,args = list())                
+                   ,rFunc=NULL, ...){
+			
 			call.f<-match.call(expand.dots = F)
 
 			#replace subset with Subset
@@ -88,13 +92,16 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		})
         
 
-.qaCheck<-function(obj,formula=NULL,Subset,outlierfunc=NULL,gOutlierfunc=NULL,rFunc=NULL,gsid=NULL,...){
+.qaCheck<-function(obj,formula=NULL,Subset
+                    ,outlierfunc
+                    ,gOutlierfunc
+                    ,rFunc=NULL,gsid=NULL,...){
 	
 
 	qaID<-qaID(obj)
 	db<-getData(obj)
 	pop<-getPop(obj)
-#	browser()
+
 	if(is.null(outlierfunc))
 	{
 		if(plotType(obj)=="bwplot")
@@ -126,14 +133,15 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 #	browser()
     if(missing(Subset))
       Subset <- obj@subset
+    
 	##query db
-	if(length(Subset) == 0)
+	if(length(Subset) == 0 || is.na(Subset))
 	{		
-		yy<-.queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
+		yy <- .queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
 		
 	}else
 	{
-		yy<-.queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
+		yy <- .queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
 		
 	}
 		
@@ -142,38 +150,61 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		return("empty subsets!")
 	}
 		
-#	yy<-cast(yy,...~stats)
+
 	yy<-reshape::rename(yy,c("value"=statsType))		
-#	browser()
+
 	##apply the function to xTerm and yTerm in each group
 	if(!is.null(formuRes$xfunc))
 		yy<-applyFunc(yy,as.character(formuRes$xTerm),formuRes$xfunc,formuRes$groupBy)
 	if(!is.null(formuRes$yfunc))
 		yy<-applyFunc(yy,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
 	
-	
-      
+
+    # outlier detection within groups (for bwplot) 
     .funcOutlierGrp <- function(x){
-      
-      curFactor<-as.factor(eval(substitute(x$v,list(v=as.character(xTerm)))))
-      
-      IQRs <- x[,IQR(.SD[[statsType]]), by = xTerm][,V1]
-      
-      #log transform for between groups outlier call
-      #                   browser()
-      curGroupOutlier<-gOutlierfunc(log(IQRs),isLower=FALSE,...)
-      
-      curOutGroupID<-names(curGroupOutlier[curGroupOutlier])
-      curOutSids<-x[curFactor%in%curOutGroupID,sid]
-      if(length(curOutSids)>0)
-        curOutSids
+              #do IQR within each group
+              IQR.Tbl <- x[,IQR(.SD[[statsType]]), by = xTerm]
+#              browser()
+              #log transform for between groups outlier call
+              IQRs <- IQR.Tbl[,V1]
+              curGroupOutlier <- do.call(gOutlierfunc$func ,c(list(x = log(IQRs))
+                                                                ,c(isLower=FALSE
+                                                                  ,gOutlierfunc$args
+                                                                  )
+                                                              )
+                                          )
+              
+              curOutGroupID <- as.character(IQR.Tbl[curGroupOutlier, xTerm])
+              #match to the respective sids of the detected group outliers
+              if(length(curOutGroupID) > 0){
+                mid <- match(curOutGroupID,x[[eval(as.character(xTerm))]])
+                
+                curOutSids <- x[mid,sid]
+                if(length(curOutSids)>0)
+                  curOutSids        
+              }
     }
+#    browser()
+    ##detect group outlier if boxplot
+	groupOutSids<-NULL
+	if(plotType(obj)=="bwplot")
+	{
+        #do the xterm_group outlier detection within each conditional group
+        if(is.null(groupBy))
+          groupOutSids <- .funcOutlierGrp(yy)
+        else
+          groupOutSids <- yy[,.funcOutlierGrp(.SD), by = groupBy][,V1]
+		
+	}
+	
+	
+    # individual outlier detection 
     .funcOutlier <-function(x){
       
       
       if(is.null(rFunc))
       {
-        inputVec <- x[[statsType]]
+        inputVec <- as.numeric(x[[statsType]])
         
       }else
       {
@@ -187,43 +218,33 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
           inputVec<-regResult$residuals
         }else
         {
-#                       browser()
-          inputVec<-x[[statsType]]
+
+          inputVec <- as.numeric(x[[statsType]])
         }
       }
-#               browser()
-      outlierVec<-outlierfunc((inputVec), ...)
+#                       browser()               
+      outlierVec <- do.call(outlierfunc$func,c(list(x= inputVec)
+                                                ,outlierfunc$args
+                                                )
+                                              
+                            )
       
       x[outlierVec,sid]
       
       
     }
-	##detect group outlier if boxplot
-	groupOutSids<-NULL
-	if(plotType(obj)=="bwplot")
-	{
-		##merge multipe conditioning variable to one to make a simply factor
-		
-		if(is.null(gOutlierfunc))
-		{
-			gOutlierfunc<-outlier.norm
-			message("outlier.norm is used for group outlier detection.")
-		}
-          
-        groupOutSids <- yy[,funcOutlierGrp(.SD), by = groupBy][,V1]
-		
-	}
-	
-	
 #	browser()
-	
 	##bwplot indicates the aditional grouping level by aliquot for individual outlier detection
 	if(plotType(obj)=="bwplot")
 	{
-		
-		groupBy<-c(groupBy,as.character(xTerm))
-	}	
-	stats_list<- yy[,.funcOutlier(.SD), by = groupBy][,V1]
+		groupBy <- c(groupBy,as.character(xTerm))
+        outlierfunc <- list(func = qoutlier,args = list())
+	}
+    if(is.null(groupBy))
+      stats_list <- .funcOutlier(yy)
+    else
+      stats_list <- yy[,.funcOutlier(.SD), by = groupBy][,V1]
+	 
 			
 
 #	browser()

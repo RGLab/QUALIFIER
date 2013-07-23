@@ -206,18 +206,21 @@ reScaleData<-function(fs,fres,channel,logScale)
 }
 
 setMethod("plot", signature=c(x="qaTask"),
-		function(x,...){
-			plot.qaTask(qaObj=x,...)
+		function(x, y, ...){
+			
+          plot.qaTask(qaObj=x,y = y, ...)
+            
 		})
 
 plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
-						,scatterPlot=FALSE,gsid=NULL, highlight = 'fileid'
-						,horiz=FALSE
+						,scatterPlot=FALSE,gsid=NULL,highlight='fileid'
+						,horizontal=FALSE
                         ,panel = NULL
 						,...)
 {
+#  browser()
   #assign null to formula if it is missing
   if(missing(y))
     formula1 <- getFormula(qaObj)
@@ -251,7 +254,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 	curGroup<-NULL
 	
 	if(is.null(qpar(qaObj)$horiz))
-		qpar(qaObj)$horiz<-FALSE
+		qpar(qaObj)$horiz <- FALSE
 	
 	if(is.null(rFunc))
 		rFunc<-rFunc(qaObj)
@@ -271,7 +274,8 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
       subset <- qaObj@subset
     subset <- substitute(subset)
     ##query db
-    if(length(subset) == 0)
+#    browser()
+    if(length(subset) == 0||is.na(subset))
     	res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
 	else
 		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
@@ -294,22 +298,21 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 		}
 	}
 #	browser()
-	if(getName(qaObj)=="BoundaryEvents")
-		res<-base::subset(res,value>0)##filter out those zero-value records which may cause slow plotting
+#	if(getName(qaObj)=="BoundaryEvents")
+#		res<-base::subset(res,value>0)##filter out those zero-value records which may cause slow plotting
 			
-	if(nrow(res)==0)
-	{
-#		message()
-		return("no samples with the value>0 matched!")
-		
-	}
+#	if(nrow(res)==0)
+#	{
+##		message()
+#		return("no samples with the value>0 matched!")
+#		
+#	}
 	#append the outlier flag
-	res$outlier<-res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
-	res$gOutlier<-res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
+	res[, outlier := res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid]
+	res[, gOutlier := res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid]
 #	browser()
-	#reshape the data to include the column of the statType which can be passed to lattice	as it is
-#	res<-as.data.frame(cast(res,...~stats))
-	res<-reshape::rename(res,c("value"=statsType))
+
+	res <- reshape::rename(res,c("value"=statsType))
 	
 
 	if(!highlight%in%colnames(res))
@@ -364,7 +367,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 		{
 			
 
-			par<-lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
+			par <- lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
 																					,pch=21
 																					)
 																	)
@@ -372,13 +375,13 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 										)
 			
 		
-			if(horiz)
+			if(horizontal)
 			{
 				groupBy.Panel<-as.character(formuRes$yTerm)#formula[[3]][[2]])
 				
 			}else
 			{
-				groupBy.Panel<-as.character(formuRes$xTerm)
+				groupBy.Panel <- as.character(formuRes$xTerm)
 		}
 
 			
@@ -386,7 +389,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
             panel <- panel.bwplotEx
           }
 
-			thisCall<-quote(bwplot(x=formula1
+			thisCall<-quote(bwplot(x = formula1
 									,data=res ##this argument does not get passed to panel function
 									,panel=panel
 									,df=res#arguments from this are passed to panel function
@@ -396,6 +399,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 									,plotAll=plotAll
 									,statsType=statsType
 									,scatterPar=scatterP
+                                    ,horizontal = horizontal
 									,db=db
 									)
 							)

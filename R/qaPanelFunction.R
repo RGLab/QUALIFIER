@@ -355,8 +355,6 @@ panel.bwplotEx <-
 	rowIds<-subscripts
 	df<-df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
 	
-	dataGroups<-split(df,f=df[,groupBy],drop=TRUE)
-	nGroups<-length(dataGroups)	
 #	browser()
 	if (horizontal)
 	{
@@ -406,14 +404,12 @@ panel.bwplotEx <-
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
 		
-		for(i in 1:nGroups)
-		{
-#			browser()
-			
-			curGroup<-dataGroups[[i]]
-			curGroupID<-curGroup[1,groupBy]
-			population<-as.character(curGroup$population[1])
-#			stats<-as.character(curGroup$stats[1])
+        df[,{
+
+              i <- .GRP
+              curGroup <- .SD
+              curGroupID <- as.character(.BY[[1]])
+      		  population<-as.character(curGroup[1,population])
 			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
@@ -507,13 +503,13 @@ panel.bwplotEx <-
 #			browser()
 			
 			## outliers
-			for(curOutInd in which(curGroup$outlier))
+			for(curOutInd in which(curGroup[,outlier]))
 			{
 				
-				curOut<-blist.x[[i]][curOutInd]
+				curOut <- blist.x[[i]][curOutInd]
 				if(!is.na(curOut))##due to the reshape,the extra NA lines from other stats were added here need to be filtered out
 				{
-					curOutRow<-curGroup[curOutInd,,drop=FALSE]
+					curOutRow <- curGroup[curOutInd,]
 				
 					if(!is.null(dest)&&plotAll!="none")
 					{
@@ -539,7 +535,8 @@ panel.bwplotEx <-
 #					browser()
 					
 					panel.points(x = curOut,#unlist(blist.out),
-							y = rep(levels.fos[i], lapply(blist.out, length)[[i]]),
+#							y = rep(levels.fos[i], lapply(blist.out, length)[[i]]),
+                            y = levels.fos[i],
 							pch = plot.symbol$pch,
 							col = plot.symbol$col,
 							alpha = plot.symbol$alpha,
@@ -551,7 +548,7 @@ panel.bwplotEx <-
 				}
 			}
 			
-		}
+		}, by = groupBy]
 	}
 	else
 	{
@@ -563,9 +560,7 @@ panel.bwplotEx <-
 						do.out = do.out)
 		blist.stats <- t(sapply(blist, "[[", "stats"))
 		blist.x <- lapply(blist, "[[", "x")
-#		browser()
-#		blist.out <- lapply(blist, "[[", "out")
-#		blist.outInd <- lapply(blist, "[[", "outInd")
+        
 		blist.height <- box.width # box.ratio / (1 + box.ratio)
 		if (varwidth)
 		{
@@ -593,164 +588,159 @@ panel.bwplotEx <-
 				xright - notch.frac * blist.height / 2,
 				xright, xright, xleft, xleft,
 				xleft + notch.frac * blist.height / 2)
-		## xs <- matrix(NA_real_, nrow = nrow(xbnd) * 2, ncol = ncol(xbnd))
-		## ys <- matrix(NA_real_, nrow = nrow(xbnd) * 2, ncol = ncol(xbnd))
-		## xs[seq(along.with = levels.fos, by = 2), ] <- xbnd[seq(along.with = levels.fos), ]
-		## ys[seq(along.with = levels.fos, by = 2), ] <- ybnd[seq(along.with = levels.fos), ]
-		
 		## box
 		
 		## append NA-s to demarcate between boxes
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
 		
-#		
-		for(i in 1:nGroups)
-		{
-#			browser()
-			
-			curGroup<-dataGroups[[i]]
-			curGroupID<-curGroup[1,groupBy]
-			population<-as.character(curGroup$population[1])
-			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
-					, " Tube=",curGroup$Tube[1],sep="")
-			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
-			if(!is.null(dest))
-				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
-			##lattice plot for outlier group
-			
-			if(plotAll!="none"&&!is.null(dest))
-			{
-				if(cur.btw.groups.outliers||plotAll==TRUE)
-				{
-#				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="s"
-							,ID=curGroupID
-							,population=population
-							,stats.=statsType)
-					
-					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
-					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
-					
-					##can't print right away since there is issue with embeded lattice plot
-					##some how it alter the viewport or leves of parent lattice object 
-#				browser()
-					curPlotObj<-qa.GroupPlot(db,curGroup,statsType=statsType,par=scatterPar)
-					if(!is.null(curPlotObj))
-					{
-						assign(basename(paths),curPlotObj,envir=plotObjs)
-					
-						setSVGShapeURL(paths)
-					}
-				}
-			}
-#			browser()
-			
-			panel.polygon(t(xs)[,i], t(ys)[,i],
-					lwd = box.rectangle$lwd,
-					lty = box.rectangle$lty,
-					col = fill,
-					alpha = box.rectangle$alpha,
-					border = ifelse(cur.btw.groups.outliers,"red",box.rectangle$col),
-					identifier = paste(identifier, "#E41A1C", sep="."))
-			
-			## whiskers
-			
-			panel.segments(rep(levels.fos[i], 2),
-					c(blist.stats[i, 2], blist.stats[i, 4]),
-					rep(levels.fos[i], 2),
-					c(blist.stats[i, 1], blist.stats[i, 5]),
-					col = box.umbrella$col,
-					alpha = box.umbrella$alpha,
-					lwd = box.umbrella$lwd,
-					lty = box.umbrella$lty,
-					identifier = paste(identifier, "whisker", sep="."))
-			
-			panel.segments(levels.fos[i] - blist.height / 2,
-					c(blist.stats[i, 1], blist.stats[i, 5]),
-					levels.fos[i] + blist.height / 2,
-					c(blist.stats[i, 1], blist.stats[i, 5]),
-					col = box.umbrella$col,
-					alpha = box.umbrella$alpha,
-					lwd = box.umbrella$lwd,
-					lty = box.umbrella$lty,
-					identifier = paste(identifier, "cap", sep="."))
-			
-#				browser()
-			## dot
-			
-			if (all(pch == "|"))
-			{
-				mult <- if (notch) 1 - notch.frac else 1
-				panel.segments(levels.fos[i] - mult * blist.height / 2,
-						blist.stats[i, 3],
-						levels.fos[i] + mult * blist.height / 2,
-						blist.stats[i, 3],
-						lwd = box.rectangle$lwd,
-						lty = box.rectangle$lty,
-						col = box.rectangle$col,
-						alpha = alpha,
-						identifier = paste(identifier, "dot", sep="."))
-			}
-			else
-			{
-				panel.points(x = levels.fos[i],
-						y = blist.stats[i, 3],
-						pch = pch,
-						col = col, alpha = alpha, cex = cex,
-						fontfamily = fontfamily,
-						fontface = lattice:::chooseFace(fontface, font),
-						fontsize = fontsize.points,
-						identifier = paste(identifier, "dot", sep="."))
-			}
-			
-			## outliers
-#				browser()
-				
-			for(curOutInd in which(curGroup$outlier))
-			{
-				curOut<-blist.x[[i]][curOutInd]
-				curOutRow<-curGroup[curOutInd,,drop=FALSE]
-				
-				if(!is.null(dest)&&plotAll!="none")
-				{
-					FileTips<-paste("uniqueID=",curOutRow$fileid," file=",curOutRow$name,sep="")
-					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
-	#				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$fileid,population=as.character(curOutRow$population)
-						,channel=as.character(curOutRow$channel)
-#						,stats=as.character(curOutRow$stats)
-						,stats=statsType
-						)
-					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
-					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
-
-					##save the individual plot obj
-#						browser()
-					assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
-					
-					
-					setSVGShapeURL(paths)
-					
-				}
-#				browser()
-				panel.points(x = levels.fos[i],
-					y = curOut,
-					pch = plot.symbol$pch,
-					col = plot.symbol$col,
-					alpha = plot.symbol$alpha,
-					cex = plot.symbol$cex,
-					fontfamily = plot.symbol$fontfamily,
-					fontface = lattice:::chooseFace(plot.symbol$fontface, plot.symbol$font),
-					fontsize = fontsize.points,
-					identifier = paste(identifier, "outlier", sep="."))
-			
-						
-		}
-		
-		
-	}
-	}
+		df[,{
+#              browser()
+                i <- .GRP
+    			curGroup <- .SD
+    			curGroupID <- as.character(.BY[[1]])
+    			population <- as.character(curGroup[1,population])
+    			groupTips <- paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
+    					, " Tube=",curGroup$Tube[1],sep="")
+    			cur.btw.groups.outliers <- unique(curGroup[,gOutlier])
+    			if(!is.null(dest))
+    				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
+    			##lattice plot for outlier group
+    			
+    			if(plotAll!="none"&&!is.null(dest))
+    			{
+    				if(cur.btw.groups.outliers||plotAll==TRUE)
+    				{
+    #				browser()
+    					paths<-QUALIFIER:::.FileNameGen(prefix="s"
+    							,ID=curGroupID
+    							,population=population
+    							,stats.=statsType)
+    					
+    					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
+    					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+    					
+    					##can't print right away since there is issue with embeded lattice plot
+    					##some how it alter the viewport or leves of parent lattice object 
+    #				browser()
+    					curPlotObj<-qa.GroupPlot(db,curGroup,statsType=statsType,par=scatterPar)
+    					if(!is.null(curPlotObj))
+    					{
+    						assign(basename(paths),curPlotObj,envir=plotObjs)
+    					
+    						setSVGShapeURL(paths)
+    					}
+    				}
+    			}
+    #			browser()
+    			
+    			panel.polygon(t(xs)[,i], t(ys)[,i],
+    					lwd = box.rectangle$lwd,
+    					lty = box.rectangle$lty,
+    					col = fill,
+    					alpha = box.rectangle$alpha,
+    					border = ifelse(cur.btw.groups.outliers,"red",box.rectangle$col),
+    					identifier = paste(identifier, "#E41A1C", sep="."))
+    			
+    			## whiskers
+    			
+    			panel.segments(rep(levels.fos[i], 2),
+    					c(blist.stats[i, 2], blist.stats[i, 4]),
+    					rep(levels.fos[i], 2),
+    					c(blist.stats[i, 1], blist.stats[i, 5]),
+    					col = box.umbrella$col,
+    					alpha = box.umbrella$alpha,
+    					lwd = box.umbrella$lwd,
+    					lty = box.umbrella$lty,
+    					identifier = paste(identifier, "whisker", sep="."))
+    			
+    			panel.segments(levels.fos[i] - blist.height / 2,
+    					c(blist.stats[i, 1], blist.stats[i, 5]),
+    					levels.fos[i] + blist.height / 2,
+    					c(blist.stats[i, 1], blist.stats[i, 5]),
+    					col = box.umbrella$col,
+    					alpha = box.umbrella$alpha,
+    					lwd = box.umbrella$lwd,
+    					lty = box.umbrella$lty,
+    					identifier = paste(identifier, "cap", sep="."))
+    			
+    #				browser()
+    			## dot
+    			
+    			if (all(pch == "|"))
+    			{
+    				mult <- if (notch) 1 - notch.frac else 1
+    				panel.segments(levels.fos[i] - mult * blist.height / 2,
+    						blist.stats[i, 3],
+    						levels.fos[i] + mult * blist.height / 2,
+    						blist.stats[i, 3],
+    						lwd = box.rectangle$lwd,
+    						lty = box.rectangle$lty,
+    						col = box.rectangle$col,
+    						alpha = alpha,
+    						identifier = paste(identifier, "dot", sep="."))
+    			}
+    			else
+    			{
+    				panel.points(x = levels.fos[i],
+    						y = blist.stats[i, 3],
+    						pch = pch,
+    						col = col, alpha = alpha, cex = cex,
+    						fontfamily = fontfamily,
+    						fontface = lattice:::chooseFace(fontface, font),
+    						fontsize = fontsize.points,
+    						identifier = paste(identifier, "dot", sep="."))
+    			}
+    			
+    			## outliers
+                
+    				
+    			for(curOutInd in which(curGroup[,outlier]))
+    			{
+    				curOut<-blist.x[[i]][curOutInd]
+    				curOutRow<-curGroup[curOutInd,,drop=FALSE]
+    				
+    				if(!is.null(dest)&&plotAll!="none")
+    				{
+    					FileTips<-paste("uniqueID=",curOutRow$fileid," file=",curOutRow$name,sep="")
+    					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
+    	#				browser()
+    					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow$fileid,population=as.character(curOutRow$population)
+    						,channel=as.character(curOutRow$channel)
+    #						,stats=as.character(curOutRow$stats)
+    						,stats=statsType
+    						)
+    					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
+    					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+    
+    					##save the individual plot obj
+    #						browser()
+    					assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
+    					
+    					
+    					setSVGShapeURL(paths)
+    					
+    				}
+    #				browser()
+    				panel.points(x = levels.fos[i],
+    					y = curOut,
+    					pch = plot.symbol$pch,
+    					col = plot.symbol$col,
+    					alpha = plot.symbol$alpha,
+    					cex = plot.symbol$cex,
+    					fontfamily = plot.symbol$fontfamily,
+    					fontface = lattice:::chooseFace(plot.symbol$fontface, plot.symbol$font),
+    					fontsize = fontsize.points,
+    					identifier = paste(identifier, "outlier", sep="."))
+    			
+    						
+    		  }
+              
+            }
+        , by = groupBy]
+        }
+	
+	
 }
 
 #modify orginal stats funtion to return more info in the final output 
