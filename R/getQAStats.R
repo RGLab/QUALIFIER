@@ -198,10 +198,11 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                   thisChnl <- chnl
                   thisStain <- stain
                 }
+#                browser()
   				statsOfNode <- data.table(channel=thisChnl
                                           ,stain=thisStain
                                            ,stats= names(statsOfNode)
-    										,value = statsOfNode
+    										,value = unname(statsOfNode)
   										)
   #				browser()
   				#get spikes meatures for each channel at root level
