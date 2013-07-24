@@ -15,6 +15,8 @@
 			
 			statsOfGS<-getQAStats(gs,...)
 			
+			
+#			browser()
 			for(curID in names(statsOfGS)){
 
                     statsOfGS[[curID]][,eval(qa.par.get("idCol")):= as.integer(curID)]
@@ -68,9 +70,9 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			}
 			##parallel mode is not available for gating set of internal structure  
 			##due to the undistributable pointer
-#			if(!is.null(nslaves)&&nslaves>1)
-#			{
-#							
+			if(!is.null(nslaves)&&nslaves>1)
+			{
+                stop("parallel mode is not available for gating set of internal structure!")							
 #				message("Using the parallel mode with ",nslaves," cores")
 #				
 #				cl<-parallel::makeCluster(nslaves,type)
@@ -79,15 +81,15 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 #												getQAStats(gh,...)
 #												},...)
 #				parallel::stopCluster(cl)
-#			}else
-#			{
-#				message("It is currently running in serial mode.")
+			}else
+			{
+				message("It is currently running in serial mode.")
 
 
 #				time1<-Sys.time()
 				statsOfGS<-lapply(glist,getQAStats,...)
 #				Sys.time()-time1
-#			}
+			}
 			
 			statsOfGS
 			

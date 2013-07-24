@@ -234,8 +234,10 @@ saveToDB<-function(db=.db,gs,gsid,metaFile,fcs.colname="name",date.colname=NULL)
 #' "fullPath" will do the full path match (e.g. "/S/Lv/L/3+/Excl/4+" will only be matched to "4+")
 matchNode<-function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath", "popName"))
 {
+#browser()
     type <- match.arg(type,c("regExpr", "fullPath", "subPath", "popName"))
     nodePath <- as.character(nodePath)
+#       browser()
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
 	if(type == "fullPath")
     {
@@ -251,6 +253,9 @@ matchNode<-function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath"
         nodesToMatch <- nodePath
         grepl(pattern,nodesToMatch)  
      } 
+      
+
+  	
 }
 
 ##API to query stats entries from db by qaTask object and formula
@@ -314,6 +319,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	}
 #	browser()
 	if(!is.null(statsType))
+		ret_stats <- subset(ret_stats,stats%in%statsType)
 	
 	ret <- merge(ret_stats,ret_anno,by=c("gsid",qa.par.get("idCol")))
     
