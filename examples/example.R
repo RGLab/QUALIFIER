@@ -43,10 +43,10 @@ nodes[matchNode("8+", nodes, type ="sub")]
 			
 datapath<-"/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/"
 #newSamples<-getSample(gh_template)
-newSamples<-list.files(datapath)[1:50]
+newSamples<-list.files(datapath)[1:200]
 length(newSamples)
 G<-GatingSet(gh_template
-			,newSamples[1:10]
+			,newSamples
 			,path=datapath
 #			,isNcdf=FALSE
 #			,dMode=4
@@ -72,7 +72,7 @@ qaPreprocess(db=db,gs=G
 pData(db$gs[[1]])
 pData(G)
 head(db$stats)
-getQAStats(G[[1]],isMFI=F,isSpike=F)
+getQAStats(G[1])
 
 #saveToDB(db=db,gs=G
 #		,metaFile=metaFile
@@ -141,7 +141,7 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 
 ##add new aggregated stats
 addStats(qaTask.list[["BoundaryEvents"]]
-		,definition=sum(proportion)~RecdDt|id+gsid
+		,definition=sum(proportion)~RecdDt|fileid+gsid
 		,pop="/root/MNC/margin"
 		,statName="sum.prop"
         )
@@ -150,19 +150,18 @@ head(subset(
 				queryStats(qaTask.list[["BoundaryEvents"]]
 							,y=sum.prop ~ RecdDt 
 							,pop="margin"
-							,subset=value>0&id==806
+#							,subset=value>0&id==806
 							)
 				,outlier==TRUE)
 )
 #check on the new stats
 qaCheck(qaTask.list[["BoundaryEvents"]]
-#		,sum.prop ~ RecdDt 
-		,outlierfunc=outlier.cutoff
-		,uBound=0.0003
+		,sum.prop ~ RecdDt 
+		,outlierfunc= list(func = outlier.cutoff,args=list(uBound=0.0003))
 		)
 
 plot(qaTask.list[["BoundaryEvents"]]
-#		,sum.prop ~ RecdDt 
+		,sum.prop ~ RecdDt 
 #		,subset=channel=="PE-A"
 #				&id==806
 #		,ylab="sum(percent)"
