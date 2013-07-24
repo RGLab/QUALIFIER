@@ -39,26 +39,27 @@ addStats<-function(x,definition,pop,statName){
 	statsType<-matchStatType(db,formuRes)
 	
 	
-	df<-queryStats(x)
-	
-	
-#	browser()
+	df <- queryStats(x)
 	
 	if(!is.null(formuRes$yfunc))
 	{
-		
-		df1<-aggregate(df[,"value",drop=FALSE],by=df[,formuRes$groupBy],FUN=formuRes$yfunc)
-		
-#		df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
+		groupBy <- paste0(formuRes$groupBy,collapse=",")
+		df1 <- df[, eval(formuRes$yfunc)(value), by = groupBy]
+        
 	}else
 		stop("no aggregation function provided!")
-
-	df1$stats<-factor(statName)
-	df1$sid<-1:nrow(df1)+max(db$stats$sid)
-	df1$channel<-NA
-	df1$population<-factor(pop)
-	df1$node<-NA
-	db$stats<-rbind(df1[,colnames(db$stats)],db$stats)
+    df1[, value := V1]
+    df1[, V1 := NULL]
+	df1[,stats := factor(statName)]
+	df1[,sid := 1:nrow(df1)+max(db$stats[,sid])]
+	df1[, channel := NA]
+    df1[, stain := NA]
+	df1[, population := factor(pop)]
+	df1[, node := NA]
+    
+    
+    
+	db$stats <- rbindlist(list(df1,db$stats))
 	
 }
 

@@ -175,7 +175,8 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 {
 	
 	
-	
+    idColName <-qa.par.get("idCol")
+    
 	annoData<-pData(gs)
 	if(is.na(match("name",colnames(annoData))))
 		stop("'name' column is missing from pData of GatingSet!")
@@ -185,9 +186,10 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		annoData_csv<-read.csv(metaFile)
 		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
 	}
-		
-	
-	annoData[,qa.par.get("idCol")]<-1:nrow(annoData)
+#browser()
+    #generate id column if not present
+	if(!idColName%in%colnames(annoData))
+	  annoData[,idColName] <- 1:nrow(annoData)
 #		browser()
 #	if(!fcs.colname%in%colnames(annoData))
 #		stop("column that specify FCS file names is missing in annotation data!")
