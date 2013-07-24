@@ -2,7 +2,7 @@
 #these are labkey db specific routines
 #to be extended to more generic DB operations
 ############################################
-loadStats <- function( db, ... ){
+loadStats <- function( db=.db, ... ){
 	db$stats <- labkey.selectRows(
 		  queryName 	= 'stats'
 		, schemaName	= 'opencyto_quality_control'
@@ -12,7 +12,7 @@ loadStats <- function( db, ... ){
 	db$stats$channel[db$stats$channel=='NA'] <- NA;
 };
 
-loadDB <- function( db, ... ){
+loadDB <- function( db=.db, ... ){
 	db$qaTaskList <- labkey.selectRows(
 		  queryName 	= 'qaTaskList'
 		, schemaName	= 'opencyto_quality_control'
@@ -33,7 +33,7 @@ loadDB <- function( db, ... ){
 	loadStats( db, ... );
 };
 
-writeTask <- function( db, ... ){
+writeTask <- function( db=.db, ... ){
 	sql <- 'SELECT MAX(qaID) AS max_qaid FROM qatasklist';
 
 	max_qaid <- labkey.executeSql(
@@ -59,7 +59,7 @@ writeTask <- function( db, ... ){
 	);
 };
 
-writeStats <- function( db, ... ){
+writeStats <- function( db=.db, ... ){
 	sql <- 'SELECT MAX(sid) AS max_sid FROM stats';
 
 	max_sid <- labkey.executeSql(
@@ -83,7 +83,7 @@ writeStats <- function( db, ... ){
 	);
 };
 
-writeQAResults <- function( db, ... ){
+writeQAResults <- function( db=.db, ... ){
 	if ( nrow( db$outlierResult ) > 0 ){
 		insertedRow	<- labkey.insertRows(
 			  toInsert	= db$outlierResult
