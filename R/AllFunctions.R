@@ -181,6 +181,8 @@ saveToDB<-function(db=.db,gs,gsid,metaFile,fcs.colname="name",date.colname=NULL)
 		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
 	}
 	
+	annoData[,qa.par.get("idCol")]<-1:nrow(annoData)
+#		browser()
 #	if(!fcs.colname%in%colnames(annoData))
 #		stop("column that specify FCS file names is missing in annotation data!")
 #	#rename the fcs filename column so that it can be fit into flowSet pData slot

@@ -9,7 +9,11 @@ clearCheck<-function(obj,gsid)
 	db$outlierResult<-db$outlierResult[!ind,]
 }
 setMethod("qaCheck", signature=c(obj="qaTask"),
-		function(obj,formula=NULL,subset
+    function(obj, ...){
+      .qaCheck.main(obj,...)
+    })
+
+.qaCheck.main <- function(obj,formula=NULL,subset
                   ,outlierfunc = list(func = outlier.norm,args = list())
                   ,gOutlierfunc=list(func = outlier.norm,args = list())                
                    ,rFunc=NULL, ...){
@@ -23,14 +27,17 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 				names(call.f)[ind]<-"Subset"
 			}
 
-			argname<-names(list(...))
+#			argname<-names(list(...))
+            argname<-names(outlierfunc$args)
+             
+#			browser()		
 			##try to run the qa for each individual cutoff value if multiple values are provided 
 			##through lbound or rbound arugments
 			if(!is.null(argname))
 			{
 				if(length(argname)==1&&grepl("[UuLl][Bb][Oo][Uu][Nn][Dd]",argname))
 				{
-					cutoff<-list(...)[[1]]
+					cutoff<-outlierfunc$args[[1]]
 					
 					#convert to named vector
 					if(class(cutoff)=="data.frame")
@@ -52,11 +59,15 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 						for(curConVal in names(cutoff))
 						{
 #						browser()
+                            cur.outlierfunc <- outlierfunc
+                            cur.outlierfunc[["args"]][[argname]] <- unname(cutoff[curConVal])
 							cur.call.f<-call.f
-							
+                            
+                        
 							cur.call.f[[1]]<-quote(.qaCheck)
 							cur.call.f$formula<-formula
-							cur.call.f$outlierfunc<-outlierfunc
+                            
+							cur.call.f$outlierfunc<-cur.outlierfunc
 							cur.call.f$gOutlierfunc<-gOutlierfunc
 							cur.call.f$rFunc<-rFunc
 #							browser()
@@ -66,9 +77,9 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 								cur.call.f$Subset<-as.call(list(as.symbol("&"),cur.call.f$Subset,substitute(subset)))
 							
 							cur.call.f$Subset<-as.call(list(quote(substitute),cur.call.f$Subset))
-							cur.call.f$...<-NULL
+#							cur.call.f$...<-NULL
 							#replace the cutoff value
-							eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
+#							eval(substitute(cur.call.f$v<-unname(cutoff[curConVal]),list(v=argname)))
 #						browser()
 							
 							eval(cur.call.f)
@@ -89,7 +100,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 				.qaCheck(obj,formula=formula,Subset=substitute(subset),outlierfunc=outlierfunc,gOutlierfunc=gOutlierfunc,rFunc=rFunc, ...)
 			
 			
-		})
+		}
         
 
 .qaCheck<-function(obj,formula=NULL,Subset

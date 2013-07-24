@@ -44,7 +44,9 @@
        .getQAStats.env(obj,gsid,...)
       })
 
-setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PSOCK",...){
+setMethod("getQAStats",signature("GatingSet"),function(obj
+#                                                      ,nslaves=NULL,type="PSOCK"
+                                                      ,...){
 			
 			
 			print("extracting stats...")
@@ -58,38 +60,38 @@ setMethod("getQAStats",signature("GatingSet"),function(obj,nslaves=NULL,type="PS
 			
 			names(glist)<-IDs
 			
-			if(length(grep("parallel",loadedNamespaces()))==1)
-			{
-#				cores<-getOption("cores")
-				if(is.null(nslaves))
-				{
-					nslaves<-parallel::detectCores()
-				}
-				
-				
-			}
+#			if(length(grep("parallel",loadedNamespaces()))==1)
+#			{
+##				cores<-getOption("cores")
+#				if(is.null(nslaves))
+#				{
+#					nslaves<-parallel::detectCores()
+#				}
+#				
+#				
+#			}
 			##parallel mode is not available for gating set of internal structure  
 			##due to the undistributable pointer
-			if(!is.null(nslaves)&&nslaves>1)
-			{
-                stop("parallel mode is not available for gating set of internal structure!")							
-#				message("Using the parallel mode with ",nslaves," cores")
-#				
-#				cl<-parallel::makeCluster(nslaves,type)
-#				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
-#												library(QUALIFIER)
-#												getQAStats(gh,...)
-#												},...)
-#				parallel::stopCluster(cl)
-			}else
-			{
-				message("It is currently running in serial mode.")
+#			if(!is.null(nslaves)&&nslaves>1)
+#			{
+#                stop("parallel mode is not available for gating set of internal structure!")							
+##				message("Using the parallel mode with ",nslaves," cores")
+##				
+##				cl<-parallel::makeCluster(nslaves,type)
+##				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
+##												library(QUALIFIER)
+##												getQAStats(gh,...)
+##												},...)
+##				parallel::stopCluster(cl)
+#			}else
+#			{
+#				message("It is currently running in serial mode.")
 
 
 #				time1<-Sys.time()
 				statsOfGS<-lapply(glist,getQAStats,...)
 #				Sys.time()-time1
-			}
+#			}
 			
 			statsOfGS
 			
