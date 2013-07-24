@@ -187,7 +187,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	}
 		
 	
-	annoData$id<-1:nrow(annoData)
+	annoData[,qa.par.get("idCol")]<-1:nrow(annoData)
 #		browser()
 #	if(!fcs.colname%in%colnames(annoData))
 #		stop("column that specify FCS file names is missing in annotation data!")

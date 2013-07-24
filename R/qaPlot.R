@@ -218,6 +218,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPlot=FALSE,gsid=NULL
 						,horizontal=FALSE
                         ,panel = NULL
+                        ,highlight
 						,...)
 {
 #  browser()
@@ -313,10 +314,11 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 #	browser()
 
 	res <- reshape::rename(res,c("value"=statsType))
-	
-    highlight <- qaObj@highlight
-	if(!highlight%in%colnames(res))
-		stop(paste(highlight,"not found in the data"))
+	if(missing(highlight)){
+      highlight <- qaObj@highlight
+    }
+    if(!highlight%in%colnames(res))
+      stop(paste(highlight,"not found in the data"))
 #	browser()	
 	if(!is.null(dest))
 	{	
