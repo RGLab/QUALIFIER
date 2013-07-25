@@ -69,10 +69,10 @@ qaPreprocess(db=db,gs=G
 #		,type="SOCK"
 		,isMFI=T,isSpike=T
 )
-pData(db$gs[[1]])
-pData(G)
-head(db$stats)
-getQAStats(G[1])
+#colnames(pData(db$gs[[1]]))
+#pData(G)
+#head(db$stats)
+#getQAStats(G[1])
 
 #saveToDB(db=db,gs=G
 #		,metaFile=metaFile

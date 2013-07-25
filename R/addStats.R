@@ -32,7 +32,11 @@
 #})
 
 
-##this routine is currently use-case-specific for the marginal events 
+#' this routine is currently use-case-specific for the marginal events
+#' @param x a \code{qaTask} object
+#' @param definition a \code{formula} that defines how the new stats is computed
+#' @param pop a \code{character} that specifies the population name of the new stats
+#' @param statName a \code{character} that specifies the name of new stats
 addStats<-function(x,definition,pop,statName){
 	formuRes<-.formulaParser(definition)
 	db<-getData(x)
@@ -48,18 +52,20 @@ addStats<-function(x,definition,pop,statName){
         
 	}else
 		stop("no aggregation function provided!")
+    
     df1[, value := V1]
     df1[, V1 := NULL]
-	df1[,stats := factor(statName)]
+	df1[,stats := statName]
 	df1[,sid := 1:nrow(df1)+max(db$stats[,sid])]
-	df1[, channel := NA]
-    df1[, stain := NA]
-	df1[, population := factor(pop)]
-	df1[, node := NA]
+	df1[, channel := as.character(NA)]
+    df1[, stain := as.character(NA)]
+	df1[, population := pop]
+	df1[, node := as.character(NA)]
     
     
+    setcolorder(df1,colnames(db$stats))
     
-	db$stats <- rbindlist(list(df1,db$stats))
+	db$stats <- rbindlist(list(db$stats, df1))
 	
 }
 
