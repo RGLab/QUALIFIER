@@ -38,34 +38,39 @@
 #' @param pop a \code{character} that specifies the population name of the new stats
 #' @param statName a \code{character} that specifies the name of new stats
 addStats<-function(x,definition,pop,statName){
-	formuRes<-.formulaParser(definition)
-	db<-getData(x)
-	statsType<-matchStatType(db,formuRes)
 	
-	
-	df <- queryStats(x)
-	
+    # subset the data by qaTask
+	DT <- queryStats(x)
+    
+    #parse the function from definition
+    formuRes <- .formulaParser(definition)
 	if(!is.null(formuRes$yfunc))
 	{
-		groupBy <- paste0(formuRes$groupBy,collapse=",")
-		df1 <- df[, eval(formuRes$yfunc)(value), by = groupBy]
         
+        groupBy <- paste0(formuRes$groupBy,collapse=",")
+        
+        db <- getData(x)
+        
+        #apply the function  
+		DT1 <- DT[, list(value = eval(formuRes$yfunc)(value)), by = groupBy]
+        
+        #add other columns
+        DT1[,stats := statName]
+        DT1[,sid := 1:nrow(DT1)+max(db$stats[,sid])]
+        DT1[, channel := as.character(NA)]
+        DT1[, stain := as.character(NA)]
+        DT1[, population := pop]
+        DT1[, node := as.character(NA)]
+        
+        #reorder the columns to prepare for rbindlist
+        colNames <- colnames(db$stats)        
+        setcolorder(DT1, colNames)
+        
+        #append new rows to db table
+        db$stats <- rbindlist(list(db$stats, DT1))    
 	}else
 		stop("no aggregation function provided!")
     
-    df1[, value := V1]
-    df1[, V1 := NULL]
-	df1[,stats := statName]
-	df1[,sid := 1:nrow(df1)+max(db$stats[,sid])]
-	df1[, channel := as.character(NA)]
-    df1[, stain := as.character(NA)]
-	df1[, population := pop]
-	df1[, node := as.character(NA)]
-    
-    
-    setcolorder(df1,colnames(db$stats))
-    
-	db$stats <- rbindlist(list(db$stats, df1))
 	
 }
 
