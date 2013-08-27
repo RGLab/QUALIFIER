@@ -116,8 +116,8 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
     			#check if data is gated
     			isGated <- obj@flag
                 
-    			nodes<-getNodes(obj)
-                nodePaths<-getNodes(obj,isPath=T)
+    			nodes<-getNodes(obj, showHidden = TRUE)
+                nodePaths<-getNodes(obj,isPath=T, showHidden = TRUE)
                 #convert to QUALIFIER's path
                 nodePaths[1]<-paste("/",nodePaths[1],sep="")
                 nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
@@ -185,7 +185,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
   				}
                 ##get count and proportion
-                statsOfNode <- flowWorkspace:::.getPopStat(obj,curNode)
+                statsOfNode <- flowWorkspace:::.getPopStat(obj,flowWorkspace:::.getNodeInd(obj,curNode))
                 
                 if(isFlowCore)
                 {
