@@ -9,11 +9,11 @@
 				stop("missing gsid!")
 			
 			
-			gs<-obj$gs[[gsid]]
+			gs <- obj$gs[[gsid]]
 			
 #			browser()
 			
-			statsOfGS<-getQAStats(gs,...)
+			statsOfGS <- getQAStats(gs, ...)
 			
 			
 #			browser()
@@ -21,7 +21,7 @@
 
                     statsOfGS[[curID]][,eval(qa.par.get("idCol")):= as.integer(curID)]
 				}
-			statsOfGS<-rbindlist(statsOfGS)
+			statsOfGS <- rbindlist(statsOfGS)
 			
                     
 			##append sid and gsid
@@ -44,55 +44,23 @@
        .getQAStats.env(obj,gsid,...)
       })
 
-setMethod("getQAStats",signature("GatingSet"),function(obj
-#                                                      ,nslaves=NULL,type="PSOCK"
-                                                      ,...){
-			
+setMethod("getQAStats",signature("GatingSet"),function(obj, ...){
+#			browser()
 			
 			print("extracting stats...")
 			
-			glist<-obj@set
-			IDs<-pData(obj)[getSamples(obj),qa.par.get("idCol")]
-			if(is.null(IDs)||length(IDs)!=length(glist))
+			
+			IDs <- pData(obj)[getSamples(obj),qa.par.get("idCol")]
+			if(is.null(IDs)||length(IDs)!=length(obj))
 			{
 				stop("Not all IDs for the current sample set are found in meta data of this GatingSet!")	
 			}
 			
-			names(glist)<-IDs
-			
-#			if(length(grep("parallel",loadedNamespaces()))==1)
-#			{
-##				cores<-getOption("cores")
-#				if(is.null(nslaves))
-#				{
-#					nslaves<-parallel::detectCores()
-#				}
-#				
-#				
-#			}
-			##parallel mode is not available for gating set of internal structure  
-			##due to the undistributable pointer
-#			if(!is.null(nslaves)&&nslaves>1)
-#			{
-#                stop("parallel mode is not available for gating set of internal structure!")							
-##				message("Using the parallel mode with ",nslaves," cores")
-##				
-##				cl<-parallel::makeCluster(nslaves,type)
-##				statsOfGS<-parallel::parLapply(cl,glist,function(gh){
-##												library(QUALIFIER)
-##												getQAStats(gh,...)
-##												},...)
-##				parallel::stopCluster(cl)
-#			}else
-#			{
-#				message("It is currently running in serial mode.")
 
-
-#				time1<-Sys.time()
-				statsOfGS<-lapply(glist,getQAStats,...)
-#				Sys.time()-time1
-#			}
+			statsOfGS <- lapply(obj, getQAStats,...)
 			
+            names(statsOfGS) <- IDs
+            
 			statsOfGS
 			
 		})
@@ -270,7 +238,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 setMethod("getQAStats",signature("GatingSetList"),function(obj,...){
       res <- lapply(obj,function(gs){
             getQAStats(gs,...)
-          })
+          }, level =1)
       
       unlist(res,recursive = FALSE)
     })
