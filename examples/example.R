@@ -46,7 +46,7 @@ datapath<-"/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/"
 newSamples<-list.files(datapath)[1:200]
 length(newSamples)
 G<-GatingSet(gh_template
-			,newSamples
+			,newSamples[1:10]
 			,path=datapath
 #			,isNcdf=FALSE
 #			,dMode=4
@@ -67,12 +67,12 @@ qaPreprocess(db=db,gs=G
 		,date.colname=c("RecdDt","AnalysisDt")
 		,nslave=1
 #		,type="SOCK"
-		,isMFI=T,isSpike=T
+#		,isMFI=T,isSpike=T
 )
-pData(db$gs[[1]])
-pData(G)
-head(db$stats)
-getQAStats(G[1])
+#colnames(pData(db$gs[[1]]))
+#pData(G)
+#head(db$stats)
+#getQAStats(G[1])
 
 #saveToDB(db=db,gs=G
 #		,metaFile=metaFile

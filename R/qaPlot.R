@@ -52,7 +52,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 #		}	
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
-		parentNodeInd<-which(getNodes(curGh)%in%parentNode)
+		parentNodeInd<-which(getNodes(curGh, showHidden = TRUE)%in%parentNode)
 		if(length(parentNodeInd)>0)
 		{
 			fr<-getData(curGh,parentNodeInd)
