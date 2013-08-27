@@ -9,7 +9,7 @@
 #					,function(x,definition,statName,subset,...){
 #			browser()
 #			
-#			formuRes<-.formulaParser(definition)
+#			formuRes<-flowWorkspace:::.formulaParser(definition)
 #			statsType<-matchStatType(x,formuRes)
 #			
 #			
@@ -43,7 +43,7 @@ addStats<-function(x,definition,pop,statName){
 	DT <- queryStats(x)
     
     #parse the function from definition
-    formuRes <- .formulaParser(definition)
+    formuRes <- flowWorkspace:::.formulaParser(definition)
 	if(!is.null(formuRes$yfunc))
 	{
         

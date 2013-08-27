@@ -131,7 +131,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 			
 			formula1<-getFormula(x)
 			
-			formuRes<-.formulaParser(formula1)
+			formuRes<-flowWorkspace:::.formulaParser(formula1)
 			xTerm<-formuRes$xTerm
 			
 			statsType<-matchStatType(db,formuRes)
