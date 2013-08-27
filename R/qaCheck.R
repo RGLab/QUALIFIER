@@ -55,7 +55,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 					#then try each individual cutoff for each conditioning value
 					if(length(cutoff)>1)
 					{
-						formuRes<-.formulaParser(formula)
+						formuRes<-flowWorkspace:::.formulaParser(formula)
 						for(curConVal in names(cutoff))
 						{
 #						browser()
@@ -136,7 +136,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		formula<-getFormula(obj)
 		
 	}
-	formuRes<-.formulaParser(formula)
+	formuRes<-flowWorkspace:::.formulaParser(formula)
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	

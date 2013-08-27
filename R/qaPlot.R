@@ -263,7 +263,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 	
 	#parse the formula
 
-	formuRes<-.formulaParser(formula1)
+	formuRes<-flowWorkspace:::.formulaParser(formula1)
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 	
 	statsType<-matchStatType(db,formuRes)

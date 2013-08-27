@@ -76,88 +76,9 @@ matchStatType<-function(db,formuRes)
 	return(statsType)
 }
 
-##recursively parsing conditional variables
-.parseCond<-function(cond){
-#			browser()
-	groupBy<-NULL
-	if(length(cond)==1)
-		groupBy<-as.character(cond)
-	else
-	{
-		for(i in 1:length(cond))
-		{
-			curCond<-cond[[i]]
-#				browser()
-			if(length(curCond)==3)
-			{
-				res<-.parseCond(curCond)
-				groupBy<-c(res,groupBy)
-			}else
-			{
-				curCond<-as.character(curCond)
-				if(!curCond%in%c(":","*","+"))
-					groupBy<-c(groupBy,curCond)	
-			}
-			
-		}	
-	}
-	
-	groupBy
-}
 
-.formulaParser<-function(formula)
-{
-#	browser()
-	
-	#parse the b term
-	bTerm<-formula[[3]]
-	cond<-NULL
-	if(length(bTerm)>2)
-	{
-		xTerm<-bTerm[[2]]
-		cond<-bTerm[[3]]
-	}else
-	{
-		xTerm<-bTerm
-	}
-#	browser()
-	##parse the conditional variable
-	if(!is.null(cond))
-	{
-		groupBy<-.parseCond(cond)
-		
-	}else
-	{
-		groupBy<-NULL
-	}
-	
-	#parse the xterm
-	xfunc<-NULL
-	if(length(xTerm)==2)
-	{
-		xfunc<-xTerm[[1]]
-		xTerm<-xTerm[[2]]
-	}else
-	{
-		if(length(xTerm)>=3)
-			stop("not supported formula!")
-	}
-	
-	
-	yTerm<-formula[[2]]
-	yfunc<-NULL
-	if(length(yTerm)==2)
-	{
-		yfunc<-yTerm[[1]]
-		yTerm<-yTerm[[2]]
-	}else
-	{
-		if(length(yTerm)>=3)
-			stop("not supported formula!")
-	}
-	
-	list(xTerm=xTerm,yTerm=yTerm,xfunc=xfunc,yfunc=yfunc,groupBy=groupBy)
-}
+
+
 .isRoot<-function(gh,node)
 {
 #	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
@@ -273,7 +194,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			if(missing(y))
 				y<-getFormula(x)
 			db<-getData(x)
-			formuRes<-.formulaParser(y)
+			formuRes<-flowWorkspace:::.formulaParser(y)
 			#determine the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 			statsType<-matchStatType(db,formuRes)
 			if(missing(pop))
