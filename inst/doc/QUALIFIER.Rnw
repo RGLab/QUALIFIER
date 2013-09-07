@@ -308,7 +308,11 @@ plot(qaTask.list[["NumberOfEvents"]]
 
 
 <<plot-RedundantStain, fig=true, results=verbatim>>=
-qaCheck(qaTask.list[["RedundantStain"]],gOutlierfunc = list(func = outlier.norm, args =list(z.cutoff = 1)))
+qaCheck(qaTask.list[["RedundantStain"]]
+        ,gOutlierfunc = list(func = outlier.norm
+                            , args =list(z.cutoff = 1)
+                            )
+         )
 plot(qaTask.list[["RedundantStain"]]
 		,y=proportion~factor(coresampleid)|channel:stain
 		,subset=stain%in%c('CD8')
