@@ -69,6 +69,9 @@ or
 
     \item{\code{formula}:}{a formula describing how the QA task is performed. 
     						see \code{\link[=qaCheck,qaTask-method]{qaCheck}} for more details. } 
+     \item{\code{type}:}{a character indicate how pop is matched.}
+	\item{\code{subset}:}{an expression specifying a subset of data to be applied QA task.}       
+                        
     \item{\code{plotType}:}{A character indicating how the QA result is plotted. Currently only "xyplot" and "bwplot" are supported.}
     \item{\code{width}:}{A numeric scalar indicating the  width of svg figure .}
     \item{\code{height}:}{A numeric scalar indicating the  height of svg figure .}

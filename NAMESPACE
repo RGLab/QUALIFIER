@@ -11,8 +11,8 @@ import(reshape)
 import(flowCore)
 import(flowWorkspace)
 import(flowViz)
-
 importFrom(hwriter, closePage, hwrite, openPage)
+importFrom(latticeExtra, ggplot2like,axis.grid)
 
 exportClasses(qaTask)
 

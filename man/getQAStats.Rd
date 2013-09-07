@@ -49,7 +49,7 @@ qaPreprocess(db=.db,gs,gs.name,metaFile,fcs.colname,date.colname,...)
 
   \item{obj}{
 	  			A \code{\link[=GatingHierarchy-class]{gating hierarchy}} that stores the gated cell populations for one FCS file; 
-	  			or a \code{\link[=GatingSet-class]{GatingSet}} containing multiple \code{gating hierarchies} 
+	  			or a \code{\link[=GatingSet-class]{GatingSet}} or a \code{\link[=GatingSetList-class]{GatingSetList}} containing multiple \code{gating hierarchies} 
 	  			or an \code{environment} that stores the \code{GatingSet} and all other information.
 	  			}
   

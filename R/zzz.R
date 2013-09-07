@@ -1,6 +1,6 @@
 
 
-
+require(grDevices)
 .db <- new.env()
 .qa.options <- new.env()
 createDbSchema <- function(db)
@@ -40,28 +40,18 @@ createDbSchema <- function(db)
 }
 
 .setupPlotTheme <- function(theme = standard.theme()){
-  myColorPal<-RColorBrewer::brewer.pal(7, "Set1")
+  
   .db$lattice<-list(par.settings=lattice:::updateList(theme
-                                                        ,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
-                                              #                                                           ,strip.text=list(lines=2)#not sure why this argument is not working ,we have to use par.strip.text outside of par.setting list
-                                                            ,background=list(col="white")
-                                                            ,plot.symbol=list(pch=19
-                                                                ,col=myColorPal[2])
-                                                            ,superpose.symbol=list(pch=rep(19,7)
-                                                                ,col=myColorPal[c(2,1,3:7)])
-                                                            ,box.dot=list(pch=22
-                                                                ,col=myColorPal[2]
-                                                                ,cex=0.4
-                                                            )
-                                                            ,box.rectangle=list(col=myColorPal[2])
-                                                            ,box.umbrella=list(col=myColorPal[2])
-                                                            ,plot.polygon=list(col=myColorPal[2])
+                                                        ,list(box.dot=list(pch=22
+                                                                          ,cex=0.4
+                                                                          )
+                                                              ,superpose.symbol = list(col = theme$superpose.symbol$col[c(5:6,1:4,7)]
+                                                                                       )#adjust the order to display dots in blue and outlier in red
+                                                              )
                                                         )
-                                                    
-                                                    )
-                                                    ,scales=list(x=list(rot=45))
-                                                    ,par.strip.text=list(lines=2)
-                                                )
+                    ,scales=list(x=list(rot=45))
+                   ,par.strip.text=list(lines=2)
+                  )
 }
 
 qa.par.set <- function (name, value){
@@ -73,7 +63,7 @@ qa.par.get <- function (name, value){
 .onLoad <- function(libname, pkgname) 
 {
 	
-	 .setupPlotTheme()
+	 .setupPlotTheme(ggplot2like())
      qa.par.set("idCol","fileid")
      createDbSchema(.db)
 }

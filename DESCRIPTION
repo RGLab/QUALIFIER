@@ -4,8 +4,8 @@ Title: Quality Control of Gated Flow Cytometry Experiments
 Version: 1.5.10
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
-Depends: R (>= 2.14.0),reshape,flowWorkspace (>= 3.7.27),flowViz,flowCore,RColorBrewer, data.table
-Imports: MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape
+Depends: R (>= 2.14.0),reshape,flowWorkspace (>= 3.7.27),flowViz,flowCore, data.table
+Imports: MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra
 Collate: AllGenerics.R 
 		AllClasses.R  
 		AllFunctions.R  

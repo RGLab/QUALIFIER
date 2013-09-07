@@ -219,6 +219,8 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,horizontal=FALSE
                         ,panel = NULL
                         ,highlight
+                        , between = list(x=0.2,y=0.2)
+                        , axis= axis.grid
 						,...)
 {
 #  browser()
@@ -361,6 +363,8 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 									,scatterPar=scatterP
 									,highlight=highlight
 									,rFunc=rFunc
+                                    ,between = between
+                                    ,axis = axis
 								)
 							)
 		}
@@ -403,6 +407,8 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 									,scatterPar=scatterP
                                     ,horizontal = horizontal
 									,db=db
+                                    ,between = between
+                                    ,axis = axis
 									)
 							)
 			
