@@ -1,6 +1,3 @@
-
-
-require(grDevices)
 .db <- new.env()
 .qa.options <- new.env()
 createDbSchema <- function(db)

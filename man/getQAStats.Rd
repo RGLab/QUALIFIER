@@ -4,6 +4,7 @@
 \alias{getQAStats-methods}
 \alias{getQAStats,environment-method}
 \alias{getQAStats,GatingSet-method}
+\alias{getQAStats,GatingSetList-method}
 \alias{getQAStats,GatingHierarchy-method}
 \alias{initDB}
 \alias{saveToDB}
