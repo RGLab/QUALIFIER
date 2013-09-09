@@ -1,10 +1,8 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
 
-##add svg anno to the original panel function for xyplot of lattice package
-##individual oultiers are colored based on the groups argument which passed through oultier column of dfframe
+
+# add svg anno to the original panel function for xyplot of lattice package
+# individual oultiers are colored based on the groups argument which passed through oultier column of dfframe
+#' @importFrom RSVGTipsDevice setSVGShapeToolTip setSVGShapeURL
 panel.xyplotEx <-
 		function(x, y, type = "p",
 				groups = NULL,
@@ -251,7 +249,7 @@ panel.xyplotEx <-
 		
 	
 }
-
+#' @importFrom MASS rlm
 panel.xyplot.qa<-function(x,y,rFunc=NULL,...){
 #	browser()
 	panel.xyplotEx(x=x,y=y,...) 
@@ -305,7 +303,7 @@ panel.xyplot.qa<-function(x,y,rFunc=NULL,...){
 		}
 	}
 }
-##add svg anno to the original panel function for boxplot of lattice package
+# add svg anno to the original panel function for boxplot of lattice package
 panel.bwplotEx <-
 		function(x, y, box.ratio = 1, box.width = box.ratio / (1 + box.ratio),
 				horizontal = TRUE,
@@ -743,7 +741,7 @@ panel.bwplotEx <-
 	
 }
 
-#modify orginal stats funtion to return more info in the final output 
+# modify orginal stats funtion to return more info in the final output 
 boxplot.statsEx<-function (x, coef = 1.5, do.conf = TRUE, do.out = TRUE) 
 {
 	if (coef < 0) 
@@ -826,7 +824,7 @@ qa.panel.densityplot<-function(...)
 	
 	
 }
-##mark outliers by by gate color
+# mark outliers by by gate color
 panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...) 
 {
 	
@@ -869,9 +867,6 @@ panel.xyplot.flowsetEx <- function(x,
 			filter <- NULL
 		}
 	}
-#	browser()
-#	channel.x<-as.expression(parseChannelName(channel=as.character(channel.x),pd=pData(parameters(frames[[nm]]))))
-#	channel.y<-as.expression(parseChannelName(channel=as.character(channel.y),pd=pData(parameters(frames[[nm]]))))
 	x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
 	y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 	

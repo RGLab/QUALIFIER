@@ -1,17 +1,126 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
-clearCheck<-function(obj,gsid)
+#' \code{clearCheck} function removes the outlier results detected by the
+#' previous \code{qaCheck} call on a particular gating set.
+#' @export 
+#' @rdname qaCheck-methods
+clearCheck <- function(obj, gsid)
 {
 #	browser()
 	if(missing(gsid))
-		gsid<-max(db$gstbl$gsid)
-	db<-getData(obj)
-	ind<-db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
-	db$outlierResult<-db$outlierResult[!ind,]
+		gsid <- max(db$gstbl$gsid)
+	db <- getData(obj)
+	ind <- db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
+	db$outlierResult <- db$outlierResult[!ind,]
 	
 }
+#'Perform the quality assessment for the qaTask object
+#'
+#'Perform the quality assessment for a particular QA Task based on the
+#'information provided by \code{\link{qaTask}} object.
+#'
+#'\code{qaCheck} method parses the formula stored in qaTask or explicitly
+#'provided by the argument and select the appropriate gated population,extract
+#'the statistics that is pre-calculated by \code{\link{getQAStats}} and perform
+#'the outlier detection within a certain sample groups specified by the
+#'conditioning variables or x term in formula. Then the outliers detection
+#'results are save in database and ready for query or plotting.
+#'
+#'
+#'@name qaCheck-methods
+#'@aliases qaCheck qaCheck-methods qaCheck,qaTask-method clearCheck
+#'@docType methods
+#'@param obj a \code{qaTask} object
+#'@param gsid an \code{integer} that uniquely identifies a gating set object.
+#'if missing, the latest added gating set is selected.
+#'@param ...  formula: a \code{formula} describing the variables to be used for
+#'QA. When it is omitted or NULL, the formula stored in \code{qaTask} is used.
+#'It is generally of the form y ~ x | g1 * g2 * ... , y is the statistics to be
+#'checked in this QA, It must be one of the four types:
+#'
+#'"MFI": Median Fluorescence Intensity of the cell population specified by
+#'\code{\link{qaTask}},
+#'
+#'"proportion": the percentage of the cell population specified by
+#'\code{qaTask} in the parent population,
+#'
+#'"count": the number of events of the cell population specified by
+#'\code{qaTask},
+#'
+#'"spike": the variance of intensity over time of each channel ,which
+#'indicating the stability of the fluorescence intensity.
+#'
+#'x is normally used to specify the variable plotted on x-axis in
+#'\code{\link[QUALIFIER:plot]{plot}} method.  when \code{plotType} of the
+#'\code{qaTask} is "bwplot", it is also taken as the conditioning variable that
+#'divides the samples into subgroups within which the \code{outlierfunc} is
+#'applied.
+#'
+#'g1,g2,.... are the conditioning variables, which are used to divide the
+#'samples into subgroups and perform QA check whitin each individual
+#'groups.They may also be omitted,in which case the outliers detection is
+#'peformed in the entire sample set.
+#'
+#'subset: a logical expression used as a filter.It follows the same syntax as
+#'the "subset" expression in \code{\link[base:subset]{subset}}.
+#'
+#'\emph{Usage:}
+#'
+#'subset=channel\%in\%c('FITC-A')
+#'
+#'subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&channel\%in\%c('FITC-A')
+#'
+#'outlierfunc:a \code{function} to be used for outlier detection.  see
+#'\code{\link{outlierFunctions}} for more details.
+#'
+#'gOutlierfunc:a \code{function} to be used for group outlier detection.  see
+#'\code{\link{outlierFunctions}} for more details.  rFunc:a \code{function} for
+#'fitting regression model within each individual subgroup.
+#'
+#'isTerminal:a logical scalar indicating whether the pop is at terminal node of
+#'the gating path.
+#'
+#'fixed:a logical scalar indicating whether the pop name is matched as it is
+#'.By default it is FALSE,which matches the gating path as the regular
+#'expression
+#'@author Mike Jiang,Greg Finak
+#'
+#'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
+#'@seealso \code{\link[QUALIFIER:plot]{plot}},\code{\link{getQAStats}}
+#'@keywords methods
+#'@examples
+#'
+#'
+#'\dontrun{
+#'
+#'data("ITNQASTUDY")
+#'checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
+#'qaTask.list<-read.qaTask(db,checkListFile)
+#'
+#'
+#'#using t-distribution based outlier detection function  
+#'#applied the linear regression on each group to detect the significant MFI change over time 
+#'qaCheck(qaTask.list[["MFIOverTime"]]
+#'		,outlierfunc=outlier.t
+#'		,rFunc=rlm
+#'		,alpha=0.05
+#')
+#'plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
+#'		,subset="channel%in%c('FITC-A')"
+#'		,rFunc=rlm
+#')
+#'
+#'
+#'#detect the outliers that has lower percentage of RBC Lysis than the threshold provided by lBound
+#'qaCheck(qaTask.list[["RBCLysis"]]
+#'		,formula=proportion ~ RecdDt | Tube
+#'		,outlierfunc=outlier.cutoff
+#'		,lBound=0.8
+#'		)
+#'		
+#'plot(qaTask.list[["RBCLysis"]])	
+#'}
+#'
+#' @rdname qaCheck-methods
+#' @export 
 setMethod("qaCheck", signature=c(obj="qaTask"),
     function(obj, ...){
       .qaCheck.main(obj,...)
@@ -106,7 +215,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			
 		}
         
-
+#' @importFrom reshape rename
 .qaCheck<-function(obj,formula=NULL,Subset
                     ,outlierfunc
                     ,gOutlierfunc
@@ -166,7 +275,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 		
 
-	yy<-reshape::rename(yy,c("value"=statsType))		
+	yy <- rename(yy,c("value"=statsType))		
 
 	##apply the function to xTerm and yTerm in each group
 	if(!is.null(formuRes$xfunc))

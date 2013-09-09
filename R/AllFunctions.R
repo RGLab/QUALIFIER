@@ -1,7 +1,4 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
+
 #.postProcessBoxPlotSVG<-function(sfile)
 #{
 #	doc = xmlParse(sfile)
@@ -15,11 +12,17 @@
 #	saveXML(top,sfile )
 #	
 #}
-
-initDB<-function(db=.db){
+#'@name preprocessing
+#' \code{initDB} initializes and prepares the data environment for storing the QA data
+#'@rdname preprocessing-methods 
+#' @export
+initDB <- function(db=.db){
 	createDbSchema(db)
 }
-#the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
+#'@name preprocessing
+#' \code{qaPreprocess} is a convenient wrapper that does saveToDB,getQAStats in one call
+#' @rdname preprocessing-methods
+#' @export 
 qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
 {
 	
@@ -34,6 +37,8 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	
 	ls(db)
 }
+
+#' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
 .postProcessSVG<-function(sfile)
 {
 
@@ -60,7 +65,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	
 }
 
-matchStatType<-function(db,formuRes)
+matchStatType <- function(db,formuRes)
 {
 #	browser()
 	statsType<-NULL
@@ -91,7 +96,10 @@ matchStatType<-function(db,formuRes)
 
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
-
+#'@name preprocessing
+#' \code{saveToDB} save the gating set and annotation data into the data environment.
+#' @rdname preprocessing-methods
+#' @export 
 saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 {
 	
@@ -168,17 +176,47 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	gsid
 }
 
-
+#' match the population by a cerntain criteria
+#' 
+#' @param pattern character population pattern to match, can be one of the four \code{type}s
+#' @param nodePath character a vector of population nodes to match with 
 #' @param type character specifing how the pattern is matched
-#' "regExpr", passes it as a regular expression to grepl (fixed = FALSE), it is flexible enough for the advance users to define any type of qa tasks. (e.g. "/(4|8)\+$" for "4+" and "8+", but not "CD154+" )
-#' for the users who don't know about regular expressions, type can be set to one of the following three options
-#' "popName" interprets the pattern as the exact population name character and do the strict matching with terminal node, (e.g. "L" for lymph populations but not live/dead "Lv")
-#' "subPath" will do the partial path match (e.g. "4+ for "4+" and all its downstream children: "4+/TNFa+", "4+/IL2+" etc... )
-#' "fullPath" will do the full path match (e.g. "/S/Lv/L/3+/Excl/4+" will only be matched to "4+")
-matchNode<-function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath", "popName"))
+#' \itemize{
+#'  \item regExpr: passes it as a regular expression to grepl (fixed = FALSE), it is flexible enough for the advance users to define any type of qa tasks. (e.g. "/(4|8)\+$" for "4+" and "8+", but not "CD154+" )
+#'                  for the users who don't know about regular expressions, type can be set to one of the following three options
+#'  \item popName: interprets the pattern as the exact population name character and do the strict matching with terminal node, (e.g. "L" for lymph populations but not live/dead "Lv")
+#'  \item subPath: will do the partial path match (e.g. "4+ for "4+" and all its downstream children: "4+/TNFa+", "4+/IL2+" etc... )
+#'  \item fullPath: will do the full path match (e.g. "/S/Lv/L/3+/Excl/4+" will only be matched to "4+")
+#' }
+#' @return \code{logical} vector as the matching result
+#' @examples 
+#' \dontrun{
+#'  nodes <- getNodes(gh, isPath = TRUE) #fetch all the population (with path) from gating hierarchy
+#'  nodes
+#'    
+#'  # exact match by population name (terminal/base name in the path)
+#'  nodes[.matchNode("root", nodes, type ="popName")]
+#'  nodes[.matchNode("Lv", nodes, type ="popName")] 
+#'  nodes[.matchNode("MNC", nodes, type ="popName")]
+#'  nodes[.matchNode("WBC_perct", nodes, type ="popName")]
+#'  
+#'  #partial match to the path
+#'  nodes[.matchNode("MFI", nodes, type ="subPath")]
+#'  nodes[.matchNode("margin", nodes, type ="subPath")]
+#' 
+#'  nodes[.matchNode("4+/TNFa+", nodes, type ="subPath")]
+#'  nodes[.matchNode("8+", nodes, type ="subPath")]
+#'  
+#'  #regular expression match
+#'  nodes[.matchNode("/(4|8)\\+$", nodes, type ="reg")]
+#'  nodes[.matchNode("4\\+/(IFNg|IL2|IL4|IL17a|TNFa)\\+$", nodes, type ="reg")]
+#'  nodes[.matchNode("/S/Lv/L/3+/Excl/4+/TNFa+", nodes, type ="fullPath")]
+#'  
+#'  }
+.matchNode <- function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath", "popName"))
 {
 #browser()
-    type <- match.arg(type,c("regExpr", "fullPath", "subPath", "popName"))
+    type <- match.arg(type)
     nodePath <- as.character(nodePath)
 #       browser()
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
@@ -201,7 +239,10 @@ matchNode<-function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath"
   	
 }
 
-##API to query stats entries from db by qaTask object and formula
+#' \code{queryStats} method queries stats entries from db by qaTask object and formula
+#' @export 
+#' @rdname qaCheck-methods
+#' @aliases queryStats,qaTask-method
 setMethod("queryStats", signature=c(x="qaTask"),
 		function(x,y,subset,pop,gsid=NULL,...){
 			
@@ -257,7 +298,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		r <- matchNode(pop,ret_stats$population, ...)
+		r <- .matchNode(pop,ret_stats$population, ...)
 		ret_stats <- ret_stats[r,]
 	}
 #	browser()
@@ -282,8 +323,8 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	
 }
 
-#this routine keeps the original schema by replacing the stats value with aggregated value
-applyFunc<-function(data,term,func,groupBy)
+# this routine keeps the original schema by replacing the stats value with aggregated value
+applyFunc <- function(data,term,func,groupBy)
 {
 #			browser()
 	factors<-lapply(groupBy,function(x){

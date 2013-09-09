@@ -20,11 +20,12 @@ setReplaceMethod("highlight",
 			object@highlight<-value
 			return(object)
 		})
-
+ 
 setMethod("qpar", signature=c(x="qaTask"),
 		function(x){
 			x@par
 		})
+
 
 setReplaceMethod("qpar",
 		signature=signature(object="qaTask",
@@ -138,8 +139,6 @@ setMethod("show",
 			print(getFormula(object))
 			cat("Plot type: ", plotType(object))
 			cat("\n")
-#			browser()
 			print(qpar(object))
-			
-			#checkParameters(object) 
 		})
+    

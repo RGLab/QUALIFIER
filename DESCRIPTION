@@ -1,27 +1,30 @@
-Package: QUALIFIER 
+Package: QUALIFIER
 Type: Package
 Title: Quality Control of Gated Flow Cytometry Experiments
 Version: 1.5.10
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
-Depends: R (>= 2.14.0),reshape,flowWorkspace (>= 3.7.27),flowViz,flowCore, data.table,grDevices
-Imports: MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra
-Collate: AllGenerics.R 
-		AllClasses.R  
-		AllFunctions.R  
-		outlier.R  
-		qaPanelFunction.R 
-		trellisPlot.R 
-		qaCheck.R 
-		qaPlot.R 
-		qaTask-accessor-Methods.R 
-		getQAStats.R
-		addStats.R
-		qaReport.R
-		utils.R 
-		zzz.R
-Description: Provides quality control and quality assessment tools for gated flow cytometry data. 
+Depends:
+    R (>= 2.14.0),flowCore,flowViz,ncdfFlow,flowWorkspace (>= 3.7.27),
+    data.table,grDevices
+Imports:
+    MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra
+Collate:
+    'AllGenerics.R'
+    'AllClasses.R'
+    'AllFunctions.R'
+    'outlier.R'
+    'qaPanelFunction.R'
+    'trellisPlot.R'
+    'qaCheck.R'
+    'qaPlot.R'
+    'qaTask-accessor-Methods.R'
+    'getQAStats.R'
+    'addStats.R'
+    'qaReport.R'
+    'utils.R'
+    'zzz.R'
+Description: Provides quality control and quality assessment tools for gated
+    flow cytometry data.
 License: Artistic-2.0
-biocViews:  Infrastructure, Flowcytometry, CellBasedAssays
-
-
+biocViews: Infrastructure, Flowcytometry, CellBasedAssays

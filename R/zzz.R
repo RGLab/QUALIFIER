@@ -57,6 +57,7 @@ qa.par.set <- function (name, value){
 qa.par.get <- function (name, value){
   get(name, .qa.options)
 }
+#' @importFrom latticeExtra ggplot2like axis.grid
 .onLoad <- function(libname, pkgname) 
 {
 	
