@@ -4,7 +4,7 @@
 #' @param definition a \code{formula} that defines how the new stats is computed
 #' @param pop a \code{character} that specifies the population name of the new stats
 #' @param statName a \code{character} that specifies the name of new stats
-addStats <- function(x, definition, pop, statName){
+.addStats <- function(x, definition, pop, statName){
 	
     # subset the data by qaTask
 	DT <- queryStats(x)

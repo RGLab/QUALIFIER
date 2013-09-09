@@ -126,7 +126,7 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
 ##add new aggregated stats
-addStats(qaTask.list[["BoundaryEvents"]]
+.addStats(qaTask.list[["BoundaryEvents"]]
 		,definition=sum(proportion)~RecdDt|fileid+gsid
 		,pop="/root/MNC/margin"
 		,statName="sum.prop"
