@@ -1,7 +1,4 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
+
 #.postProcessBoxPlotSVG<-function(sfile)
 #{
 #	doc = xmlParse(sfile)
@@ -16,10 +13,16 @@
 #	
 #}
 
-initDB<-function(db=.db){
+#' \code{initDB} initializes and prepares the data environment for storing the QA data
+#'@rdname preprocessing-methods 
+#' @export
+initDB <- function(db=.db){
 	createDbSchema(db)
 }
-#the convienient wrapper that does saveToDB,getQAStats,makeQaTask 3 steps in one call
+
+#' \code{qaPreprocess} is a convenient wrapper that does saveToDB,getQAStats in one call
+#' @rdname preprocessing-methods
+#' @export 
 qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
 {
 	
@@ -34,6 +37,8 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	
 	ls(db)
 }
+
+#' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
 .postProcessSVG<-function(sfile)
 {
 
@@ -60,7 +65,7 @@ qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colnam
 	
 }
 
-matchStatType<-function(db,formuRes)
+matchStatType <- function(db,formuRes)
 {
 #	browser()
 	statsType<-NULL
@@ -78,88 +83,9 @@ matchStatType<-function(db,formuRes)
 	return(statsType)
 }
 
-##recursively parsing conditional variables
-.parseCond<-function(cond){
-#			browser()
-	groupBy<-NULL
-	if(length(cond)==1)
-		groupBy<-as.character(cond)
-	else
-	{
-		for(i in 1:length(cond))
-		{
-			curCond<-cond[[i]]
-#				browser()
-			if(length(curCond)==3)
-			{
-				res<-.parseCond(curCond)
-				groupBy<-c(res,groupBy)
-			}else
-			{
-				curCond<-as.character(curCond)
-				if(!curCond%in%c(":","*","+"))
-					groupBy<-c(groupBy,curCond)	
-			}
-			
-		}	
-	}
-	
-	groupBy
-}
 
-.formulaParser<-function(formula)
-{
-#	browser()
-	
-	#parse the b term
-	bTerm<-formula[[3]]
-	cond<-NULL
-	if(length(bTerm)>2)
-	{
-		xTerm<-bTerm[[2]]
-		cond<-bTerm[[3]]
-	}else
-	{
-		xTerm<-bTerm
-	}
-#	browser()
-	##parse the conditional variable
-	if(!is.null(cond))
-	{
-		groupBy<-.parseCond(cond)
-		
-	}else
-	{
-		groupBy<-NULL
-	}
-	
-	#parse the xterm
-	xfunc<-NULL
-	if(length(xTerm)==2)
-	{
-		xfunc<-xTerm[[1]]
-		xTerm<-xTerm[[2]]
-	}else
-	{
-		if(length(xTerm)>=3)
-			stop("not supported formula!")
-	}
-	
-	
-	yTerm<-formula[[2]]
-	yfunc<-NULL
-	if(length(yTerm)==2)
-	{
-		yfunc<-yTerm[[1]]
-		yTerm<-yTerm[[2]]
-	}else
-	{
-		if(length(yTerm)>=3)
-			stop("not supported formula!")
-	}
-	
-	list(xTerm=xTerm,yTerm=yTerm,xfunc=xfunc,yfunc=yfunc,groupBy=groupBy)
-}
+
+
 .isRoot<-function(gh,node)
 {
 #	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
@@ -171,11 +97,15 @@ matchStatType<-function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
+#' \code{saveToDB} save the gating set and annotation data into the data environment.
+#' @rdname preprocessing-methods
+#' @export 
 saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 {
 	
 	
-	
+    idColName <-qa.par.get("idCol")
+    
 	annoData<-pData(gs)
 	if(is.na(match("name",colnames(annoData))))
 		stop("'name' column is missing from pData of GatingSet!")
@@ -185,9 +115,10 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		annoData_csv<-read.csv(metaFile)
 		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
 	}
-		
-	
-	annoData$id<-1:nrow(annoData)
+#browser()
+    #generate id column if not present
+	if(!idColName%in%colnames(annoData))
+	  annoData[,idColName] <- 1:nrow(annoData)
 #		browser()
 #	if(!fcs.colname%in%colnames(annoData))
 #		stop("column that specify FCS file names is missing in annotation data!")
@@ -245,78 +176,89 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	gsid
 }
 
-
-
-
-
-matchNode<-function(pattern,nodePath,isTerminal=FALSE,fixed=FALSE)
+#' match the population by a cerntain criteria
+#' 
+#' @param pattern character population pattern to match, can be one of the four \code{type}s
+#' @param nodePath character a vector of population nodes to match with 
+#' @param type character specifing how the pattern is matched
+#' \itemize{
+#'  \item regExpr: passes it as a regular expression to grepl (fixed = FALSE), it is flexible enough for the advance users to define any type of qa tasks. (e.g. "/(4|8)\+$" for "4+" and "8+", but not "CD154+" )
+#'                  for the users who don't know about regular expressions, type can be set to one of the following three options
+#'  \item popName: interprets the pattern as the exact population name character and do the strict matching with terminal node, (e.g. "L" for lymph populations but not live/dead "Lv")
+#'  \item subPath: will do the partial path match (e.g. "4+ for "4+" and all its downstream children: "4+/TNFa+", "4+/IL2+" etc... )
+#'  \item fullPath: will do the full path match (e.g. "/S/Lv/L/3+/Excl/4+" will only be matched to "4+")
+#' }
+#' @return \code{logical} vector as the matching result
+#' @examples 
+#' \dontrun{
+#'  nodes <- getNodes(gh, isPath = TRUE) #fetch all the population (with path) from gating hierarchy
+#'  nodes
+#'    
+#'  # exact match by population name (terminal/base name in the path)
+#'  nodes[.matchNode("root", nodes, type ="popName")]
+#'  nodes[.matchNode("Lv", nodes, type ="popName")] 
+#'  nodes[.matchNode("MNC", nodes, type ="popName")]
+#'  nodes[.matchNode("WBC_perct", nodes, type ="popName")]
+#'  
+#'  #partial match to the path
+#'  nodes[.matchNode("MFI", nodes, type ="subPath")]
+#'  nodes[.matchNode("margin", nodes, type ="subPath")]
+#' 
+#'  nodes[.matchNode("4+/TNFa+", nodes, type ="subPath")]
+#'  nodes[.matchNode("8+", nodes, type ="subPath")]
+#'  
+#'  #regular expression match
+#'  nodes[.matchNode("/(4|8)\\+$", nodes, type ="reg")]
+#'  nodes[.matchNode("4\\+/(IFNg|IL2|IL4|IL17a|TNFa)\\+$", nodes, type ="reg")]
+#'  nodes[.matchNode("/S/Lv/L/3+/Excl/4+/TNFa+", nodes, type ="fullPath")]
+#'  
+#'  }
+.matchNode <- function(pattern, nodePath, type = c("regExpr", "fullPath", "subPath", "popName"))
 {
-#	browser()
+#browser()
+    type <- match.arg(type)
+    nodePath <- as.character(nodePath)
+#       browser()
 	#when pattern starts as slash, then assume it is a full path match instead of the substring match
-	if(substr(pattern,1,1)=="/")
-		return(pattern==nodePath)
-#	browser()
-#get the positions of the parttern matched in the gate path
-	if(isTerminal){
-		if(fixed) {
-			basename(as.character(nodePath))%in%pattern
-		} else {
-			grepl(pattern,basename(as.character(nodePath)),fixed=fixed)
-		}
-#		posList<-gregexpr(pattern,nodePath,fixed=fixed)
-	} else {
-		if(fixed){
-			pattern%in%nodePath
-		}else{
-			grepl(pattern,nodePath,fixed=fixed)
-		     }
-}
-       	
-#	unlist(lapply(1:length(posList),function(i){
-#				pos<-posList[[i]]
-#				curNode<-as.character(nodePath[[i]])
-#				if(length(pos)==1&&pos==-1)
-#					return(FALSE)
-#				else
-#				{
-#					if(isTerminal)#if matched as a terminal node,do the further check on the slash
-#					{
-#						res<-unlist(lapply(pos,function(x){
-#											#check the existence of slash after the pattern
-#											toMatch<-substring(curNode,x+1,nchar(curNode))
-#											!grepl("/",toMatch)
-#										}))
-#						return(any(res))#return true if any matched instance satifsfy the terminal check
-#					}else
-#					{
-#						return(TRUE) #if mathced as non-terminal node, then return true once it is matched anywhere in the path
-#					}
-#					
-#				}
-#			}))
-	
-	
-	
-	
+	if(type == "fullPath")
+    {
+      nodesToMatch <- nodePath
+      nodesToMatch%in%pattern
+    }else if(type == "subPath"){
+      nodesToMatch <- nodePath
+      grepl(pattern,nodesToMatch, fixed = TRUE)
+    }else if(type == "popName"){
+      nodesToMatch <- basename(nodePath)
+      nodesToMatch%in%pattern
+    }else if (type == "regExpr"){
+        nodesToMatch <- nodePath
+        grepl(pattern,nodesToMatch)  
+     } 
+      
+
+  	
 }
 
-##API to query stats entries from db by qaTask object and formula
+#' \code{queryStats} method queries stats entries from db by qaTask object and formula
+#' @export 
+#' @rdname qaCheck-methods
+#' @aliases queryStats,qaTask-method
 setMethod("queryStats", signature=c(x="qaTask"),
-		function(x,y,subset,pop,isTerminal=TRUE,fixed=FALSE,gsid=NULL,...){
+		function(x,y,subset,pop,gsid=NULL,...){
 			
 			if(missing(y))
 				y<-getFormula(x)
 			db<-getData(x)
-			formuRes<-.formulaParser(y)
+			formuRes<-flowWorkspace:::.formulaParser(y)
 			#determine the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 			statsType<-matchStatType(db,formuRes)
 			if(missing(pop))
 				pop<-getPop(x)
-#			browser()
+			
 			if(missing(subset))
-				res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, ...)
 			else
-				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, ... )
 			
 			if(nrow(res)!=0)
 			{
@@ -330,10 +272,10 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			
 			res
 		})
-#queryStats<-function(db,formula,Subset,pop=character(0),isReshape=FALSE)
-.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),isTerminal=FALSE,fixed=FALSE,gsid)
+
+.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
 {
-#	browser()
+	
 
 	if(is.null(gsid))
 	{
@@ -356,32 +298,15 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
 	if(length(pop)!=0)
 	{
-		r<-matchNode(pop,ret_stats$population,isTerminal,fixed)
-		ret_stats <-ret_stats[r,]
+		r <- .matchNode(pop,ret_stats$population, ...)
+		ret_stats <- ret_stats[r,]
 	}
 #	browser()
 	if(!is.null(statsType))
-		ret_stats<-subset(ret_stats,stats%in%statsType)
+		ret_stats <- subset(ret_stats,stats%in%statsType)
 	
-	ret<-merge(ret_stats,ret_anno,by.x=c("gsid","id"),by.y=c("gsid","id"))
-	
-	##add stain column from tube and channel
-#	ret$stain<-apply(ret,1,function(x){
-#				curChannel<-as.character(x["channel"])
-##									browser()
-#				
-#				if(is.na(curChannel)||curChannel%in%db$params[1:2])
-#				{	
-#					curStain<-NA
-#				}else
-#				{
-#					chnlInd<-which(db$params[3:7]==curChannel)
-#					curStain<-strsplit(x["Tube"],"\\/")[[1]][chnlInd]
-#				}
-#				curStain
-#			})
-
-#	browser()
+	ret <- merge(ret_stats,ret_anno,by=c("gsid",qa.par.get("idCol")))
+    
 	#filter by subset 
 
 	if(!missing(Subset))
@@ -398,8 +323,8 @@ setMethod("queryStats", signature=c(x="qaTask"),
 	
 }
 
-#this routine keeps the original schema by replacing the stats value with aggregated value
-applyFunc<-function(data,term,func,groupBy)
+# this routine keeps the original schema by replacing the stats value with aggregated value
+applyFunc <- function(data,term,func,groupBy)
 {
 #			browser()
 	factors<-lapply(groupBy,function(x){

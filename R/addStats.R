@@ -1,88 +1,43 @@
-#
-################################################################################
-##this method allow user using formula "definition" to add their own statsTypes 
-##based on the four original stats(count/proportion/MFI/spike) and different conditioning/aggregation variables.
-##and the QA check and plot can be done on this new stat type afterwards 
-##unfinished:
-################################################################################
-#setMethod("addStats",signature(x="environment",definition="formula")
-#					,function(x,definition,statName,subset,...){
-#			browser()
-#			
-#			formuRes<-.formulaParser(definition)
-#			statsType<-matchStatType(x,formuRes)
-#			
-#			
-#			if(!missing(subset))
-#				df<-queryStats(x,Subset=substitute(subset),statsType=statsType,...)
-#			else
-#				df<-queryStats(x,statsType=statsType,...)
-#			
-#			
-#			
-##			if(!is.null(formuRes$xfunc))
-##				df<-applyFunc(df,as.character(formuRes$xTerm),formuRes$xfunc,formuRes$groupBy)
-#			if(!is.null(formuRes$yfunc))
-#			{
-#				df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
-#			}
-#				df<-df[,colnames(db$stats)]
-#				
-#			
-#})
-
-
-##this routine is currently use-case-specific for the marginal events 
-addStats<-function(x,definition,pop,statName){
-	formuRes<-.formulaParser(definition)
-	db<-getData(x)
-	statsType<-matchStatType(db,formuRes)
+#' this routine is currently use-case-specific for the marginal events
+#' 
+#' @param x a \code{qaTask} object
+#' @param definition a \code{formula} that defines how the new stats is computed
+#' @param pop a \code{character} that specifies the population name of the new stats
+#' @param statName a \code{character} that specifies the name of new stats
+.addStats <- function(x, definition, pop, statName){
 	
-	
-	df<-queryStats(x)
-	
-	
-#	browser()
-	
+    # subset the data by qaTask
+	DT <- queryStats(x)
+    
+    #parse the function from definition
+    formuRes <- flowWorkspace:::.formulaParser(definition)
 	if(!is.null(formuRes$yfunc))
 	{
-		
-		df1<-aggregate(df[,"value",drop=FALSE],by=df[,formuRes$groupBy],FUN=formuRes$yfunc)
-		
-#		df1<-applyFunc2(df,as.character(formuRes$yTerm),formuRes$yfunc,formuRes$groupBy)
+        
+        groupBy <- paste0(formuRes$groupBy,collapse=",")
+        
+        db <- getData(x)
+        
+        #apply the function  
+		DT1 <- DT[, list(value = eval(formuRes$yfunc)(value)), by = groupBy]
+        
+        #add other columns
+        DT1[,stats := statName]
+        DT1[,sid := 1:nrow(DT1)+max(db$stats[,sid])]
+        DT1[, channel := as.character(NA)]
+        DT1[, stain := as.character(NA)]
+        DT1[, population := pop]
+        DT1[, node := as.character(NA)]
+        
+        #reorder the columns to prepare for rbindlist
+        colNames <- colnames(db$stats)        
+        setcolorder(DT1, colNames)
+        
+        #append new rows to db table
+        db$stats <- rbindlist(list(db$stats, DT1))    
 	}else
 		stop("no aggregation function provided!")
-
-	df1$stats<-factor(statName)
-	df1$sid<-1:nrow(df1)+max(db$stats$sid)
-	df1$channel<-NA
-	df1$population<-factor(pop)
-	df1$node<-NA
-	db$stats<-rbind(df1[,colnames(db$stats)],db$stats)
+    
 	
 }
 
-
-#
-##this routine add new entries for the new statsType
-#applyFunc2<-function(data,term,func,groupBy)
-#{
-#
-#	factors<-lapply(groupBy,function(x){
-#				
-#				eval(substitute(data$v,list(v=x)))
-#			})
-#						
-#			browser()	
-#	by1<-paste(groupBy,collapse="+")
-#	res<-eval(
-#			substitute(aggregate(value~x,data=data,FUN=f),list(f=func,x=as.symbol(by1)))
-#	)	
-##	data<-by(data,factors,function(x){
-###				browser()
-##				eval(substitute(f(x$stats),list(f=func,stats=term)))
-##				
-##			})
-##	do.call("rbind",data)
-#	res
-#}

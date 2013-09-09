@@ -1,7 +1,3 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
 .FileNameGen<-function(prefix=NA,ID=NA,population=NA,channel=NA,stain=NA,stats=NA,...)
 {
 	fileName<-c(prefix,ID,basename(population),channel,stain,stats,...)
@@ -52,7 +48,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 #		}	
 		curGate<-getGate(curGh,curNode)
 		parentNode<-getParent(curGh,curNode)
-		parentNodeInd<-which(getNodes(curGh)%in%parentNode)
+		parentNodeInd<-which(getNodes(curGh, showHidden = TRUE)%in%parentNode)
 		if(length(parentNodeInd)>0)
 		{
 			fr<-getData(curGh,parentNodeInd)
@@ -204,24 +200,134 @@ reScaleData<-function(fs,fres,channel,logScale)
 	
 	list(fs=fs,fres=fres,scales=list(labels=labels,at=ats))
 }
+#'plot the statistics for a particular cell population of a group of samples
+#'
+#'plot the statistics for a particular cell population of a group of
+#'samples,this method is usually called after \code{qaCheck} to visualize the
+#'QA results.
+#'
+#'The method does the same thing as \code{qaCheck} in terms of parsing the
+#'formula and selecting the gated population,statistics and subsetting the
+#'samples. The difference is that it reads the outliers detection results saved
+#'in database and hightlight them in the summary plots. Two kinds of lattice
+#'plots are currently supported:xyplot and bwplot(boxplot),depends on the
+#'\code{plotType} in \code{qaTask} object. When the output path is provided by
+#'\code{dest}, the svg plot is generated.  In svg plot, each dot or box (or
+#'only the one marked as outliers) is annotated by the tooltip or
+#'hyperlink.which further points to the individual density plot of the gated
+#'population.
+#'
+#'with \code{scatterPlot} and \code{subset} arguments, scatter plots can be
+#'generated for the selected FCS files or sample groups,which allows users to
+#'investigate the individual outlier groups or files.
+#'
+#'@name plot-methods
+#'@aliases plot plot,qaTask-method plot,qaTask,ANY-method
+#'@docType methods
+#'@param x a \code{qaTask} object
+#'@param y a \code{formula} describing the variables to be used for plotting.
+#'see \code{\link{qaCheck}} for more details.
+#'@param ...  arguments to control the output.
+#'
+#'pop:a character scalar indicating the population name.If provided,it
+#'overwrites the pop slot in qaTask object.
+#'
+#'isTerminal:a logical scalar indicating whether the pop is at the terminal
+#'node of the gating path.
+#'
+#'fixed:a logical scalar indicating whether the pop name is matched as it is
+#'.By default it is FALSE,which matches the gating path as the regular
+#'expression
+#'
+#'subset:a logical expression as a filter. see \code{\link{qaCheck}} for more
+#'details.
+#'
+#'width,height:size specification for the svg output.
+#'
+#'dest: a character specifying the output path. It is NULL by default, which
+#'indicates using the regular R device as the output.  Otherwise it outputs to
+#'a svg file.
+#'
+#'plotAll: a logical/character scalar indicating whether to plot the 1D/2D
+#'density plot for all the individual FCS files together with the summary
+#'plot(either xyplot or bwplot).  It is only valid when \code{dest} is
+#'specified as non-null path.  It is FALSE by default,indicating that only the
+#'FCS files that are marked as outliers by \code{qaCheck} are plotted.  If
+#'TRUE, all FCS files are plotted ,which should be used cautously since it
+#'could be time consuming for a large dataset.  When it is "none",no scatter
+#'plot will be generated.
+#'
+#'scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is
+#'plotted instead of the summary plot(xyplot/bwplot)
+#'
+#'par:A list storing all the lattice arguments.If provided,it overwrites the
+#'par slot of qaTask object.
+#'
 
+#'@author Mike Jiang,Greg Finak
+#'
+#'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
+#'@seealso \code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
+#'@keywords methods
+#'@examples
+#'
+#'
+#'\dontrun{
+#'
+#'data("ITNQASTUDY")
+#'checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
+#'qaTask.list<-read.qaTask(db,checkListFile)
+#'
+#'#using formula to summing up the percentage of boundary events of each channel
+#'#using the cutoff function to detect the FCS files that has the higher percentage of boundary events
+#'#than the upper threshold provided by uBound
+#'#Note that the percentages of all channels for each fcs file ("name" here indicates the fcs file name) 
+#'#are summed up through the formula  
+#'qaCheck(qaTask.list[["BoundaryEvents"]]
+#'		,sum(proportion) ~ RecdDt | name
+#'		,outlierfunc=outlier.cutoff
+#'		,uBound=0.0003
+#'		)
+#'
+#'plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel)
+#'
+#'
+#'
+#'#using Interquartile Range based outlier detection function
+#'#to find the outliers that has significant variance of MNC cell population among aliquots
+#'#here the formula is implicitly provided by qaTask object
+#'
+#'qaCheck(qaTask.list[["MNC"]],outlierfunc=qoutlier,alpha=1.5)
+#'
+#'plot(qaTask.list[["MNC"]])
+#'}
+#'
+#' @importFrom stats4 plot
+#' @export 
 setMethod("plot", signature=c(x="qaTask"),
-		function(x,y,...){
-#browser()
-			#assign null to formula if it is missing
-			if(missing(y))
-				y<-getFormula(x)
-			plot.qaTask(qaObj=x,formula1=y,...)
+		function(x, y, ...){
+			
+          plot.qaTask(qaObj=x,y = y, ...)
+            
 		})
-
-plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
+#' @importFrom RSVGTipsDevice devSVGTips
+plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
-						,isTerminal=TRUE,fixed=FALSE
 						,dest=NULL,rFunc=NULL,plotAll=FALSE
-						,scatterPlot=FALSE,gsid=NULL,highlight="id"
-						,horiz=FALSE
+						,scatterPlot=FALSE,gsid=NULL
+						,horizontal=FALSE
+                        ,panel = NULL
+                        ,highlight
+                        , between = list(x=0.2,y=0.2)
+                        , axis= axis.grid
 						,...)
 {
+#  browser()
+  #assign null to formula if it is missing
+  if(missing(y))
+    formula1 <- getFormula(qaObj)
+  else
+    formula1 <- y
 #	browser()
 	par<-.db$lattice
 	par<-lattice:::updateList(par,list(main=description(qaObj)))
@@ -240,32 +346,41 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		width<-QUALIFIER:::width(qaObj)
 	if(missing(height))
 		height<-QUALIFIER:::height(qaObj)
-	lattice.options(print.function=plot.trellisEx)
+    if(is.null(panel)){
+      lattice.options(print.function=plot.trellisEx)  
+    }  
+	
 
 	db<-getData(qaObj)
 	##query db
 	curGroup<-NULL
 	
 	if(is.null(qpar(qaObj)$horiz))
-		qpar(qaObj)$horiz<-FALSE
+		qpar(qaObj)$horiz <- FALSE
 	
 	if(is.null(rFunc))
 		rFunc<-rFunc(qaObj)
 		
 	
 	#parse the formula
-	formuRes<-.formulaParser(formula1)
+
+	formuRes<-flowWorkspace:::.formulaParser(formula1)
 	#decide the statsType(currently only one of the terms can be statType,we want to extend both in the future)
 	
 	statsType<-matchStatType(db,formuRes)
 	if(missing(pop))
 		pop<-getPop(qaObj)
 		
-	
-	if(missing(subset))
-		res<-.queryStats(db,statsType=statsType,pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+#	browser()
+    if(missing(subset))
+      subset <- qaObj@subset
+    subset <- substitute(subset)
+    ##query db
+#    browser()
+    if(length(subset) == 0||is.na(subset))
+    	res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
 	else
-		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,isTerminal=isTerminal,fixed=fixed,gsid=gsid)
+		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
 	if(nrow(res)==0)
 	{
 		return("no samples are matched!")
@@ -284,27 +399,17 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 			eval(substitute(v<-as.factor(v),list(v=curCol)))
 		}
 	}
-#	browser()
-	if(getName(qaObj)=="BoundaryEvents")
-		res<-base::subset(res,value>0)##filter out those zero-value records which may cause slow plotting
-			
-	if(nrow(res)==0)
-	{
-#		message()
-		return("no samples with the value>0 matched!")
-		
-	}
 	#append the outlier flag
-	res$outlier<-res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid
-	res$gOutlier<-res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid
+	res[, outlier := res$sid%in%base::subset(db$outlierResult,qaID==qaID(qaObj))$sid]
+	res[, gOutlier := res$sid%in%base::subset(db$GroupOutlierResult,qaID==qaID(qaObj))$sid]
 #	browser()
-	#reshape the data to include the column of the statType which can be passed to lattice	as it is
-#	res<-as.data.frame(cast(res,...~stats))
-	res<-reshape::rename(res,c("value"=statsType))
-	
 
-	if(!highlight%in%colnames(res))
-		stop(paste(highlight,"not found in the data"))
+	res <- rename(res,c("value"=statsType))
+	if(missing(highlight)){
+      highlight <- qaObj@highlight
+    }
+    if(!highlight%in%colnames(res))
+      stop(paste(highlight,"not found in the data"))
 #	browser()	
 	if(!is.null(dest))
 	{	
@@ -330,11 +435,14 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		if(plotType(qaObj)=="xyplot")
 		{
 #			browser()
+            if(is.null(panel)){
+              panel <- panel.xyplot.qa
+            }
 			thisCall<-quote(
 							xyplot(x=formula1
 									,data=res
 									,groups=outlier
-									,panel=panel.xyplot.qa
+									,panel= panel
 									,df=res
 									,dest=dest
 									,plotObjs=plotObjs
@@ -344,6 +452,8 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 									,scatterPar=scatterP
 									,highlight=highlight
 									,rFunc=rFunc
+                                    ,between = between
+                                    ,axis = axis
 								)
 							)
 		}
@@ -352,7 +462,7 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 		{
 			
 
-			par<-lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
+			par <- lattice:::updateList(par,list(par.settings=list(plot.symbol=list(col="#E41A1C"
 																					,pch=21
 																					)
 																	)
@@ -360,21 +470,23 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 										)
 			
 		
-			if(horiz)
+			if(horizontal)
 			{
 				groupBy.Panel<-as.character(formuRes$yTerm)#formula[[3]][[2]])
 				
 			}else
 			{
-				groupBy.Panel<-as.character(formuRes$xTerm)
+				groupBy.Panel <- as.character(formuRes$xTerm)
 		}
 
 			
+          if(is.null(panel)){
+            panel <- panel.bwplotEx
+          }
 
-
-			thisCall<-quote(bwplot(x=formula1
+			thisCall<-quote(bwplot(x = formula1
 									,data=res ##this argument does not get passed to panel function
-									,panel=panel.bwplotEx
+									,panel=panel
 									,df=res#arguments from this are passed to panel function
 									,groupBy=groupBy.Panel
 									,dest=dest
@@ -382,7 +494,10 @@ plot.qaTask<-function(qaObj,formula1,subset,pop,width,height
 									,plotAll=plotAll
 									,statsType=statsType
 									,scatterPar=scatterP
+                                    ,horizontal = horizontal
 									,db=db
+                                    ,between = between
+                                    ,axis = axis
 									)
 							)
 			
