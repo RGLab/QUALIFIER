@@ -2,6 +2,7 @@
 \alias{outlier.cutoff}
 \alias{outlier.norm}
 \alias{outlier.t}
+\alias{outlierFunctions}
 \alias{proportion.outliers.mle}
 \alias{proportion.outliers.robust}
 \alias{qoutlier}

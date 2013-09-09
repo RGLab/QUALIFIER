@@ -25,7 +25,7 @@
 #'@keywords functions
 #' @rdname outlierFunctions
 #' @export
-#' @aliases rlm
+#' @aliases rlm outlierFunctions
 proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
 	outliers<-rep(FALSE,length(x))
