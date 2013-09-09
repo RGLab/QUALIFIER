@@ -46,7 +46,6 @@
 #'the results are stored as a dataframe with the name of "statsOfGS" in the
 #'environment.
 #'
-#'@name preprocessing
 #' 
 #'@aliases getQAStats getQAStats-methods getQAStats,environment-method
 #'getQAStats,GatingSet-method getQAStats,GatingSetList-method

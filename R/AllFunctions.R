@@ -12,14 +12,14 @@
 #	saveXML(top,sfile )
 #	
 #}
-#'@name preprocessing
+
 #' \code{initDB} initializes and prepares the data environment for storing the QA data
 #'@rdname preprocessing-methods 
 #' @export
 initDB <- function(db=.db){
 	createDbSchema(db)
 }
-#'@name preprocessing
+
 #' \code{qaPreprocess} is a convenient wrapper that does saveToDB,getQAStats in one call
 #' @rdname preprocessing-methods
 #' @export 
@@ -96,7 +96,7 @@ matchStatType <- function(db,formuRes)
 
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
-#'@name preprocessing
+
 #' \code{saveToDB} save the gating set and annotation data into the data environment.
 #' @rdname preprocessing-methods
 #' @export 

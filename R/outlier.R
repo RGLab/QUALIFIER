@@ -24,7 +24,6 @@
 #'@seealso \code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
 #'@keywords functions
 #' @rdname outlierFunctions
-#' @name outlierFunctions
 #' @export
 #' @aliases rlm
 proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
