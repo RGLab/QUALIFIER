@@ -23,7 +23,6 @@ Collate:
     'addStats.R'
     'qaReport.R'
     'utils.R'
-    'zzz.R'
     'data.R'
 Description: Provides quality control and quality assessment tools for gated
     flow cytometry data.
