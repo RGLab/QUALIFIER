@@ -36,7 +36,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 				
 		gsid<-as.integer(curRow[["gsid"]])
 		curGS<-db$gs[[gsid]]
-		curSampleInd<-which(getSamples(curGS)%in%curRow["name"])
+		curSampleInd<-which(sampleNames(curGS)%in%curRow["name"])
 		curGh<-curGS[[curSampleInd]]
 		curNode<-as.character(curRow["node"])
 #				browser()

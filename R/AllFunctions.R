@@ -142,15 +142,15 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	
 	
 	#do some filtering for annoData
-	annoData<-subset(annoData,name%in%getSamples(gs))
+	annoData<-subset(annoData,name%in%sampleNames(gs))
 	annoData<-droplevels(annoData)
 		
 	##fit it into GatingSet(or flowSet)
 	rownames(annoData)<-annoData$name
 	
-	gs<-gs[which(getSamples(gs)%in%annoData$name)]
+	gs<-gs[which(sampleNames(gs)%in%annoData$name)]
 	
-	annoData<-annoData[getSamples(gs),]	#sort by sample order in gh
+	annoData<-annoData[sampleNames(gs),]	#sort by sample order in gh
 
 	
 	

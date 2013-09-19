@@ -136,7 +136,7 @@ setMethod("getQAStats",signature("GatingSet"),function(obj, ...){
 			print("extracting stats...")
 			
 			
-			IDs <- pData(obj)[getSamples(obj),qa.par.get("idCol")]
+			IDs <- pData(obj)[sampleNames(obj),qa.par.get("idCol")]
 			if(is.null(IDs)||length(IDs)!=length(obj))
 			{
 				stop("Not all IDs for the current sample set are found in meta data of this GatingSet!")	
