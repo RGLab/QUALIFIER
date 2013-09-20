@@ -13,21 +13,58 @@
 #	
 #}
 
-#' \code{initDB} initializes and prepares the data environment for storing the QA data
-#'@rdname preprocessing-methods 
+#' Initializes the data environment
+#' 
+#' Initializes and prepares the data environment for storing the QA data
+#' 
+#' 
+#' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
+#' 
 #' @export
 initDB <- function(db=.db){
 	createDbSchema(db)
 }
 
-#' \code{qaPreprocess} is a convenient wrapper that does saveToDB,getQAStats in one call
-#' @rdname preprocessing-methods
+#' Preprocessing for QA check
+#' 
+#' A convenient wrapper that does \link{saveToDB}, \link{getQAStats} in one call
+#' 
+#' @inheritParams initDB
+#' @param gs A \code{\link[=GatingSet-class]{GatingSet}} containing multiple
+#'  \code{gating hierarchies}
+#' @param gs.name A character scalar giving the name of the GatingSet.
+#' @param metaFile A character scalar giving the file path of the sample
+#'  annotation data, which is a csv spreadsheet contains the meta information.
+#'  Each row corresponds to one FCS file and The QUALIFIER package looks for the
+#'  FCS filename from "name" column of the spreadsheet.
+#' @param fcs.colname A character scalar indicating column name that specify FCS
+#'  file names in annotation data.
+#' @param date.colname A character scalar indicating column names that contains
+#'  date information which are automatically formatted to "\%m/\%d/\%y".
+#' @param ... other arguments passed to \link{getQAStats}
+#' 
+#' @return a list of elements stored in the data environment.
+#'
+#'@examples
+#'
+#'\dontrun{
+#'#prepare the data environment
+#'db<-new.env()
+#'initDB(db)
+#'
+#'qaPreprocess(db=db,gs=G
+#'			,metaFile=metaFile
+#'			,fcs.colname="FCS_Files"
+#'			,date.colname=c("RecdDt","AnalysisDt")
+#'			)
+#' 
+#'}
 #' @export 
-qaPreprocess<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
+qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
 {
 	
 	##associate the anno with gating set and save them in db
-	gsid<-saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
+	gsid <- saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
@@ -97,8 +134,31 @@ matchStatType <- function(db,formuRes)
 #cell number(first node in gating hierachy) marginal events and MFI are also based on sub-populations defined by manual gates
 #which are extracted during the batch process of storing % and MFI
 
-#' \code{saveToDB} save the gating set and annotation data into the data environment.
-#' @rdname preprocessing-methods
+#' Save the gating set and annotation data into the data environment.
+#' 
+#' Save the gating set and annotation data into the data environment.
+#'
+#' @inheritParams qaPreprocess
+#' 
+#' @return An unique id for \code{GatingSet} that is generated incrementally.
+#'@examples
+#'
+#'\dontrun{
+#'#prepare the data environment
+#'db<-new.env()
+#'initDB(db)
+#'
+#'metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
+#'##append the annotation  and Gating set to db
+#'metaFile<-"FCS_File_mapping.csv"
+#'saveToDB(db=db,gs=G
+#'		,metaFile=metaFile
+#'		,fcs.colname="FCS_Files"
+#'		,date.colname=c("RecdDt","AnalysisDt")
+#'	) 
+#'
+#'}
+
 #' @export 
 saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
 {

@@ -1,0 +1,57 @@
+\name{saveToDB}
+\alias{saveToDB}
+\title{Save the gating set and annotation data into the data environment.}
+\usage{
+  saveToDB(db = .db, gs, gs.name = "default gatingSet",
+    metaFile, fcs.colname = "name", date.colname = NULL)
+}
+\arguments{
+  \item{db}{An \code{environment} storing all the QA data.
+  By default it is an hidden global environment
+  \code{.db}.}
+
+  \item{gs}{A \code{\link[=GatingSet-class]{GatingSet}}
+  containing multiple \code{gating hierarchies}}
+
+  \item{gs.name}{A character scalar giving the name of the
+  GatingSet.}
+
+  \item{metaFile}{A character scalar giving the file path
+  of the sample annotation data, which is a csv spreadsheet
+  contains the meta information.  Each row corresponds to
+  one FCS file and The QUALIFIER package looks for the FCS
+  filename from "name" column of the spreadsheet.}
+
+  \item{fcs.colname}{A character scalar indicating column
+  name that specify FCS file names in annotation data.}
+
+  \item{date.colname}{A character scalar indicating column
+  names that contains date information which are
+  automatically formatted to "\%m/\%d/\%y".}
+}
+\value{
+  An unique id for \code{GatingSet} that is generated
+  incrementally.
+}
+\description{
+  Save the gating set and annotation data into the data
+  environment.
+}
+\examples{
+\dontrun{
+#prepare the data environment
+db<-new.env()
+initDB(db)
+
+metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
+##append the annotation  and Gating set to db
+metaFile<-"FCS_File_mapping.csv"
+saveToDB(db=db,gs=G
+		,metaFile=metaFile
+		,fcs.colname="FCS_Files"
+		,date.colname=c("RecdDt","AnalysisDt")
+	)
+
+}
+}
+
