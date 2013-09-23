@@ -126,22 +126,31 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
       .qaCheck.main(obj,...)
     })
 
-.qaCheck.main <- function(obj,formula=NULL,subset
-                  ,outlierfunc = list(func = outlier.norm,args = list())
-                  ,gOutlierfunc=list(func = outlier.norm,args = list())                
-                   ,rFunc=NULL, ...){
-			
-			call.f<-match.call(expand.dots = F)
+.qaCheck.main <- function(obj,formula = NULL, subset
+                  , outlierfunc = NULL
+                  , gOutlierfunc = NULL                
+                   , rFunc = NULL, ...){
+#			browser()
+            #set outlier detection function
+            if(is.null(outlierfunc))
+              outlierfunc <- list(func = obj@outlierFunc
+                                  , args = obj@outlierFunc_args)
+                 
+            if(is.null(gOutlierfunc))
+              gOutlierfunc <- list(func = obj@goutlierFunc
+                                  , args = obj@goutlierFunc_args)
+                            
+			call.f <- match.call(expand.dots = F)
 
 			#replace subset with Subset
-			ind<-which(names(call.f)=="subset")
-			if(length(ind)>0)
+			ind <- which(names(call.f) == "subset")
+			if(length(ind) > 0)
 			{
-				names(call.f)[ind]<-"Subset"
+				names(call.f)[ind] <- "Subset"
 			}
 
-#			argname<-names(list(...))
-            argname<-names(outlierfunc$args)
+
+            argname <- names(outlierfunc$args)
              
 #			browser()		
 			##try to run the qa for each individual cutoff value if multiple values are provided 
@@ -226,19 +235,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	db<-getData(obj)
 	pop<-getPop(obj)
 
-	if(is.null(outlierfunc))
-	{
-		if(plotType(obj)=="bwplot")
-		{
-			outlierfunc<-qoutlier
-			message("qoutlier is used for outlier detection.")
-		}else
-		{
-			outlierfunc<-outlier.norm
-			message("outlier.norm is used for outlier detection.")
-		}
 	
-	}
 	
 	if(is.null(rFunc))
 		rFunc<-rFunc(obj)	
@@ -253,20 +250,19 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	
-	statsType<-matchStatType(db,formuRes)
+	statsType <- matchStatType(db,formuRes)
 #	browser()
     if(missing(Subset))
       Subset <- obj@subset
     
 	##query db
-	if(length(Subset) == 0 || is.na(Subset))
+	if(is.call(Subset))
 	{		
-		yy <- .queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
-		
+        yy <- .queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)		
 	}else
 	{
-		yy <- .queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
-		
+
+      yy <- .queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)		
 	}
 		
 	if(nrow(yy)==0)

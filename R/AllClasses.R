@@ -59,6 +59,10 @@ NULL
 #'   							It should be a valid column name in the metaFile (see \code{\link{getQAStats} for more details about the meta file}.
 #'   							}
 #'   \item{\code{rFunc}:}{A regression function passed to some qa tasks to monitor the long term trend.}
+#'   \item{\code{outlierFunc}:}{An outlier detection function.}
+#'   \item{\code{outlierFunc_args}:}{named arguments passed to the outlier detection function.}
+#'   \item{\code{goutlierFunc}:}{A group outlier detection function.} 
+#'   \item{\code{goutlierFunc_args}:}{named arguments passed to the group outlier detection function.}
 #'    \item{\code{db}:}{An environment containing the database connection, which stores the gating hierarchy,QA task list,sample information and outliers detection results. .}
 
 #'  }
@@ -123,6 +127,10 @@ setClass("qaTask",
 						,scatterPar="list"#arguments for indivdiual plot
 						,htmlReport="logical"#decide wether to plot even without outliers detected
 						,rFunc="ANY"
+                        ,outlierFunc="ANY"
+                        ,goutlierFunc="ANY"
+                        ,outlierFunc_args="ANY"
+                        ,goutlierFunc_args="ANY"
 						,highlight="character"#argument to determine level on which the dot will be higtlighted when hoverover in svg plot(like FCS,or sampleID ,should be the column name in the meta data) 
 						,db="ANY"
 						),
@@ -143,9 +151,13 @@ setClass("qaTask",
 						,scatterPar=list(type="xyplot"
 										,smooth=FALSE
 										,stat=TRUE)
-						,htmlReport=FALSE
+						,htmlReport = FALSE
 						,rFunc = NULL
-						,highlight= NULL
+						,highlight = NULL
+                        ,outlierFunc = NULL
+                        ,goutlierFunc = NULL
+                        ,outlierFunc_args = NULL
+                        ,goutlierFunc_args = NULL
 						,db="ANY"
 						)
 		)
@@ -204,21 +216,75 @@ read.qaTask <-function(checkListFile, ...)
 	db$qaTaskTbl<-df
 	qaTask.list<-apply(df,1,function(curRow,db){
                           
-                          filter <- curRow["subset"]
+                          plotType <- curRow["plotType"]
+                        
+                          filter <- gsub("^\\s*|\\s*$", "", curRow["subset"]) #trim the leading and trailing space
                           if(!is.na(filter))
-                            filter <- parse(text = filter)
+                          {
+                            if(nchar(filter) > 0)
+                              filter <- parse(text = filter)
+                            else
+                              filter  <- NULL
+                          }else
+                            filter  <- NULL
+                          #parse outlier functions                          
+                          outlierFunc_args <- goutlierFunc_args <- list()
+                          
+                          outlierFunc <- curRow["outlierFunc"]
+                          outlierFunc <- eval(parse(text = outlierFunc))
+                          if(is.function(outlierFunc))
+                          {
+                            
+                            outlierFunc_args <- curRow["outlierFunc_args"]
+                            
+                            if(!is.na(outlierFunc_args))
+                              outlierFunc_args <- openCyto:::.argParser(outlierFunc_args)
+                            
+                          }else{
+                            message("Outlier function is not specified!")
+                            if(plotType=="bwplot")
+                            {
+                              outlierFunc <- qoutlier
+                              message("'qoutlier' will be used as default outlier function.")
+                            }else
+                            {
+                              outlierFunc <- outlier.norm
+                              message("'outlier.norm' will be used as default outlier function.")
+                            }
+                            
+                          }
+                          
+                          
+                          goutlierFunc <- curRow["goutlierFunc"]
+                          goutlierFunc <- eval(parse(text = goutlierFunc))
+                          if(is.function(goutlierFunc))
+                          {
+                            goutlierFunc_args <- curRow["goutlierFunc_args"]
+                            if(!is.na(aoutlierFunc_args))
+                              outlierFunc_args <- openCyto:::.argParser(outlierFunc_args)
+                             
+                          }else{
+                            goutlierFunc <- outlier.norm
+                          }
+                          
+                          
+                          
                     		curQa<-new("qaTask"
-                        				,qaID=as.integer(curRow["qaID"])
-                        				,qaName=curRow["qaName"]
-                        				,description=curRow["description"]
-                        				,qaLevel=curRow["qaLevel"]
-                        				,pop=curRow["pop"]
-                        				,formula=as.formula(curRow["formula"])
-                                        ,type=curRow["type"]
+                        				,qaID = as.integer(curRow["qaID"])
+                        				,qaName = curRow["qaName"]
+                        				,description = curRow["description"]
+                        				,qaLevel = curRow["qaLevel"]
+                        				,pop = curRow["pop"]
+                        				,formula = as.formula(curRow["formula"])
+                                        ,type = curRow["type"]
                                         ,subset = filter
-                        				,plotType=curRow["plotType"]
+                        				,plotType = plotType
                                         ,highlight = qa.par.get("idCol")
-                        				,db=db
+                                        ,outlierFunc = outlierFunc
+                                        ,goutlierFunc = goutlierFunc
+                                        ,outlierFunc_args = outlierFunc_args
+                                        ,goutlierFunc_args = goutlierFunc_args
+                        				,db = db
                         		    )
                 		  curQa					
 			            } ,db)

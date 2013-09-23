@@ -313,12 +313,12 @@ setMethod("plot", signature=c(x="qaTask"),
 #' @importFrom RSVGTipsDevice devSVGTips
 plot.qaTask<-function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
-						,dest=NULL,rFunc=NULL,plotAll=FALSE
-						,scatterPlot=FALSE,gsid=NULL
-						,horizontal=FALSE
+						,dest = NULL,rFunc = NULL,plotAll = FALSE
+						,scatterPlot = FALSE,gsid = NULL
+						,horizontal = FALSE
                         ,panel = NULL
                         ,highlight
-                        , between = list(x=0.2,y=0.2)
+                        , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
 						,...)
 {
@@ -377,10 +377,11 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
     subset <- substitute(subset)
     ##query db
 #    browser()
-    if(length(subset) == 0||is.na(subset))
-    	res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
+    if(is.call(subset))
+      res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
 	else
-		res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop, gsid=gsid, type = qaObj@type)
+      res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = qaObj@type)
+		
 	if(nrow(res)==0)
 	{
 		return("no samples are matched!")
@@ -439,19 +440,19 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
               panel <- panel.xyplot.qa
             }
 			thisCall<-quote(
-							xyplot(x=formula1
-									,data=res
-									,groups=outlier
-									,panel= panel
-									,df=res
-									,dest=dest
-									,plotObjs=plotObjs
-									,plotAll=plotAll
-									,statsType=statsType
-									,db=db
-									,scatterPar=scatterP
-									,highlight=highlight
-									,rFunc=rFunc
+							xyplot(x = formula1
+									,data = res
+									,groups = outlier
+									,panel = panel
+									,df = res
+									,dest = dest
+									,plotObjs = plotObjs
+									,plotAll = plotAll
+									,statsType = statsType
+									,db = db
+									,scatterPar = scatterP
+									,highlight = highlight
+									,rFunc = rFunc
                                     ,between = between
                                     ,axis = axis
 								)
@@ -477,7 +478,7 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 			}else
 			{
 				groupBy.Panel <- as.character(formuRes$xTerm)
-		}
+		     }
 
 			
           if(is.null(panel)){
@@ -503,9 +504,9 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 			
 		}
 		#append the par list
-		thisCall<-as.call(c(as.list(thisCall),par))
+		thisCall <- as.call(c(as.list(thisCall),par))
 #		browser()
-		thisCall<-eval(thisCall)
+		thisCall <- eval(thisCall)
 #		print(thisCall)
 	}
 	
