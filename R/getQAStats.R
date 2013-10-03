@@ -283,6 +283,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 			
 			
 }
+#' @importFrom flowWorkspace lapply
 setMethod("getQAStats",signature("GatingSetList"),function(obj,...){
       res <- lapply(obj,function(gs){
             getQAStats(gs,...)

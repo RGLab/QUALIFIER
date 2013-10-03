@@ -8,7 +8,8 @@ Depends:
     R (>= 2.14.0),flowCore,flowViz,ncdfFlow,flowWorkspace (>= 3.7.29),
     data.table
 Imports:
-    MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra,grDevices, openCyto
+    MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra,grDevices,
+    openCyto
 Collate:
     'AllGenerics.R'
     'AllClasses.R'

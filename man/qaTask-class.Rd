@@ -88,10 +88,16 @@
   \code{\link{getQAStats} for more details about the meta
   file}.  } \item{\code{rFunc}:}{A regression function
   passed to some qa tasks to monitor the long term trend.}
-  \item{\code{db}:}{An environment containing the database
-  connection, which stores the gating hierarchy,QA task
-  list,sample information and outliers detection results.
-  .} }
+  \item{\code{outlierFunc}:}{An outlier detection
+  function.} \item{\code{outlierFunc_args}:}{named
+  arguments passed to the outlier detection function.}
+  \item{\code{goutlierFunc}:}{A group outlier detection
+  function.} \item{\code{goutlierFunc_args}:}{named
+  arguments passed to the group outlier detection
+  function.} \item{\code{db}:}{An environment containing
+  the database connection, which stores the gating
+  hierarchy,QA task list,sample information and outliers
+  detection results. .} }
 }
 \section{Objects from the Class}{
   Objects can be created by using constructor:
