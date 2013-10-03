@@ -22,20 +22,6 @@ gh_template<-GT[[1]]
 getPopStats(gh_template)[,2:3]
 
 #test the matchNode
-nodes <- getNodes(gh_template,isPath=T)
-nodes
-nodes[matchNode("MFI", nodes, type ="subPath")]
-nodes[matchNode("root", nodes, type ="popName")]
-nodes[matchNode("MNC", nodes, type ="popName")]
-nodes[matchNode("WBC_perct", nodes, type ="popName")]
-nodes[matchNode("margin", nodes, type ="subPath")]
-nodes <- getNodes(GT[[1]],isPath=T)
-nodes[matchNode("Lv", nodes, type ="popName")]
-nodes[matchNode("/(4|8)\\+$", nodes, type ="reg")]
-nodes[matchNode("4\\+/(IFNg|IL2|IL4|IL17a|TNFa)\\+$", nodes, type ="reg")]
-nodes[matchNode("/S/Lv/L/3+/Excl/4+/TNFa+", nodes, type ="fullPath")]
-nodes[matchNode("4+/TNFa+", nodes, type ="sub")]
-nodes[matchNode("8+", nodes, type ="sub")]
 
 ###############################################################################
 #2.apply gating template to new data
@@ -140,7 +126,7 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
 ##add new aggregated stats
-addStats(qaTask.list[["BoundaryEvents"]]
+.addStats(qaTask.list[["BoundaryEvents"]]
 		,definition=sum(proportion)~RecdDt|fileid+gsid
 		,pop="/root/MNC/margin"
 		,statName="sum.prop"

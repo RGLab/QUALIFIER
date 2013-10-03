@@ -1,34 +1,156 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
-clearCheck<-function(obj,gsid)
+#' \code{clearCheck} function removes the outlier results detected by the
+#' previous \code{qaCheck} call on a particular gating set.
+#' @export 
+#' @rdname qaCheck-methods
+clearCheck <- function(obj, gsid)
 {
-	db<-getData(obj)
-	ind<-db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
-	db$outlierResult<-db$outlierResult[!ind,]
+#	browser()
+	if(missing(gsid))
+		gsid <- max(db$gstbl$gsid)
+	db <- getData(obj)
+	ind <- db$outlierResult$qaID%in%qaID(obj)&db$outlierResult$gsid%in%gsid
+	db$outlierResult <- db$outlierResult[!ind,]
+	
 }
+#'Perform the quality assessment for the qaTask object
+#'
+#'Perform the quality assessment for a particular QA Task based on the
+#'information provided by \code{\link{qaTask}} object.
+#'
+#'\code{qaCheck} method parses the formula stored in qaTask or explicitly
+#'provided by the argument and select the appropriate gated population,extract
+#'the statistics that is pre-calculated by \code{\link{getQAStats}} and perform
+#'the outlier detection within a certain sample groups specified by the
+#'conditioning variables or x term in formula. Then the outliers detection
+#'results are save in database and ready for query or plotting.
+#'
+#'
+#'@name qaCheck-methods
+#'@aliases qaCheck qaCheck-methods qaCheck,qaTask-method clearCheck
+#'@docType methods
+#'@param obj a \code{qaTask} object
+#'@param gsid an \code{integer} that uniquely identifies a gating set object.
+#'if missing, the latest added gating set is selected.
+#'@param ...  formula: a \code{formula} describing the variables to be used for
+#'QA. When it is omitted or NULL, the formula stored in \code{qaTask} is used.
+#'It is generally of the form y ~ x | g1 * g2 * ... , y is the statistics to be
+#'checked in this QA, It must be one of the four types:
+#'
+#'"MFI": Median Fluorescence Intensity of the cell population specified by
+#'\code{\link{qaTask}},
+#'
+#'"proportion": the percentage of the cell population specified by
+#'\code{qaTask} in the parent population,
+#'
+#'"count": the number of events of the cell population specified by
+#'\code{qaTask},
+#'
+#'"spike": the variance of intensity over time of each channel ,which
+#'indicating the stability of the fluorescence intensity.
+#'
+#'x is normally used to specify the variable plotted on x-axis in
+#'\code{\link[QUALIFIER:plot]{plot}} method.  when \code{plotType} of the
+#'\code{qaTask} is "bwplot", it is also taken as the conditioning variable that
+#'divides the samples into subgroups within which the \code{outlierfunc} is
+#'applied.
+#'
+#'g1,g2,.... are the conditioning variables, which are used to divide the
+#'samples into subgroups and perform QA check whitin each individual
+#'groups.They may also be omitted,in which case the outliers detection is
+#'peformed in the entire sample set.
+#'
+#'subset: a logical expression used as a filter.It follows the same syntax as
+#'the "subset" expression in \code{\link[base:subset]{subset}}.
+#'
+#'\emph{Usage:}
+#'
+#'subset=channel\%in\%c('FITC-A')
+#'
+#'subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&channel\%in\%c('FITC-A')
+#'
+#'outlierfunc:a \code{function} to be used for outlier detection.  see
+#'\code{\link{outlierFunctions}} for more details.
+#'
+#'gOutlierfunc:a \code{function} to be used for group outlier detection.  see
+#'\code{\link{outlierFunctions}} for more details.  rFunc:a \code{function} for
+#'fitting regression model within each individual subgroup.
+#'
+#'isTerminal:a logical scalar indicating whether the pop is at terminal node of
+#'the gating path.
+#'
+#'fixed:a logical scalar indicating whether the pop name is matched as it is
+#'.By default it is FALSE,which matches the gating path as the regular
+#'expression
+#'@author Mike Jiang,Greg Finak
+#'
+#'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
+#'@seealso \code{\link[QUALIFIER:plot]{plot}},\code{\link{getQAStats}}
+#'@keywords methods
+#'@examples
+#'
+#'
+#'\dontrun{
+#'
+#'data("ITNQASTUDY")
+#'checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
+#'qaTask.list<-read.qaTask(db,checkListFile)
+#'
+#'
+#'#using t-distribution based outlier detection function  
+#'#applied the linear regression on each group to detect the significant MFI change over time 
+#'qaCheck(qaTask.list[["MFIOverTime"]]
+#'		,outlierfunc=outlier.t
+#'		,rFunc=rlm
+#'		,alpha=0.05
+#')
+#'plot(qaTask.list[["MFIOverTime"]],y=MFI~RecdDt|stain
+#'		,subset="channel%in%c('FITC-A')"
+#'		,rFunc=rlm
+#')
+#'
+#'
+#'#detect the outliers that has lower percentage of RBC Lysis than the threshold provided by lBound
+#'qaCheck(qaTask.list[["RBCLysis"]]
+#'		,formula=proportion ~ RecdDt | Tube
+#'		,outlierfunc=outlier.cutoff
+#'		,lBound=0.8
+#'		)
+#'		
+#'plot(qaTask.list[["RBCLysis"]])	
+#'}
+#'
+#' @rdname qaCheck-methods
+#' @export 
 setMethod("qaCheck", signature=c(obj="qaTask"),
     function(obj, ...){
       .qaCheck.main(obj,...)
     })
 
-.qaCheck.main <- function(obj,formula=NULL,subset
-                  ,outlierfunc = list(func = outlier.norm,args = list())
-                  ,gOutlierfunc=list(func = outlier.norm,args = list())                
-                   ,rFunc=NULL, ...){
-			
-			call.f<-match.call(expand.dots = F)
+.qaCheck.main <- function(obj,formula = NULL, subset
+                  , outlierfunc = NULL
+                  , gOutlierfunc = NULL                
+                   , rFunc = NULL, ...){
+#			browser()
+            #set outlier detection function
+            if(is.null(outlierfunc))
+              outlierfunc <- list(func = obj@outlierFunc
+                                  , args = obj@outlierFunc_args)
+                 
+            if(is.null(gOutlierfunc))
+              gOutlierfunc <- list(func = obj@goutlierFunc
+                                  , args = obj@goutlierFunc_args)
+                            
+			call.f <- match.call(expand.dots = F)
 
 			#replace subset with Subset
-			ind<-which(names(call.f)=="subset")
-			if(length(ind)>0)
+			ind <- which(names(call.f) == "subset")
+			if(length(ind) > 0)
 			{
-				names(call.f)[ind]<-"Subset"
+				names(call.f)[ind] <- "Subset"
 			}
 
-#			argname<-names(list(...))
-            argname<-names(outlierfunc$args)
+
+            argname <- names(outlierfunc$args)
              
 #			browser()		
 			##try to run the qa for each individual cutoff value if multiple values are provided 
@@ -102,7 +224,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			
 		}
         
-
+#' @importFrom reshape rename
 .qaCheck<-function(obj,formula=NULL,Subset
                     ,outlierfunc
                     ,gOutlierfunc
@@ -113,19 +235,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	db<-getData(obj)
 	pop<-getPop(obj)
 
-	if(is.null(outlierfunc))
-	{
-		if(plotType(obj)=="bwplot")
-		{
-			outlierfunc<-qoutlier
-			message("qoutlier is used for outlier detection.")
-		}else
-		{
-			outlierfunc<-outlier.norm
-			message("outlier.norm is used for outlier detection.")
-		}
 	
-	}
 	
 	if(is.null(rFunc))
 		rFunc<-rFunc(obj)	
@@ -140,20 +250,19 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	xTerm<-formuRes$xTerm
 	groupBy<-formuRes$groupBy
 	
-	statsType<-matchStatType(db,formuRes)
+	statsType <- matchStatType(db,formuRes)
 #	browser()
     if(missing(Subset))
       Subset <- obj@subset
     
 	##query db
-	if(length(Subset) == 0 || is.na(Subset))
+	if(is.call(Subset))
 	{		
-		yy <- .queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)
-		
+        yy <- .queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)		
 	}else
 	{
-		yy <- .queryStats(db,statsType=statsType,Subset,pop=getPop(obj), gsid=gsid, type = obj@type)
-		
+
+      yy <- .queryStats(db,statsType=statsType,pop=getPop(obj),gsid=gsid, type = obj@type)		
 	}
 		
 	if(nrow(yy)==0)
@@ -162,7 +271,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	}
 		
 
-	yy<-reshape::rename(yy,c("value"=statsType))		
+	yy <- rename(yy,c("value"=statsType))		
 
 	##apply the function to xTerm and yTerm in each group
 	if(!is.null(formuRes$xfunc))

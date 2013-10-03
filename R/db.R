@@ -3,11 +3,13 @@
 #to be extended to more generic DB operations
 ############################################
 loadStats <- function( db=.db, ... ){
-	db$stats <- labkey.selectRows(
-		  queryName 	= 'stats'
-		, schemaName	= 'opencyto_quality_control'
-		, ...
-	);
+    df <-   labkey.selectRows(
+		        queryName   = 'stats',
+		        schemaName  = 'opencyto_quality_control',
+		        ...
+	        );
+    df <- df[ colnames(test) != 'Folder' ];
+    db$stats <- data.table( df );
 
 	db$stats$channel[db$stats$channel=='NA'] <- NA;
 };
@@ -33,7 +35,7 @@ loadDB <- function( db=.db, ... ){
 	loadStats( db, ... );
 };
 
-writeTask <- function( db=.db, ... ){
+writeTask <- function( db=.db, reportId, ... ){
 	sql <- 'SELECT MAX(qaID) AS max_qaid FROM qatasklist';
 
 	max_qaid <- labkey.executeSql(
@@ -49,7 +51,7 @@ writeTask <- function( db=.db, ... ){
 
 	db$qaTaskTbl$qaID <- db$qaTaskTbl$qaID + max_qaid;
 	
-	toInsert <- db$qaTaskTbl;
+	toInsert <- cbind( db$qaTaskTbl, data.frame( reportId = reportId ) );
 	
 	insertedRow <- labkey.insertRows(
 		  toInsert	= toInsert

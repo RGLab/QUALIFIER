@@ -1,7 +1,31 @@
-# TODO: Add comment
-# 
-# Author: mike
-###############################################################################
+#'outliers detection functions
+#'
+#'Distribution based outlier detection functions.
+#'
+#' These different outlier detection functions are used together with qaCheck method to perform outlier checks.
+#'
+#'@param x An integer/numeric vector used as the input
+#'@param alpha,z.cutoff alpha is the percentage of the standard deviation from
+#'the center of the data.  z.cutoff is the standardized z-score value. They are
+#'used as the distribution based thresholds.
+#'@param lBound,uBound Numeric scalars used as cutoff threshold for either
+#'lower limit or upper limit
+#'@param isUpper,isLower logical scalars indicating whether the outliers are
+#'checked at upper or lower side of the distribution.
+#'@param plot logical scalar indicating whether to visualize the outlier
+#'detection results.
+#'@param ...  other arguments to be passed to qoutlier function,currently it is
+#'ignored.
+#'@return a logical vector with the same length of input vector,indicating
+#'whether each entry of the input is a outlier.
+#'@author Mike Jiang,Greg Finak
+#'
+#'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
+#'@seealso \code{\link{qaCheck}},\code{\link[QUALIFIER:qaReport]{qaReport}}
+#'@keywords functions
+#' @rdname outlierFunctions
+#' @export
+#' @aliases rlm outlierFunctions
 proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
 	outliers<-rep(FALSE,length(x))
@@ -27,6 +51,8 @@ proportion.outliers.robust<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 	return(outliers)
 }
 
+#' @rdname outlierFunctions
+#' @export
 proportion.outliers.mle<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 {
 	outliers<-rep(FALSE,length(x))
@@ -51,7 +77,10 @@ proportion.outliers.mle<-function (x, alpha = 0.01,isUpper=TRUE,isLower=TRUE)
 }
 
 
-##based on boxplot ... is the argument passed from parent call which is ignored here
+
+#' qoutlier is IQR based outlier detection.
+#' @rdname outlierFunctions
+#' @export
 qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...) 
 {
 #	browser()
@@ -87,7 +116,11 @@ qoutlier <-function (x, alpha = 1.5,isUpper=TRUE,isLower=TRUE,plot=FALSE,...)
 }
 
 
-##outlier detection based on normal distribution robusted estimation of mu and sigma 
+#' outlier.norm is based on normal distribution using Huber M-estimator of location with MAD scale 
+#' @rdname outlierFunctions
+#' @export
+#' @importFrom MASS huber rlm
+#' @export rlm
 outlier.norm <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 {
 #	browser()
@@ -124,7 +157,9 @@ outlier.norm <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,
 	isOutlier
 }
 
-
+#' outlier.t is based on t-distribution. 
+#' @rdname outlierFunctions
+#' @export
 outlier.t <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plot=FALSE) 
 {
 #	browser()
@@ -148,7 +183,9 @@ outlier.t <-function (x,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE,plo
 	isOutlier	
 	
 }
-
+#' outlier.cutoff is a simple cutoff-based outlier detection.
+#' @rdname outlierFunctions
+#' @export
 outlier.cutoff<-function(x,lBound=NULL,uBound=NULL)
 {
 #	browser()
@@ -165,7 +202,7 @@ outlier.cutoff<-function(x,lBound=NULL,uBound=NULL)
 }
 
 
-#outlier detection based on the given probability vector(p) and threshold(alpha)
+# outlier detection based on the given probability vector(p) and threshold(alpha)
 outlierDetection<-function(cp,alpha = 0.01,z.cutoff=NULL,isUpper=TRUE,isLower=TRUE)
 {
 if(is.null(z.cutoff)){
@@ -183,7 +220,7 @@ if(is.null(z.cutoff)){
 	
 }
 
-##plot the original dots and mean and higlight the outliers 
+# plot the original dots and mean and higlight the outliers 
 outlier.plot<-function (x,mu,isOutlier)
 {
 	

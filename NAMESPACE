@@ -1,47 +1,41 @@
-importFrom(MASS, huber, rlm)
-
-importFrom(stats4, plot)
-
-importFrom(lattice,standard.theme)
-
-importFrom(RSVGTipsDevice, devSVGTips, setSVGShapeToolTip,
-           setSVGShapeURL)
-
-import(reshape)
-import(flowCore)
-import(flowWorkspace)
-import(flowViz)
-
-importFrom(hwriter, closePage, hwrite, openPage)
-
+export(clearCheck)
+export(initDB)
+export(outlier.cutoff)
+export(outlier.norm)
+export(outlier.t)
+export(proportion.outliers.mle)
+export(proportion.outliers.robust)
+export(qaPreprocess)
+export(qoutlier)
+export(read.qaTask)
+export(rlm)
+export(saveToDB)
 exportClasses(qaTask)
-
-export( qaPreprocess
-	,saveToDB
-        ,makeQaTask
-        ,read.qaTask
-        ,proportion.outliers.robust
-        ,proportion.outliers.mle
-        ,qoutlier
-        ,outlier.cutoff
-        ,outlier.t
-        ,outlier.norm
-        ,rlm
-        ,initDB
-        ,loadDB
-        ,loadStats
-        ,writeTask
-        ,writeStats
-        ,writeQAResults
-        ,clearCheck
-        )
-
-
-exportMethods(plot,qaCheck,getQAStats,queryStats
-			,qaReport
-			,qpar,'qpar<-'
-			,scatterPar,'scatterPar<-'
-			,rFunc,'rFunc<-'
-			,htmlReport,'htmlReport<-'
-			)          
-
+exportMethods("htmlReport<-")
+exportMethods("qpar<-")
+exportMethods("rFunc<-")
+exportMethods("scatterPar<-")
+exportMethods(getQAStats)
+exportMethods(htmlReport)
+exportMethods(plot)
+exportMethods(qaCheck)
+exportMethods(qaReport)
+exportMethods(qpar)
+exportMethods(queryStats)
+exportMethods(rFunc)
+exportMethods(scatterPar)
+importFrom(flowWorkspace,lapply)
+importFrom(hwriter,closePage)
+importFrom(hwriter,hwrite)
+importFrom(hwriter,openPage)
+importFrom(latticeExtra,axis.grid)
+importFrom(latticeExtra,ggplot2like)
+importFrom(MASS,huber)
+importFrom(MASS,rlm)
+importFrom(reshape,cast)
+importFrom(reshape,melt)
+importFrom(reshape,rename)
+importFrom(RSVGTipsDevice,devSVGTips)
+importFrom(RSVGTipsDevice,setSVGShapeToolTip)
+importFrom(RSVGTipsDevice,setSVGShapeURL)
+importFrom(stats4,plot)

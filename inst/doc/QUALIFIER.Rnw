@@ -53,6 +53,8 @@
 
 <<loadPackage-QUALIFIER, echo=FALSE,results=hide>>=
 library(QUALIFIER)
+QUALIFIER:::qa.par.set("idCol","id")
+QUALIFIER:::qa.par.get("idCol")
 @
 
 \section{Parsing the QA gating template}
@@ -149,7 +151,11 @@ qaTask.list[["RBCLysis"]]
 According to the formula stored in \Rclass{qaTask}, it uses the statistical property "proportion" and groups 
 the data by "Tube" (or staining panel). "RecdDt" is only for the plotting purpose (specifing the x-axis). Cell population is defined as "WBC\_perct"
 <<qaCheck-RBCLysis, results=verbatim>>=
-qaCheck(qaTask.list[["RBCLysis"]],outlierfunc=outlier.cutoff,lBound=0.8)
+qaCheck(qaTask.list[["RBCLysis"]]
+       ,outlierfunc=list(func = outlier.cutoff
+                        ,args =  list(lBound=0.8)
+                       )
+      )
 @
 
 \Rfunction{qaCheck} reads all the necessary information about the gated data from \Rclass{qaTask} object.
@@ -225,10 +231,11 @@ by fcs file ("name" in this case).
 
 <<qaCheck-BoundaryEvents,  results=verbatim>>=
 qaCheck(qaTask.list[["BoundaryEvents"]]
-		,sum(proportion) ~ RecdDt | name
-		,outlierfunc=outlier.cutoff
-		,uBound=0.0003
-		)
+        ,sum(proportion) ~ RecdDt | name
+        ,outlierfunc=list(func = outlier.cutoff
+                          ,args =list(uBound=0.0003)
+                          )
+        )
 @
 
 And we still can visualize the results chanel by chanel.
@@ -241,8 +248,9 @@ Another three examples:
 QA check of Fluorescence stability overtime using t-distribution based outlier detection function.     
 <<qaCheck-MFIOverTime, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["MFIOverTime"]]
-		,rFunc=rlm
-		,z.cutoff=3
+		,rFunc= list (func = rlm
+		              ,args = list(z.cutoff=3)
+                  )
 		)
 
 plot(qaTask.list[["MFIOverTime"]]
@@ -260,8 +268,11 @@ All the lattice options (like \Robject{scales} here in this example) can be pass
 
 <<plot-spike, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["spike"]]
-			,outlierfunc=outlier.t
-			,alpha=0.00001)
+			,outlierfunc = list (func = outlier.t
+                                ,args = list(alpha=0.00001)
+                                ) 
+                
+			)
 
 plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')
@@ -272,9 +283,8 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 When monitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
 <<tubesEvents, results=hide,echo=FALSE>>=
-QUALIFIER:::.parseTubeID(db)
-tubesEvents<-read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
-tubesEvents<-QUALIFIER:::.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
+tubesEvents <- read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
+tubesEvents <- QUALIFIER:::.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
 @
 \Robject{tubesEvents} pass to the argument of \Rfunction{qaCheck} could be a one-column data frame or a named list/vector. 
 Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
@@ -285,9 +295,10 @@ tubesEvents
 <<plot-NumberOfEvents, fig=true, results=verbatim>>=
 qaCheck(qaTask.list[["NumberOfEvents"]]
 		,formula=count ~ RecdDt | Tube
-		,outlierfunc=outlier.cutoff
-		,lBound=0.8*tubesEvents
-		)
+		,outlierfunc = list(func = outlier.cutoff
+		                    ,args = list(lBound = 0.8 * tubesEvents)
+                        )
+		  )
 plot(qaTask.list[["NumberOfEvents"]]
 		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 		,xlab="Record Date"
@@ -297,7 +308,11 @@ plot(qaTask.list[["NumberOfEvents"]]
 
 
 <<plot-RedundantStain, fig=true, results=verbatim>>=
-qaCheck(qaTask.list[["RedundantStain"]],z.cutoff=1)
+qaCheck(qaTask.list[["RedundantStain"]]
+        ,gOutlierfunc = list(func = outlier.norm
+                            , args =list(z.cutoff = 1)
+                            )
+         )
 plot(qaTask.list[["RedundantStain"]]
 		,y=proportion~factor(coresampleid)|channel:stain
 		,subset=stain%in%c('CD8')
