@@ -146,6 +146,12 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                     nodePaths <- nodePaths[pops]
                   }else{
                     nodes <- nodes[match(pops,nodes)]
+                    
+                    #validity check for pops
+                    invalidNodes <- is.na(nodes)
+                    if(any(invalidNodes))
+                      stop("Invalid pops:", paste0(pops[invalidNodes]))
+                    
                     nodePaths <- nodePaths[match(pops,nodes)]
                   }
                   
