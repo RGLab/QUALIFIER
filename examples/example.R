@@ -3,7 +3,7 @@ library(QUALIFIER)
 #library(flowWorkspace)
 #unloadNamespace("QUALIFIER")
 #unloadNamespace("flowWorkspace")
-lapply(list.files("/home/wjiang2/rglab/workspace/QUALIFIER/R",pattern=".R",full=T),source)
+#lapply(list.files("/home/wjiang2/rglab/workspace/QUALIFIER/R",pattern=".R",full=T),source)
 
 #outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
 #dest<-file.path(outDir,"trellis_plot/")

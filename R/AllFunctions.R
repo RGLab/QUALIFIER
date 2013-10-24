@@ -172,7 +172,8 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		
 	if(!missing(metaFile))
 	{
-		annoData_csv<-read.csv(metaFile)
+		dt <- fread(metaFile)
+        annoData_csv <- as.data.frame(dt)
 		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
 	}
 #browser()

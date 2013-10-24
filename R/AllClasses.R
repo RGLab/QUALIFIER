@@ -205,7 +205,13 @@ makeQaTask <- function(db=.db,qaName,description,qaLevel,pop,formula, type, plot
 #' }
 read.qaTask <-function(checkListFile, ...)
 {
-  df<-read.csv(checkListFile)
+  if(tools::file_ext(checkListFile) == "gz"){
+    df <- read.csv(checkListFile)
+  }else
+  {
+    dt <- fread(checkListFile)
+    df <- as.data.frame(dt)
+  }
   .read.qaTask(df,...)
 }
 

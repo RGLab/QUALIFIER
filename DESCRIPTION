@@ -9,7 +9,7 @@ Depends:
     data.table
 Imports:
     MASS,hwriter,RSVGTipsDevice,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,reshape,latticeExtra,grDevices,
-    openCyto
+    openCyto, tools
 Collate:
     'AllGenerics.R'
     'AllClasses.R'
