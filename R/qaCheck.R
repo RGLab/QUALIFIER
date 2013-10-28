@@ -224,7 +224,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 			
 		}
         
-#' @importFrom reshape rename
+# @importFrom reshape rename
 .qaCheck<-function(obj,formula=NULL,Subset
                     ,outlierfunc
                     ,gOutlierfunc

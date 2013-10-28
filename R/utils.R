@@ -27,7 +27,7 @@ createDbSchema <- function(db)
       ,value=numeric()
       ,stringsAsFactors=F
   )
-  db$stats <- reshape::rename(db$stats,c(id = qa.par.get("idCol")))                    
+  db$stats <- rename(db$stats,c(id = qa.par.get("idCol")))                    
   #gating set table
   db$gstbl<-data.frame(gsid=integer()
       ,gsname=character()

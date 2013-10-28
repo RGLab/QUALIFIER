@@ -76,6 +76,7 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 }
 
 #' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
+#' @importFrom XML xmlParse xmlRoot xmlNode xmlCDataNode addChildren replaceNodes saveXML
 .postProcessSVG<-function(sfile)
 {
 

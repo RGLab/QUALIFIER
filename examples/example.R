@@ -14,9 +14,8 @@ library(QUALIFIER)
 ws<-openWorkspace("/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/QA_template.xml")
 GT<-parseWorkspace(ws
 					,name=2
-					,execute=T
+					,execute=F
 					,subset=1
-					,useInternal=T
 					)
 gh_template<-GT[[1]]					
 getPopStats(gh_template)[,2:3]
@@ -32,9 +31,9 @@ datapath<-"/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/"
 newSamples<-list.files(datapath)[1:200]
 length(newSamples)
 G<-GatingSet(gh_template
-			,newSamples[1:10]
+			,newSamples[1:30]
 			,path=datapath
-#			,isNcdf=FALSE
+			,isNcdf=T
 #			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
@@ -260,7 +259,7 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 qaCheck(qaTask.list[["MNC"]]
 #		,Subset=coresampleid%in%c(11730,8780)
-#		,z.cutoff=1
+		,z.cutoff=2
 )
 
 plot(qaTask.list[["MNC"]]
@@ -331,9 +330,14 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 
 
 											
+#modify functions within package namespace
+funcToinsert <- "qaWrite.task" 
+funcSym <- as.symbol(funcToinsert)
+eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
+assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
 
-qaReport(qaTask.list[1]
+qaReport(qaTask.list["MNC"]
 		,outDir="~/rglab/workspace/QUALIFIER/output"
 		,plotAll="none"
 #		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
