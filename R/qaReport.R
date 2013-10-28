@@ -88,6 +88,8 @@ qaWrite.list<-function(x,page,...){
 #' @importFrom reshape cast melt		
 qaWrite.summary<-function(x,p,gsid=NULL,...){
 #	browser()
+    idColName <- qa.par.get("idCol")
+    
 	hwrite("Summary",p,heading=1)
 	
 	taskTbl<-do.call(rbind,lapply(names(x),function(y)data.frame(qaTask=y,qaID=qaID(x[[y]]))))
