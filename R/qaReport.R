@@ -154,20 +154,20 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 			anno<-pData(curGS)
 			curQaID<-qaID(x)
 #			browser()
-			outResult<-base::subset(db$outlierResult,qaID==curQaID)
-			outResult<-merge(outResult,db$stats[,c("sid",idColName,"channel")])
-			outResult<-merge(outResult,anno)
+			outResult <- base::subset(db$outlierResult,qaID==curQaID)
+			outResult <- merge(outResult, db$stats[,c("sid",idColName,"channel"), with = FALSE], by = "sid")
+			outResult <- merge(outResult,anno, by = idColName)
 
-			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
-			if(nrow(outResult)>0)
-				outResult$qaTask<-getName(x)
+            outResult <- rename(outResult, c("name" = "fcsFile"))
+			if(nrow(outResult) > 0)
+				outResult$qaTask <- getName(x)
 			
-			gOutResult<-base::subset(db$GroupOutlierResult,qaID==curQaID)
-			gOutResult<-merge(gOutResult,db$stats)
-			gOutResult<-merge(gOutResult,anno)
-			nFscFailed<-length(unique(outResult$fcsFile))
-			if(nrow(gOutResult)>0)
-				gOutResult$qaTask<-getName(x)			
+			gOutResult <- base::subset(db$GroupOutlierResult,qaID==curQaID)
+			gOutResult <- merge(gOutResult,db$stats, by = "sid")
+			gOutResult <- merge(gOutResult,anno, by = idColName)
+			nFscFailed <- length(unique(outResult$fcsFile))
+			if(nrow(gOutResult) > 0)
+				gOutResult$qaTask <- getName(x)			
 	
 			
 			hwrite(paste(description(x)
@@ -423,7 +423,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 								
 #										##table+image
 #
-								
+#								browser()
 		
 								plotCallStr<-quote(plot(x
 														,formula1
@@ -505,10 +505,10 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 					)
 				}else
 				{
-#					browser()
+					
 					#if only one conditioning variable
 					#simply order by it and output the fcsfile list
-					if(length(formuRes$groupBy)==0)
+					if(length(formuRes$groupBy) == 0)
 					{
 
 						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
@@ -522,20 +522,20 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 						
 					}else
 					{
-						groupBy<-formuRes$groupBy
+						groupBy <- formuRes$groupBy
 
-						castResult<-eval(substitute(u[order(u$v),c(w,v)]
+						castResult <- eval(substitute(u[order(u$v),c(w,v)]
 													,list(u=as.symbol("outResult"),v=groupBy,w="fcsFile")
 												)
 											)
 
-						gcastResult<-eval(substitute(u[order(u$v),c(w,v)]
+						gcastResult <- eval(substitute(u[order(u$v),c(w,v)]
 														,list(u=as.symbol("gOutResult"),v=groupBy,w=groupField)
 												)
 										)
 					}
 					
-					
+                    browser()
 					
 					##make sure the w and h pass to plot and large enough to display strip text
 					thisCall<-	quote(

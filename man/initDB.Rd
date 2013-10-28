@@ -13,4 +13,8 @@
   Initializes and prepares the data environment for storing
   the QA data
 }
+\examples{
+db <- new.env()
+initDB(db)
+}
 

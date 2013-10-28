@@ -204,7 +204,7 @@ clearCheck(qaTask.list[["MFIOverTime"]])
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
-		,outlierfunc=list(func=outlier.cutoff,args=list(lBound=0.8))
+		,outlierfunc=list(func=outlier.cutoff,args=list(lBound=0.9))
 )
 
 subset(
@@ -259,7 +259,7 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 qaCheck(qaTask.list[["MNC"]]
 #		,Subset=coresampleid%in%c(11730,8780)
-		,z.cutoff=2
+#		,z.cutoff=0.1
 )
 
 plot(qaTask.list[["MNC"]]
@@ -329,7 +329,9 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 
-											
+save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
+db1 <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+db1$gs[[1]]@pointer
 #modify functions within package namespace
 funcToinsert <- "qaWrite.task" 
 funcSym <- as.symbol(funcToinsert)
@@ -337,7 +339,7 @@ eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)
 assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
 
-qaReport(qaTask.list["MNC"]
+qaReport(qaTask.list["RBCLysis"]
 		,outDir="~/rglab/workspace/QUALIFIER/output"
 		,plotAll="none"
 #		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)

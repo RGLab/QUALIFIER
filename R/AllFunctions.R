@@ -20,9 +20,79 @@
 #' 
 #' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
 #' 
+#' @examples 
+#' db <- new.env()
+#' initDB(db)
 #' @export
 initDB <- function(db=.db){
 	createDbSchema(db)
+}
+
+#' save/load the data environment to/from disk
+#' 
+#' save and load the data environment that contains both statistics and GatingSets.
+#' 
+#' 
+#' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
+#' @param path \code{character} data path that stores the db.
+#' @param cdf \code{character} the option to control cdf file operation. see \link{save_gs} for more details.
+#' @param ... other arguments passed to \link{save_gs}
+#' @examples
+#' \dontrun{
+#' save_db(db, path = "./PreprocessedData")
+#' db <- load_db(path = "./PreprocessedData")
+#' } 
+#' @export
+#' @aliases load_db save_db
+#' @rdname save_db
+save_db <- function(db = .db, path, overwrite = FALSE, cdf = "link",...){
+  if (file.exists(path)) {
+    path <- normalizePath(path, mustWork = TRUE)
+    if (!overwrite) {
+      stop(path, "' already exists!try to use overwrite = TRUE to overwrite it.")
+    }
+  }
+  else {
+    dir.create(path = path)
+    path <- normalizePath(path, mustWork = TRUE)
+  }
+  
+  message("saving db ...")
+  saveRDS(db, file = file.path(path, "db.rds"))
+#  browser()
+  gsids <- db$gstbl[, "gsid"]
+  nGS <- length(gsids)
+  if(!setequal(1:nGS, gsids))
+    stop("Can't save the corrupted db!")
+  
+  l_ply(gsids, function(gsid){
+        message("saving gs ", gsid)
+        suppressMessages( 
+          save_gs(db$gs[[gsid]], file.path(path, gsid), cdf = cdf, overwrite = overwrite, ...)
+        )
+      })
+  
+  message("Done\nTo reload it, use 'load_db' function\n")
+  
+}
+#' @export
+#' @rdname save_db
+load_db <- function(path){
+  path <- normalizePath(path, mustWork = TRUE)
+  if (!file.exists(path)) 
+    stop(path, "' not found!")
+  files <- list.files(path)
+  message("loading db ...")
+  db <- readRDS(file.path(path, "db.rds"))
+  gsids <- db$gstbl[, "gsid"]
+  l_ply(gsids, function(gsid){
+        message("loading gs ", gsid)
+        suppressMessages( 
+            db$gs[[gsid]] <- load_gs(file.path(path, gsid))
+        )
+      })
+  message("Done\n")
+  db
 }
 
 #' Preprocessing for QA check
