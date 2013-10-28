@@ -102,7 +102,7 @@ qaWrite.summary<-function(x,p,gsid=NULL,...){
 	
 	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y = idColName)
 	m.outResult<-merge(m.outResult,taskTbl,by.x="qaID",by.y="qaID")
-	m.outResult<-merge(m.outResult,anno[,c("id","name")],by.x = idColName, by.y = idColName)
+	m.outResult<-merge(m.outResult,anno[,c(idColName,"name")],by.x = idColName, by.y = idColName)
 	
 	castResult<-cast(m.outResult,name~qaTask)
 	castResult<-as.data.frame(castResult)
