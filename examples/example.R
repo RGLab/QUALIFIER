@@ -332,18 +332,24 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 
 
 library(QUALIFIER)
-
+#sessionInfo()
 #save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
 db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
 qaTask.list <- db$qaTaskList
 
 
 #modify functions within package namespace
-funcToinsert <- "panel.xyplotEx" 
+funcToinsert <- "plot.qaTask" 
 funcSym <- as.symbol(funcToinsert)
 eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
 assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
+
+plot(qaTask.list[["MNC"]]
+    ,proportion~`coresampleid`
+    ,dest="~/rglab/workspace/QUALIFIER/output/image"
+#		,par=list(horiz=TRUE)
+)
 
 plot(qaTask.list[["RBCLysis"]]
     ,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
@@ -357,15 +363,15 @@ plot(qaTask.list[["RBCLysis"]]
 #		,horiz=T
     ,dest="~/rglab/workspace/QUALIFIER/output/image"
     ,highlight="coresampleid"
-#		,plotAll="none"
+#    , axis = list()
+		,plotAll=TRUE
 #    ,width=27,height=13
 )	
 
 
-qaReport(qaTask.list["RBCLysis"]
-		,outDir="~/rglab/workspace/QUALIFIER/output"
-		,plotAll="none"
-#		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-		)
-
-
+#qaReport(qaTask.list["RBCLysis"]
+#		,outDir="~/rglab/workspace/QUALIFIER/output"
+#		,plotAll="none"
+##		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
+#		)
+#

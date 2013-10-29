@@ -160,14 +160,14 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 	
 	close(srcFile)
 
-	doc <- xmlTreeParse(sfile, useInternalNodes = FALSE)
+	doc <- xmlTreeParse(sfile, useInternalNodes = FALSE, addAttributeNamespaces = TRUE)
 	
 	top <- xmlRoot(doc)
 
 	newNode <- xmlNode("script",attrs=c(type="text/ecmascript"))
 	newNode <- addChildren(newNode, xmlCDataNode(paste(srcCode,collapse="\n")))
     top[["script"]] <- newNode		
-	
+#	browser()
     saveXML(top, sfile)
 
     

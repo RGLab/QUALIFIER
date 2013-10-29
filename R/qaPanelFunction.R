@@ -108,16 +108,6 @@ panel.xyplotEx <-
 		if(!is.null(dest))
 		{
 			###add svg anno
-#			rFunc<-list(...)$rFunc
-#			subscripts<-list(...)$subscripts
-
-#			plotObjs<-list(...)$plotObjs
-#			plotAll<-list(...)$plotAll
-#			statsType<-list(...)$statsType
-#			scatterPar<-list(...)$scatterPar
-#			db<-list(...)$db
-#			if(is.null(plotAll))
-#				plotAll=FALSE
 #		browser()
 			rowIds<-subscripts
 			#should not subset df since subscripts are global indices to the original dataframe
@@ -145,21 +135,16 @@ panel.xyplotEx <-
 						if(curOutRow$outlier||plotAll==TRUE)
 						{
 							##save the individual plot obj
-#						browser()
+#                            browser()
 							assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
-							
-#						png(file.path(dest,paths))
-#						qa.GroupPlot(db,curOutRow)
-#						dev.off()
-#						dev.set(2)
 							
 							setSVGShapeURL(paths)	
 						}
 					}
 					
 					
-					panel.points(x = if (jitter.x) jitter(x[i], factor = factor, amount = amount) else x[i],
-							y = if (jitter.y) jitter(y[i], factor = factor, amount = amount) else y[i],
+					panel.points(x = if (jitter.x) jitter(x[i], factor = factor, amount = amount) else x[i]
+							, y = if (jitter.y) jitter(y[i], factor = factor, amount = amount) else y[i],
 							cex = cex,
 							fill = fill,
 							font = font,
