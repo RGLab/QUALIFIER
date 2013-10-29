@@ -311,7 +311,7 @@ setMethod("plot", signature=c(x="qaTask"),
             
 		})
 #' @importFrom RSVGTipsDevice devSVGTips
-plot.qaTask<-function(qaObj,y,subset,pop,width,height
+plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest = NULL,rFunc = NULL,plotAll = FALSE
 						,scatterPlot = FALSE,gsid = NULL

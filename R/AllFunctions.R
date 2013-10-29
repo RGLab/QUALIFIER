@@ -146,31 +146,31 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 }
 
 #' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
-#' @importFrom XML xmlParse xmlRoot xmlNode xmlCDataNode addChildren replaceNodes saveXML
-.postProcessSVG<-function(sfile)
+#' @importFrom XML xmlTreeParse xmlRoot xmlNode xmlCDataNode addChildren saveXML
+.postProcessSVG <- function(sfile)
 {
 
-#	browser()
+
 	
-	srcFile<-list.files(system.file("javascript",package="QUALIFIER"),pattern="highlight.js",full.names=TRUE)
-	srcFile<-file(srcFile, "r")
-	srcCode<-readLines(srcFile)
+	srcFile <- list.files(system.file("javascript",package="QUALIFIER")
+                          , pattern="highlight.js"
+                          , full.names=TRUE )
+	srcFile <- file(srcFile, "r")
+	srcCode <- readLines(srcFile)
 	
 	close(srcFile)
+
+	doc <- xmlTreeParse(sfile, useInternalNodes = FALSE)
 	
-	doc = xmlParse(sfile)
+	top <- xmlRoot(doc)
+
+	newNode <- xmlNode("script",attrs=c(type="text/ecmascript"))
+	newNode <- addChildren(newNode, xmlCDataNode(paste(srcCode,collapse="\n")))
+    top[["script"]] <- newNode		
 	
-	top<-xmlRoot(doc)
-	
-	
-	oldNode<-top[["script"]]
-	newNode<-xmlNode("script",attrs=c(type="text/ecmascript"))
-	newNode<-addChildren(newNode,xmlCDataNode(paste(srcCode,collapse="\n")))
-	
-	replaceNodes(oldNode,newNode)
-		
-	saveXML(top,sfile)
-	
+    saveXML(top, sfile)
+
+    
 }
 
 matchStatType <- function(db,formuRes)
