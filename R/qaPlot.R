@@ -58,7 +58,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		}
 		list(frame=fr,gate=curGate)
 	})
-	names(frlist)<-df[,"name"]
+	names(frlist)<-df[,"name", with = FALSE]
 #	browser()
 	#merge frames into flowSet for flowViz plot
 	fs1<-flowSet(lapply(frlist,"[[","frame"))

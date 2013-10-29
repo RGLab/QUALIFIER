@@ -129,10 +129,12 @@ panel.xyplotEx <-
 					curRowID<-rowIds[i]
 					curOutRow<-df[curRowID,]
 #					browser()
-					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
+					FileTips <- paste(highlight,"=",curOutRow[, highlight, with = FALSE]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
+					paths <- QUALIFIER:::.FileNameGen(prefix="f"
+                                                    , ID = curOutRow[,qa.par.get("idCol"), with = FALSE]
+                                                    , population = as.character(curOutRow$population)
 							,channel=as.character(curOutRow$channel)
 							,stats=statsType)
 					

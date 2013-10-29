@@ -535,15 +535,15 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 										)
 					}
 					
-                    browser()
+#                    browser()
 					
 					##make sure the w and h pass to plot and large enough to display strip text
 					thisCall<-	quote(
 										plot(x
-											,y=getFormula(x)
-											,plotAll=plotAll
-											,dest=imageDir
-											,width=27,height=13
+											,y = getFormula(x)
+											,plotAll = plotAll
+											,dest = imageDir
+											,width = 27, height = 13
 											)
 										)
 					

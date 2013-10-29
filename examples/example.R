@@ -274,15 +274,15 @@ plot(qaTask.list[["MNC"]]
 #		,par=list(xlab="coresampleid")
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
-		,subset=coresampleid%in%c(
-#									11730
-									8780
-		)
+#		,subset=coresampleid%in%c(
+##									11730
+#									8780
+#		)
 #		,scatterPlot=TRUE
 		,scatterPar=list(xbin=128
 						,stat=T)
-#		,dest="image"
-#		,plotAll=TRUE
+		,dest="~/rglab/workspace/QUALIFIER/output/image"
+		,plotAll=F
 )
 #scatter for one sample
 plot(qaTask.list[["MNC"]]
@@ -329,14 +329,37 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 
-save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
-db1 <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
-db1$gs[[1]]@pointer
+
+
+library(QUALIFIER)
+
+#save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
+db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+qaTask.list <- db$qaTaskList
+
+
 #modify functions within package namespace
-funcToinsert <- "qaWrite.task" 
+funcToinsert <- "panel.xyplotEx" 
 funcSym <- as.symbol(funcToinsert)
 eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
 assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
+
+
+plot(qaTask.list[["RBCLysis"]]
+    ,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+#				&id%in%c(270)
+#		, RecdDt~proportion | Tube
+    ,scales=list(format="%m/%d/%y")
+    ,ylab="percent"
+#		,scatterPlot=T
+#		,scatterPar=list(stat=T
+#						,xbin=128)
+#		,horiz=T
+    ,dest="~/rglab/workspace/QUALIFIER/output/image"
+    ,highlight="coresampleid"
+#		,plotAll="none"
+#    ,width=27,height=13
+)	
 
 
 qaReport(qaTask.list["RBCLysis"]
