@@ -122,6 +122,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 #' @param pops a \code{numeric} or \code {character} vector as the population indices specifing a subset of populations to extract stats from
 #' @param isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
 #' it is automatically set to TRUE when isMFI is TRUE
+#' @importFrom Biobase rowMedians
 .getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, ...){
 			
     			message("reading GatingHierarchy:",getSample(obj))

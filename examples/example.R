@@ -1,12 +1,17 @@
 
 library(QUALIFIER)
-#library(flowWorkspace)
-#unloadNamespace("QUALIFIER")
-#unloadNamespace("flowWorkspace")
-#lapply(list.files("/home/wjiang2/rglab/workspace/QUALIFIER/R",pattern=".R",full=T),source)
 
-#outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
-#dest<-file.path(outDir,"trellis_plot/")
+
+#save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
+db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+qaTask.list <- db$qaTaskList
+
+
+#modify functions within package namespace
+funcToinsert <- ".postProcessSVG" 
+funcSym <- as.symbol(funcToinsert)
+eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
+assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
 ###############################################################################
 #1.parse gating template
@@ -331,47 +336,5 @@ qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free"))
 
 
 
-library(QUALIFIER)
-#sessionInfo()
-#save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
-db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
-qaTask.list <- db$qaTaskList
 
 
-#modify functions within package namespace
-funcToinsert <- "plot.qaTask" 
-funcSym <- as.symbol(funcToinsert)
-eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
-assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
-
-
-plot(qaTask.list[["MNC"]]
-    ,proportion~`coresampleid`
-    ,dest="~/rglab/workspace/QUALIFIER/output/image"
-#		,par=list(horiz=TRUE)
-)
-
-plot(qaTask.list[["RBCLysis"]]
-    ,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
-#				&id%in%c(270)
-#		, RecdDt~proportion | Tube
-    ,scales=list(format="%m/%d/%y")
-    ,ylab="percent"
-#		,scatterPlot=T
-#		,scatterPar=list(stat=T
-#						,xbin=128)
-#		,horiz=T
-    ,dest="~/rglab/workspace/QUALIFIER/output/image"
-    ,highlight="coresampleid"
-#    , axis = list()
-		,plotAll=TRUE
-#    ,width=27,height=13
-)	
-
-
-#qaReport(qaTask.list["RBCLysis"]
-#		,outDir="~/rglab/workspace/QUALIFIER/output"
-#		,plotAll="none"
-##		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-#		)
-#
