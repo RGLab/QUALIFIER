@@ -25,53 +25,46 @@ qa.GroupPlot<-function(db,df,statsType,par)
 	if(is.null(ylog))
 		ylog<-FALSE
 	
-	pop<-unique(as.character(df$population))
+	pop <- unique(as.character(df$population))
 	if(length(pop)>1)
 		stop("not the same population in lattice group plot!")
 #	browser()
 	#extract flowFrame and gate from each gating hierarchy
-	frlist<-apply(df,1,function(curRow){
+	frlist <- apply(df,1,function(curRow){
 
 		#get the parent population for the scatter plot
-				
-		gsid<-as.integer(curRow[["gsid"]])
-		curGS<-db$gs[[gsid]]
-		curSampleInd<-which(sampleNames(curGS)%in%curRow["name"])
-		curGh<-curGS[[curSampleInd]]
-		curNode<-as.character(curRow["node"])
-#				browser()
+#        browser()				
+		gsid <- as.integer(curRow[["gsid"]])
+		curGh <- db$gs[[gsid]][[curRow["name"]]]
+		curNode <- as.character(curRow["node"])
+	
+		curGate <- getGate(curGh, curNode)
+        
+        curProp <- getProp(curGh, curNode, flowJo = FALSE)
+        
+        param <- as.vector(parameters(curGate))
+        
+		parentNode <- getParent(curGh, curNode)
 		
-#		if(is.na(curNode))
-#		{
-#			curPop<-curRow["population"]
-#			
-#		}	
-		curGate<-getGate(curGh,curNode)
-		parentNode<-getParent(curGh,curNode)
-		parentNodeInd<-which(getNodes(curGh, showHidden = TRUE)%in%parentNode)
-		if(length(parentNodeInd)>0)
+		if(length(parentNode)>0)
 		{
-			fr<-getData(curGh,parentNodeInd)
+			fr <- getData(curGh,parentNode, j = param)
 		}else
 		{
-			fr<-getData(curGh)
+			fr <- getData(curGh, j = param)
 		}
-		list(frame=fr,gate=curGate)
+		list(frame = fr ,gate = curGate, stats = curProp)
 	})
-	names(frlist)<-df[,"name", with = FALSE]
-#	browser()
+	names(frlist) <- df[["name"]]
+	
 	#merge frames into flowSet for flowViz plot
-	fs1<-flowSet(lapply(frlist,"[[","frame"))
-	#append outlier flags
-	if(!"outlier"%in%colnames(df))
-		df$outlier<-FALSE
-	pData(fs1)$outlier<-df$outlier
-	varMetadata(fs1)["outlier",]<-"outlier"
+	fs1 <- flowSet(sapply(frlist,"[[","frame"))
 
 	#extract gates from the list
-	gates<-lapply(frlist,"[[","gate")
+	gates <- sapply(frlist,"[[","gate")
+    stats <- sapply(frlist,"[[","stats", simplify = FALSE)
 #	browser()
-	thisCall<-NULL
+	thisCall <- NULL
 	if(statsType=="count"&&pop=="/root")##total cell count
 	{
 		##individual xyplot without gate
@@ -83,7 +76,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		if(statsType=="spike")
 		{
 			chnl<-unique(as.character(df$channel))
-			fres<-NULL
+            gates <- NULL
 			if(length(chnl)>1)
 				stop("can't display multiple channels at a time!")
 			else
@@ -93,55 +86,61 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		}else
 		{
 	
-			fres<-filter(fs1,gates)
+
 			if(type=="xyplot")
 			{
 				
-				if(length(parameters(fres[[1]]))==2)
+				if(length(parameters(gates[[1]]))==2)
 				{
-					xterm<-as.symbol(parameters(gates[[1]])[1])
-					yterm<-as.symbol(parameters(gates[[1]])[2])
+					xterm <- as.symbol(parameters(gates[[1]])[1])
+					yterm <- as.symbol(parameters(gates[[1]])[2])
 				}else
 				{
-					xterm<-as.symbol(parameters(gates[[1]])[1])
-					yterm<-as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
+					xterm <- as.symbol(parameters(gates[[1]])[1])
+					yterm <- as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
 				}
 				t1<-substitute(y~x,list(y=yterm,x=xterm))
 				
 			}else
 			{
-				xterm<-as.symbol(parameters(fres[[1]])[1])
+				xterm<-as.symbol(parameters(gates[[1]])[1])
 				t1<-substitute(~x,list(x=xterm))
 				yterm<-NULL
 			}
 		}
 #		browser()
-		t1<-as.formula(t1)		
+		t1 <- as.formula(t1)		
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
-			res<-reScaleData(fs1,fres,xterm,xlog)
+			res <- reScaleData(fs1,gates,xterm,xlog)
 		#			browser()
 			fs1<-res$fs
-			fres<-res$fres
+            gates<-res$gates
 		}
 		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
 		{
-			res<-reScaleData(fs1,fres,yterm,ylog)
+			res<-reScaleData(fs1,gates,yterm,ylog)
 		#			browser()
 			fs1<-res$fs
-			fres<-res$fres
+            gates<-res$gates
 		}
 		
 #		browser()
-
+        if(!"outlier"%in%colnames(df))
+        		outlier <- rep(FALSE, nrow(df))
+        outlier <- df[, outlier]
+        names(outlier) <- df[, name]	
+        
 		if(type=="xyplot")
 			thisCall<-quote(
 							xyplot(t1
-									,fs1
-									,filter=fres
-									,pd=pData(fs1)
-									,panel=panel.xyplot.flowsetEx
+									, fs1
+									, filter = gates
+                                    , stats = stats
+									, outlier = outlier
+									, panel = panel.xyplot.flowsetEx
+                                    , ...
 									)
 						)
 		
@@ -158,7 +157,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 }
 
 
-reScaleData<-function(fs,fres,channel,logScale)
+reScaleData<-function(fs,gates,channel,logScale)
 {
 	#set the logbase if neccessary
 	if(!is.logical(logScale))
@@ -178,17 +177,17 @@ reScaleData<-function(fs,fres,channel,logScale)
 		fs <- eval(parse(text=paste("flowCore::transform(fs,`",channel,"`=log(`",channel,"`,base=",logbase,"))",sep="")))
 
 		#log transform the filter result
-		if(!is.null(fres))
-			fres<-lapply(fres,function(curFres){
-						max<-curFres@filterDetails[[1]]$filter@max
-						curFres@filterDetails[[1]]$filter@max<-log(max,logbase)
-						min<-curFres@filterDetails[[1]]$filter@min
+		if(!is.null(gates))
+          gates<-sapply(gates,function(curFilter){
+						max <- curFilter@max
+                        curFilter@max <- log(max,logbase)
+						min <- curFilter@min
 #						browser()
 						#make sure to keep the the name of the scalar value in order for the flowViz plot properly
 						min1<-max(0,log(min,logbase))
-						names(min1)<-names(min)
-						curFres@filterDetails[[1]]$filter@min<-min1
-						curFres
+						names(min1) <- names(min)
+                        curFilter@min <- min1
+                        curFilter
 					})
 						
 	}
@@ -198,7 +197,7 @@ reScaleData<-function(fs,fres,channel,logScale)
 	ats<- seq(from=max(0,min(rg.new)),to=max(rg.new),length.out=5)
 	labels<-round(logbase^ats)
 	
-	list(fs=fs,fres=fres,scales=list(labels=labels,at=ats))
+	list(fs=fs,gates=gates,scales=list(labels=labels,at=ats))
 }
 #'plot the statistics for a particular cell population of a group of samples
 #'
@@ -320,6 +319,7 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
                         ,highlight
                         , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
+                        , flowViz = list()
 						,...)
 {
 #  browser()

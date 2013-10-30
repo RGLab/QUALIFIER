@@ -7,11 +7,6 @@ db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocesse
 qaTask.list <- db$qaTaskList
 
 
-#modify functions within package namespace
-funcToinsert <- ".postProcessSVG" 
-funcSym <- as.symbol(funcToinsert)
-eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
-assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
 ###############################################################################
 #1.parse gating template
@@ -36,7 +31,7 @@ datapath<-"/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/"
 newSamples<-list.files(datapath)[1:200]
 length(newSamples)
 G<-GatingSet(gh_template
-			,newSamples[1:30]
+			,newSamples[1:100]
 			,path=datapath
 			,isNcdf=T
 #			,dMode=4
@@ -57,8 +52,9 @@ qaPreprocess(db=db,gs=G
 		,date.colname=c("RecdDt","AnalysisDt")
 		,nslave=1
 #		,type="SOCK"
-#		,isMFI=T,isSpike=T
+		,isMFI=T,isSpike=T, isChannel = T
 )
+getQAStats(G[[1]],isMFI=T,isSpike=T)
 #colnames(pData(db$gs[[1]]))
 #pData(G)
 #head(db$stats)
@@ -209,7 +205,8 @@ clearCheck(qaTask.list[["MFIOverTime"]])
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
-		,outlierfunc=list(func=outlier.cutoff,args=list(lBound=0.9))
+		,outlierfunc=list(func=outlier.cutoff
+                        ,args=list(lBound=0.9))
 )
 
 subset(
@@ -221,16 +218,16 @@ plot(qaTask.list[["RBCLysis"]]
 #		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #				&id%in%c(270)
 #		, RecdDt~proportion | Tube
-		,scales=list(format="%m/%d/%y")
-		,ylab="percent"
+#		,scales=list(format="%m/%d/%y")
+#		,ylab="percent"
 #		,scatterPlot=T
 #		,scatterPar=list(stat=T
 #						,xbin=128)
 #		,horiz=T
 #		,dest="image"
-		,highlight="coresampleid"
+#		,highlight="coresampleid"
 #		,plotAll="none"
-		,width=27,height=13
+#		,width=27,height=13
 )	
 
 clearCheck(qaTask.list[["RBCLysis"]])
@@ -333,8 +330,31 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 #scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
+#modify functions within package namespace
+funcToinsert <- "panel.xyplot.flowsetEx" 
+funcSym <- as.symbol(funcToinsert)
+eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
+assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
 
+db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+qaTask.list <- db$qaTaskList
+db$stats[sid == 3, value:= 0.1]
+qaCheck(qaTask.list[["MNC"]] 
+        , gOutlierfunc=list(func=outlier.norm
+                            ,args=list(alpha=0.1))
+        )
+         
 
+plot(qaTask.list[["MNC"]]
+#    , dest = "rglab/workspace/QUALIFIER/output/image"
+#    , plotAll = "none"
+#    , scatterPlot = T
+#    , subset = participantid == "002005"
+#    , scatterPar = list(xbin = 32)
+    )
+  
+    
+qaReport(qaTask.list[], outDir = "rglab/workspace/QUALIFIER/output/", plotAll = "none")
 
 
