@@ -225,7 +225,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 		}
         
 # @importFrom reshape rename
-.qaCheck<-function(obj,formula=NULL,Subset
+.qaCheck <- function(obj,formula=NULL,Subset
                     ,outlierfunc
                     ,gOutlierfunc
                     ,rFunc=NULL,gsid=NULL,...){
@@ -251,7 +251,7 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
 	groupBy<-formuRes$groupBy
 	
 	statsType <- matchStatType(db,formuRes)
-#	browser()
+	
     if(missing(Subset))
       Subset <- obj@subset
     
@@ -306,14 +306,18 @@ setMethod("qaCheck", signature=c(obj="qaTask"),
     }
 #    browser()
     ##detect group outlier if boxplot
-	groupOutSids<-NULL
-	if(plotType(obj)=="bwplot")
+	groupOutSids <- NULL
+	if(plotType(obj) == "bwplot")
 	{
         #do the xterm_group outlier detection within each conditional group
         if(is.null(groupBy))
           groupOutSids <- .funcOutlierGrp(yy)
-        else
-          groupOutSids <- yy[,.funcOutlierGrp(.SD), by = groupBy][,V1]
+        else{
+          groupOut <- yy[,.funcOutlierGrp(.SD), by = groupBy]
+          if(nrow(groupOut) > 0)
+            groupOutSids <- groupOut[,V1]
+        }
+          
 		
 	}
 	

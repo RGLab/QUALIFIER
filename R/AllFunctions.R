@@ -377,7 +377,7 @@ saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname=
 #' @rdname qaCheck-methods
 #' @aliases queryStats,qaTask-method
 setMethod("queryStats", signature=c(x="qaTask"),
-		function(x,y,subset,pop,gsid=NULL,...){
+		function(x,y,subset,pop,gsid=NULL, type = x@type,...){
 			
 			if(missing(y))
 				y<-getFormula(x)
@@ -389,9 +389,9 @@ setMethod("queryStats", signature=c(x="qaTask"),
 				pop<-getPop(x)
 			
 			if(missing(subset))
-				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, ...)
+				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = type, ...)
 			else
-				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, ... )
+				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, type = type, ... )
 			
 			if(nrow(res)!=0)
 			{
@@ -406,7 +406,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			res
 		})
 
-.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
+.queryStats <- function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
 {
 	
 
@@ -425,7 +425,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 		ret_anno<-pData(db$gs[[gsid]])
 		ret_anno$gsid=gsid
 	}
-	ret_stats<-db$stats
+	ret_stats <- db$stats
 	
 #	browser()
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 
