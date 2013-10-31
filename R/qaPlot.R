@@ -33,7 +33,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 	frlist <- apply(df,1,function(curRow){
 
 		#get the parent population for the scatter plot
-#        browser()				
+			
 		gsid <- as.integer(curRow[["gsid"]])
 		curGh <- db$gs[[gsid]][[curRow["name"]]]
 		curNode <- as.character(curRow["node"])
@@ -41,19 +41,38 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		curGate <- getGate(curGh, curNode)
         
         curProp <- getProp(curGh, curNode, flowJo = FALSE)
+        fr_pd <- pData(parameters(getData(curGh, use.exprs = FALSE)))
+        thiscolnames <- fr_pd[, "name"]
+#        browser()
         
-        param <- as.vector(parameters(curGate))
-        
-		parentNode <- getParent(curGh, curNode)
-		
-		if(length(parentNode)>0)
-		{
-			fr <- getData(curGh,parentNode, j = param)
-		}else
-		{
-			fr <- getData(curGh, j = param)
-		}
-		list(frame = fr ,gate = curGate, stats = curProp)
+        if(!extends(class(curGate),"filter")){
+          if(statsType=="count"&&pop=="/root")##total cell count
+          {
+            param <- c("FSC-A", "SSC-A")  
+          }else if(statsType=="spike"){
+            chnl <- unique(as.character(df[,channel]))
+            if(length(chnl)>1)
+              stop("can't display multiple channels at a time!")
+            
+            timeChnl <- thiscolnames[grep("time",thiscolnames, ignore.case=T)]
+            param <- c(timeChnl, chnl)
+          }else{
+            stop ("How do you end up to here?")
+          }    
+        }else
+          param <- as.vector(parameters(curGate))
+          if(length(param) == 1 && type == "xyplot"){
+            sscChnl <- thiscolnames[grep("SSC",thiscolnames, ignore.case=T)]
+            param <- c(param, sscChnl)
+          }
+            
+        if(curNode == "root"){
+          fr <- getData(curGh, j = param)
+        }else{
+          parentNode <- getParent(curGh, curNode)
+          fr <- getData(curGh,parentNode, j = param)
+        }
+		list(frame = fr ,gate = curGate, stats = curProp, param = param)
 	})
 	names(frlist) <- df[["name"]]
 	
@@ -63,26 +82,28 @@ qa.GroupPlot<-function(db,df,statsType,par)
 	#extract gates from the list
 	gates <- sapply(frlist,"[[","gate")
     stats <- sapply(frlist,"[[","stats", simplify = FALSE)
+    param <- sapply(frlist,"[[","param", simplify = FALSE)[[1]]
 #	browser()
 	thisCall <- NULL
 	if(statsType=="count"&&pop=="/root")##total cell count
 	{
 		##individual xyplot without gate
-		thisCall<-xyplot(`SSC-A`~`FSC-A`,data=fs1,smooth=FALSE)
+        t1 <- flowWorkspace:::mkformula(param)
+		thisCall <- quote(xyplot(t1, data=fs1))
 	}else
 	{
 					
 			
 		if(statsType=="spike")
 		{
-			chnl<-unique(as.character(df$channel))
+			
             gates <- NULL
-			if(length(chnl)>1)
-				stop("can't display multiple channels at a time!")
-			else
-			yterm<-as.symbol(chnl)
-			xterm<-as.symbol(colnames(fs1[[1]])[grep("time",colnames(fs1[[1]]),ignore.case=T)])
-			t1<-substitute(y~x,list(y=yterm,x=xterm))
+            xterm <- as.symbol(param[1])
+            yterm <- as.symbol(param[2])
+            
+            t1<-substitute(y~x,list(y=yterm,x=xterm))
+            
+			
 		}else
 		{
 	
@@ -90,22 +111,16 @@ qa.GroupPlot<-function(db,df,statsType,par)
 			if(type=="xyplot")
 			{
 				
-				if(length(parameters(gates[[1]]))==2)
-				{
-					xterm <- as.symbol(parameters(gates[[1]])[1])
-					yterm <- as.symbol(parameters(gates[[1]])[2])
-				}else
-				{
-					xterm <- as.symbol(parameters(gates[[1]])[1])
-					yterm <- as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
-				}
+				xterm <- as.symbol(param[1])
+				yterm <- as.symbol(param[2])
+
 				t1<-substitute(y~x,list(y=yterm,x=xterm))
 				
 			}else
 			{
-				xterm<-as.symbol(parameters(gates[[1]])[1])
+				xterm<-as.symbol(param[1])
 				t1<-substitute(~x,list(x=xterm))
-				yterm<-NULL
+				yterm <- NULL
 			}
 		}
 #		browser()
@@ -132,25 +147,19 @@ qa.GroupPlot<-function(db,df,statsType,par)
         outlier <- df[, outlier]
         names(outlier) <- df[, name]	
         
-		if(type=="xyplot")
-			thisCall<-quote(
+		if(type == "xyplot")
+			thisCall <- quote(
 							xyplot(t1
 									, fs1
 									, filter = gates
                                     , stats = stats
 									, outlier = outlier
 									, panel = panel.xyplot.flowsetEx
-                                    , ...
 									)
 						)
-		
-		thisCall<-as.call(c(as.list(thisCall),par))
-		thisCall<-eval(thisCall)			
-	
 	}
-	
-			
-			
+    thisCall <- as.call(c(as.list(thisCall),par))
+    thisCall <- eval(thisCall)
 	
 	return(thisCall)
 	

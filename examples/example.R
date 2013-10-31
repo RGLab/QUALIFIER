@@ -2,7 +2,7 @@
 library(QUALIFIER)
 
 
-#save_db(db1, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T)
+#save_db(db, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T, cdf = "copy")
 db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
 qaTask.list <- db$qaTaskList
 
@@ -126,7 +126,7 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
 ##add new aggregated stats
-.addStats(qaTask.list[["BoundaryEvents"]]
+QUALIFIER:::.addStats(qaTask.list[["BoundaryEvents"]]
 		,definition=sum(proportion)~RecdDt|fileid+gsid
 		,pop="/root/MNC/margin"
 		,statName="sum.prop"
@@ -188,15 +188,23 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 #		,z.cutoff=10
 )
 
+head(subset(
+        queryStats(qaTask.list[["MFIOverTime"]]
+#            ,y=sum.prop ~ RecdDt 
+            ,pop="MFI"
+#							,subset=value>0&id==806
+        )
+        ,outlier==TRUE)
+)
 plot(qaTask.list[["MFIOverTime"]]
-		,y=MFI~RecdDt|stain
+#		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('APC-A')
-#				&stain=="Va24"
-#				&id==806
-		,rFunc=rlm
-		,scales=list(format="%m/%d/%y")
-#		,scatterPlot=TRUE
-		,scatterPar=list(xlog=F)
+				&stain=="CD62L APC-A"
+##				&id==806
+#		,rFunc=rlm
+#		,scales=list(format="%m/%d/%y")
+##		,scatterPlot=TRUE
+#		,scatterPar=list(xlog=F)
 #		,dest="image"
 
 )
@@ -234,10 +242,11 @@ clearCheck(qaTask.list[["RBCLysis"]])
 
 
 qaCheck(qaTask.list[["spike"]]
-#		,outlierfunc=outlier.t
-#		,z.cutoff=3
-#		,alpha=0.001
-#		,isLower=FALSE
+		,outlierfunc = list(func = outlier.t
+                  		    ,args = list(alpha=0.001
+                                        ,isLower=FALSE)
+                          )
+		
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
@@ -331,7 +340,7 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 #modify functions within package namespace
-funcToinsert <- "panel.xyplot.flowsetEx" 
+funcToinsert <- "qa.GroupPlot" 
 funcSym <- as.symbol(funcToinsert)
 eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
 assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
@@ -355,6 +364,9 @@ plot(qaTask.list[["MNC"]]
     )
   
     
-qaReport(qaTask.list[], outDir = "rglab/workspace/QUALIFIER/output/", plotAll = "none")
+qaReport(qaTask.list, outDir = "rglab/workspace/QUALIFIER/output/"
+          , plotAll = T
+            , subset = participantid == "002005"
+          )
 
 
