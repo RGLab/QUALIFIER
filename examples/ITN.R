@@ -7,7 +7,8 @@ opts_chunk$set(warning = FALSE, message = FALSE, include = TRUE)
 #' # Data preprocessing
 #' ## Parse the template workspace
 #+ eval = FALSE
-ws<-openWorkspace("./QA_template.xml")
+datapath <- "~/rglab/workspace/QUALIFIER/misc/ITN029ST/"
+ws<-openWorkspace(file.path(datapath, "QA_template.xml"))
 GT<-parseWorkspace(ws ,name=2 ,execute=F ,subset=1)
 #' ## extract the gating hiearchy
 #+ eval = FALSE
@@ -15,9 +16,9 @@ gh_template <- GT[[1]]
 
 #' ## Apply gating template to new data
 #+ eval = FALSE
-datapath<-"./ITN029ST"
-newSamples<-list.files(datapath)
-G<-GatingSet(gh_template ,newSamples ,path = datapath ,isNcdf=T
+
+newSamples <- list.files(datapath, pattern = ".fcs")[1:30]
+G <- GatingSet(gh_template ,newSamples ,path = datapath ,isNcdf=T
             #, ncdfFile = "mypath/myfile.nc" 
             )
   
@@ -25,15 +26,19 @@ G<-GatingSet(gh_template ,newSamples ,path = datapath ,isNcdf=T
 #+ eval = FALSE
 db<-new.env()
 initDB(db)
-metaFile="./ITN029ST/FCS_File_mapping.csv"
-qaPreprocess(db=db,gs=G ,metaFile=metaFile ,fcs.colname="FCS_Files" ,date.colname=c("RecdDt","AnalysisDt")
-            ,isMFI=T,isSpike=T, isChannel = T)
+metaFile="~/rglab/workspace/QUALIFIER/misc/ITN029ST/FCS_File_mapping.csv"
+qaPreprocess(db=db,gs=G ,metaFile=metaFile 
+              , fcs.colname="FCS_Files" 
+              , date.colname=c("RecdDt","AnalysisDt")
+              , date.format = "%Y-%m-%d"
+            ,isMFI=T,isSpike=T, isChannel = T
+        )
 
 
  
 #' ## Load QA check list
 #+ eval = FALSE
-checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
+checkListFile <- file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
 qaTask.list <- read.qaTask(db,checkListFile=checkListFile)
 
 #' ## Archive the preprocessed data
@@ -273,8 +278,8 @@ qpar(qaTask.list[["RedundantStain"]]) <- list(scales=list(x=list(relation="free"
 
 #+ eval = FALSE
 qaReport(qaTask.list, outDir = "~/rglab/workspace/QUALIFIER/output/"
-                    , plotAll = "none"
-#                    , subset = coresampleid == 11730
+                    , plotAll = FALSE
+                    , subset = coresampleid == 11730
         )
 
 

@@ -244,7 +244,6 @@ panel.xyplot.qa<-function(x,y,rFunc=NULL,...){
 	if(!is.null(rFunc))
 	{
 		
-#											x1<-as.Date(x,"%m/%d/%y")
 		reg.res<-try(rFunc(y~x),silent=TRUE)
 		if(all(class(reg.res)!="try-error"))
 		{

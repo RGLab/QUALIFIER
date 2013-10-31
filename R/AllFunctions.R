@@ -110,7 +110,9 @@ load_db <- function(path){
 #' @param fcs.colname A character scalar indicating column name that specify FCS
 #'  file names in annotation data.
 #' @param date.colname A character scalar indicating column names that contains
-#'  date information which are automatically formatted to "\%m/\%d/\%y".
+#'  date information which are automatically formatted to date object in R
+#' @param  date.format A character scalar indicating the format of date column , default is "\%m/\%d/\%y"..
+#'                      see \link{as.Date} for more details. 
 #' @param ... other arguments passed to \link{getQAStats}
 #' 
 #' @return a list of elements stored in the data environment.
@@ -130,11 +132,11 @@ load_db <- function(path){
 #' 
 #'}
 #' @export 
-qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
+qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL, date.format = "%m/%d/%y", ...)
 {
 	
 	##associate the anno with gating set and save them in db
-	gsid <- saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
+	gsid <- saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname, date.format)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
@@ -231,7 +233,7 @@ matchStatType <- function(db,formuRes)
 #'}
 
 #' @export 
-saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
+saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL, date.format)
 {
 	
 	
@@ -245,17 +247,12 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 	{
 		dt <- fread(metaFile)
         annoData_csv <- as.data.frame(dt)
-		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
+		annoData <- merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname, suffixes = c("", ".y"))
 	}
-#browser()
+
     #generate id column if not present
 	if(!idColName%in%colnames(annoData))
 	  annoData[,idColName] <- 1:nrow(annoData)
-#		browser()
-#	if(!fcs.colname%in%colnames(annoData))
-#		stop("column that specify FCS file names is missing in annotation data!")
-#	#rename the fcs filename column so that it can be fit into flowSet pData slot
-#	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
 #	browser()
@@ -264,10 +261,14 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		if(!all(date.colname%in%colnames(annoData)))
 			warning("date column not found in annotation data!")
 		else
-			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x){
+			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F]
+                                                        ,function(x){
 #																			browser()
-																			as.Date(as.character(x),"%m/%d/%y")
-																		}
+											                thisDate <- as.Date(as.character(x), format = date.format)
+                                                            if(is.na(thisDate))
+                                                              stop(as.character(x), " can't be converted to ", date.format)
+                                                            thisDate
+										    }
 											,simplify=FALSE)
 					
 	}

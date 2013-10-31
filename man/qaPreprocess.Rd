@@ -4,7 +4,7 @@
 \usage{
   qaPreprocess(db = .db, gs, gs.name = "default gatingSet",
     metaFile, fcs.colname = "name", date.colname = NULL,
-    ...)
+    date.format = "\%m/\%d/\%y", ...)
 }
 \arguments{
   \item{gs}{A \code{\link[=GatingSet-class]{GatingSet}}
@@ -24,7 +24,11 @@
 
   \item{date.colname}{A character scalar indicating column
   names that contains date information which are
-  automatically formatted to "\%m/\%d/\%y".}
+  automatically formatted to date object in R}
+
+  \item{date.format}{A character scalar indicating the
+  format of date column , default is "\%m/\%d/\%y"..  see
+  \link{as.Date} for more details.}
 
   \item{...}{other arguments passed to \link{getQAStats}}
 
