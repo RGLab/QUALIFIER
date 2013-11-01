@@ -338,8 +338,10 @@ panel.bwplotEx <-
 	
 	rowIds <- subscripts
 	df <- df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
+#	browser()    
+    #make sure groupBy is factorized
+    df[, (groupBy):= factor(df[, get(groupBy)])]
     
-#	browser()
 	if (horizontal)
 	{
       blist <-
@@ -580,7 +582,7 @@ panel.bwplotEx <-
 		## append NA-s to demarcate between boxes
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
-		
+#		browser()
 		df[,{
 #              browser()
                 thisGroupFactor <- .BY[[1]]

@@ -235,6 +235,11 @@ plot(qaTask.list[["MNC"]]
     ,proportion~factor(`coresampleid`)
 )
 
+#' ### try to rotate the boxplot
+plot(qaTask.list[["MNC"]]
+    , factor(`coresampleid`) ~ proportion
+    , horiz = TRUE
+)
 
 plot(qaTask.list[["MNC"]]
 	, subset=coresampleid%in%c(10908)
