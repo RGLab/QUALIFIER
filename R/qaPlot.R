@@ -436,9 +436,9 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
 	
 	
 #	browser()
-	plotObjs=new.env()
+	plotObjs <- new.env()
 	if(scatterPlot)
-			thisCall<-qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
+			thisCall <- qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
 	else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 				

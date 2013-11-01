@@ -336,23 +336,24 @@ panel.bwplotEx <-
 	
 	if (!notch) notch.frac <- 0
 	
-	rowIds<-subscripts
-	df<-df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
-	
+	rowIds <- subscripts
+	df <- df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
+    
 #	browser()
 	if (horizontal)
 	{
-		blist <-
-				tapply(x, factor(y, levels = levels.fos),
-						stats,
-						coef = coef,
-						do.out = do.out)
-		blist.stats <- t(sapply(blist, "[[", "stats"))
-		blist.out <- lapply(blist, "[[", "out")
-		blist.x <- lapply(blist, "[[", "x")
-#		browser()
-		
-		blist.height <- box.width # box.ratio / (1 + box.ratio)
+      blist <-
+               tapply(x, factor(y, levels = levels.fos),
+                                   stats,
+                                   coef = coef,
+                                   do.out = do.out)
+         blist.stats <- t(sapply(blist, "[[", "stats"))
+         blist.out <- lapply(blist, "[[", "out")
+         blist.x <- lapply(blist, "[[", "x")
+        
+         
+         blist.height <- box.width # box.ratio / (1 + box.ratio)
+
 		if (varwidth)
 		{
 			maxn <- max(table(y))
@@ -390,9 +391,11 @@ panel.bwplotEx <-
 		
         df[,{
 
-              i <- .GRP
+              thisGroupFactor <- .BY[[1]]
+              i <- as.integer(thisGroupFactor)
+              curGroupID <- as.character(thisGroupFactor)
               curGroup <- .SD
-              curGroupID <- as.character(.BY[[1]])
+              
       		  population<-as.character(curGroup[1,population])
 			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
@@ -536,16 +539,16 @@ panel.bwplotEx <-
 	}
 	else
 	{
-#		browser()
-		blist <-
-				tapply(y, factor(x, levels = levels.fos),
-						stats,
-						coef = coef,
-						do.out = do.out)
-		blist.stats <- t(sapply(blist, "[[", "stats"))
-		blist.x <- lapply(blist, "[[", "x")
-        
-		blist.height <- box.width # box.ratio / (1 + box.ratio)
+      blist <-
+          tapply(y, factor(x, levels = levels.fos),
+              stats,
+              coef = coef,
+              do.out = do.out)
+      blist.stats <- t(sapply(blist, "[[", "stats"))
+      blist.x <- lapply(blist, "[[", "x")
+      
+      blist.height <- box.width # box.ratio / (1 + box.ratio)
+#      browser()
 		if (varwidth)
 		{
 			maxn <- max(table(x))
@@ -580,9 +583,10 @@ panel.bwplotEx <-
 		
 		df[,{
 #              browser()
-                i <- .GRP
+                thisGroupFactor <- .BY[[1]]
+                i <- as.integer(thisGroupFactor)
+                curGroupID <- as.character(thisGroupFactor)
     			curGroup <- .SD
-    			curGroupID <- as.character(.BY[[1]])
     			population <- as.character(curGroup[1,population])
     			groupTips <- paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
     					, " Tube=",curGroup$Tube[1],sep="")
@@ -708,7 +712,7 @@ panel.bwplotEx <-
     					setSVGShapeURL(paths)
     					
     				}
-    #				browser()
+    				
     				panel.points(x = levels.fos[i],
     					y = curOut,
     					pch = plot.symbol$pch,
