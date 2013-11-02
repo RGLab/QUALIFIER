@@ -329,7 +329,8 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
                         , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
                         , flowViz = list()
-						,...)
+                        , outerStrip = FALSE 
+						, ...)
 {
 #  browser()
   #assign null to formula if it is missing
@@ -515,7 +516,12 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
 		#append the par list
 		thisCall <- as.call(c(as.list(thisCall),par))
 #		browser()
+        
 		thisCall <- eval(thisCall)
+        
+        if(outerStrip){
+          thisCall <-  eval(quote(useOuterStrips(thisCall)))
+        }
 #		print(thisCall)
 	}
 	
