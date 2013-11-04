@@ -240,12 +240,6 @@ reScaleData<-function(fs,gates,channel,logScale)
 #'pop:a character scalar indicating the population name.If provided,it
 #'overwrites the pop slot in qaTask object.
 #'
-#'isTerminal:a logical scalar indicating whether the pop is at the terminal
-#'node of the gating path.
-#'
-#'fixed:a logical scalar indicating whether the pop name is matched as it is
-#'.By default it is FALSE,which matches the gating path as the regular
-#'expression
 #'
 #'subset:a logical expression as a filter. see \code{\link{qaCheck}} for more
 #'details.
@@ -268,10 +262,12 @@ reScaleData<-function(fs,gates,channel,logScale)
 #'scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is
 #'plotted instead of the summary plot(xyplot/bwplot)
 #'
+#' scatterPar: A list storing all the fliwViz arguments. see \link[flowViz::xyplot]{xyplot}
+#' 
 #'par:A list storing all the lattice arguments.If provided,it overwrites the
 #'par slot of qaTask object.
 #'
-
+#' outerStrip: a \code{logical} indicating whether to enable \link[latticeExtra:useOuterStrips]{useOuterStrips} 
 #'@author Mike Jiang,Greg Finak
 #'
 #'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
@@ -319,6 +315,7 @@ setMethod("plot", signature=c(x="qaTask"),
             
 		})
 #' @importFrom RSVGTipsDevice devSVGTips
+#' @importFrom latticeExtra useOuterStrips
 plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest = NULL,rFunc = NULL,plotAll = FALSE
@@ -328,7 +325,6 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
                         ,highlight
                         , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
-                        , flowViz = list()
                         , outerStrip = FALSE 
 						, ...)
 {
