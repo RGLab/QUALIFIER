@@ -316,6 +316,7 @@ setMethod("plot", signature=c(x="qaTask"),
 		})
 #' @importFrom RSVGTipsDevice devSVGTips
 #' @importFrom latticeExtra useOuterStrips
+#' @param strip.lines,strip.left.lines arguments passed to \link[latticeExtra:useOuterStrips]{useOuterStrips}
 plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest = NULL,rFunc = NULL,plotAll = FALSE
@@ -326,6 +327,8 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
                         , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
                         , outerStrip = FALSE 
+                        , strip.lines = 2
+                        , strip.left.lines = 3
 						, ...)
 {
 #  browser()
@@ -516,7 +519,12 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
 		thisCall <- eval(thisCall)
         
         if(outerStrip){
-          thisCall <-  eval(quote(useOuterStrips(thisCall)))
+          thisCall <-  eval(quote(useOuterStrips(thisCall
+                                                 , strip.lines = strip.lines
+                                                 , strip.left.lines = strip.left.lines
+                                                  )
+                                   )
+                             )
         }
 #		print(thisCall)
 	}
