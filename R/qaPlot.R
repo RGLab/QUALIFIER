@@ -1,12 +1,3 @@
-.FileNameGen<-function(prefix=NA,ID=NA,population=NA,channel=NA,stain=NA,stats=NA,...)
-{
-	fileName<-c(prefix,ID,basename(population),channel,stain,stats,...)
-	fileName<-fileName[!is.na(fileName)]
-	paste(fileName,collapse="_")
-	
-}
-
-
 ##group plot for each sampleID or other aggregation ID
 qa.GroupPlot<-function(db,df,statsType,par)
 {

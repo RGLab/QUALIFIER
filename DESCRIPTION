@@ -1,7 +1,7 @@
 Package: QUALIFIER
 Type: Package
 Title: Quality Control of Gated Flow Cytometry Experiments
-Version: 1.5.17
+Version: 1.5.18
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends:

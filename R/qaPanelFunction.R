@@ -122,11 +122,7 @@ panel.xyplotEx <-
 					FileTips <- paste(highlight,"=",curOutRow[, highlight, with = FALSE]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
-					paths <- QUALIFIER:::.FileNameGen(prefix="f"
-                                                    , ID = curOutRow[,qa.par.get("idCol"), with = FALSE]
-                                                    , population = as.character(curOutRow$population)
-							,channel=as.character(curOutRow$channel)
-							,stats=statsType)
+					paths <- "f"
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -411,10 +407,7 @@ panel.bwplotEx <-
 				if(cur.btw.groups.outliers||plotAll==TRUE)
 				{
 #				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="s"
-							,ID=curGroupID
-							,population=population
-							,stats.=statsType)
+					paths <- "s"
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -505,11 +498,7 @@ panel.bwplotEx <-
 						FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
 						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 						#				browser()
-						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
-								,channel=as.character(curOutRow$channel)
-#								,stats=as.character(curOutRow$stats)
-								,stats=statsType
-									)
+						paths <- "f"
 						if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 						paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
 						
@@ -602,11 +591,7 @@ panel.bwplotEx <-
     				if(cur.btw.groups.outliers||plotAll==TRUE)
     				{
 #    				browser()
-    					paths <- .FileNameGen(prefix = "s"
-                      							,ID = curGroupID
-                      							, population = population
-                      							, stats = statsType)
-    					
+    					paths <- "s"    					
     					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
     					paths <- tempfile(pattern=paths,tmpdir="individual",fileext=".png")
     					
@@ -698,11 +683,7 @@ panel.bwplotEx <-
     					FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
     					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
     	#				browser()
-    					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
-    						,channel=as.character(curOutRow$channel)
-    #						,stats=as.character(curOutRow$stats)
-    						,stats=statsType
-    						)
+    					paths <- "f"
     					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
     					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
     
