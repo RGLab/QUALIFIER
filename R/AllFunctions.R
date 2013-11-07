@@ -148,7 +148,7 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 }
 
 #' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
-#' @importFrom XML xmlTreeParse xmlRoot xmlNode xmlCDataNode addChildren saveXML
+#' @importFrom XML xmlTreeParse xmlRoot xmlNode xmlCDataNode addChildren saveXML xmlGetAttr xmlAttrs<- 
 .postProcessSVG <- function(sfile)
 {
 
@@ -168,8 +168,20 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 
 	newNode <- xmlNode("script",attrs=c(type="text/ecmascript"))
 	newNode <- addChildren(newNode, xmlCDataNode(paste(srcCode,collapse="\n")))
-    top[["script"]] <- newNode		
-#	browser()
+    top[["script"]] <- newNode
+    
+    #update xlink with onclick event
+
+    anchor_ind <- grep("a", names(top))
+    for(thisInd in anchor_ind)
+    {
+        thisNode <- top[[thisInd]]
+        class(thisNode)
+        imgSrc <- xmlGetAttr(thisNode, "xlink:href")
+        newNode <- thisNode[["circle"]]
+        xmlAttrs(newNode) <- c(onclick = paste("showPlot(evt, ", imgSrc, ")", sep = "'"))
+        top[[thisInd]] <- newNode
+    }
     saveXML(top, sfile)
 
     

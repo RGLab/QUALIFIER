@@ -340,7 +340,7 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
 #modify functions within package namespace
-funcToinsert <- "plot.qaTask" 
+funcToinsert <- ".postProcessSVG" 
 funcSym <- as.symbol(funcToinsert)
 eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
 assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
