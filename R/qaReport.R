@@ -63,7 +63,7 @@ setMethod("qaReport", signature=c(obj="qaTask"),
 			
 #			browser()
             taskList <- list(obj)
-            names(taskList) <- as.vector(QUALIFIER:::getName(thisTask))
+            names(taskList) <- as.vector(QUALIFIER:::getName(obj))
 			qaReport(taskList, ...)
 		})
 
