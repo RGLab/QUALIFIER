@@ -133,8 +133,8 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
     			#check if data is gated
     			isGated <- obj@flag
                 
-    			nodes<-getNodes(obj, showHidden = TRUE)
-                nodePaths<-getNodes(obj,isPath=T, showHidden = TRUE)
+    			nodes<-getNodes(obj, isPath = FALSE, showHidden = TRUE)
+                nodePaths<-getNodes(obj, isPath = TRUE, showHidden = TRUE)
                 #convert to QUALIFIER's path
                 nodePaths[1]<-paste("/",nodePaths[1],sep="")
                 nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
