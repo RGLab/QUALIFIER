@@ -258,7 +258,9 @@ reScaleData<-function(fs,gates,channel,logScale)
 #'par:A list storing all the lattice arguments.If provided,it overwrites the
 #'par slot of qaTask object.
 #'
-#' outerStrip: a \code{logical} indicating whether to enable \link[latticeExtra:useOuterStrips]{useOuterStrips} 
+#' outerStrip: a \code{logical} indicating whether to enable \link[latticeExtra:useOuterStrips]{useOuterStrips}
+#' 
+#' strip.lines,strip.left.lines: arguments passed to \link[latticeExtra:useOuterStrips]{useOuterStrips}  
 #'@author Mike Jiang,Greg Finak
 #'
 #'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
@@ -307,7 +309,6 @@ setMethod("plot", signature=c(x="qaTask"),
 		})
 #' @importFrom RSVGTipsDevice devSVGTips
 #' @importFrom latticeExtra useOuterStrips
-#' @param strip.lines,strip.left.lines arguments passed to \link[latticeExtra:useOuterStrips]{useOuterStrips}
 plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest = NULL,rFunc = NULL,plotAll = FALSE

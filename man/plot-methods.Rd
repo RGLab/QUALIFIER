@@ -48,6 +48,9 @@
   provided,it overwrites the par slot of qaTask object.
 
   outerStrip: a \code{logical} indicating whether to enable
+  \link[latticeExtra:useOuterStrips]{useOuterStrips}
+
+  strip.lines,strip.left.lines: arguments passed to
   \link[latticeExtra:useOuterStrips]{useOuterStrips}}
 }
 \description{
