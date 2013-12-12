@@ -19,6 +19,9 @@
   \item{cdf}{\code{character} the option to control cdf
   file operation. see \link{save_gs} for more details.}
 
+  \item{overwrite}{\code{logical} whether to overwrite the
+  existing folder}
+
   \item{...}{other arguments passed to \link{save_gs}}
 }
 \description{

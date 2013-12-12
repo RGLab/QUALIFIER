@@ -42,7 +42,7 @@
   plot(xyplot/bwplot)
 
   scatterPar: A list storing all the fliwViz arguments. see
-  \link[flowViz::xyplot]{xyplot}
+  \link[flowViz:xyplot]{xyplot}
 
   par:A list storing all the lattice arguments.If
   provided,it overwrites the par slot of qaTask object.

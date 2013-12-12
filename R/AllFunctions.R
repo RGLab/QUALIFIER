@@ -36,6 +36,7 @@ initDB <- function(db=.db){
 #' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
 #' @param path \code{character} data path that stores the db.
 #' @param cdf \code{character} the option to control cdf file operation. see \link{save_gs} for more details.
+#' @param overwrite \code{logical} whether to overwrite the existing folder
 #' @param ... other arguments passed to \link{save_gs}
 #' @examples
 #' \dontrun{
