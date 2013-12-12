@@ -253,7 +253,7 @@ reScaleData<-function(fs,gates,channel,logScale)
 #'scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is
 #'plotted instead of the summary plot(xyplot/bwplot)
 #'
-#' scatterPar: A list storing all the fliwViz arguments. see \link[flowViz::xyplot]{xyplot}
+#' scatterPar: A list storing all the fliwViz arguments. see \link[flowViz:xyplot]{xyplot}
 #' 
 #'par:A list storing all the lattice arguments.If provided,it overwrites the
 #'par slot of qaTask object.
