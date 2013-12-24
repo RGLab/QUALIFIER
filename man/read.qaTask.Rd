@@ -1,0 +1,33 @@
+\name{read.qaTask}
+\alias{read.qaTask}
+\title{Loading \code{qaTask}s from a csv file}
+\usage{
+  read.qaTask(checkListFile, ...)
+}
+\arguments{
+  \item{checkListFile}{A character scalar giving the file
+  path, which is a csv spreadsheet contains the detailed
+  information of each QA task. It should have the columns:
+  'qaID', 'qaName', 'description', 'qaLevel','pop', 'type',
+  'formula', 'subset', 'plotType'.  See the slots of
+  \code{\link{qaTask-class}} for more details.}
+
+  \item{...}{other arguments \itemize{ \item db
+  \code{environment} See the slots of
+  \code{\link{qaTask-class}} for more details. }}
+}
+\value{
+  a list of \code{qaTask} objects
+}
+\description{
+  The csv file contains the definition of one
+  \code{qaTask}s
+}
+\examples{
+\dontrun{
+ checkListFile <- file.path(system.file("data", package = "QUALIFIER"), "qaCheckList.csv.gz")
+ qaTask.list <- read.qaTask(db, checkListFile)
+ qaTask.list[[1]]
+}
+}
+

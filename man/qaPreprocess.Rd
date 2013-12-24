@@ -1,0 +1,60 @@
+\name{qaPreprocess}
+\alias{qaPreprocess}
+\title{Preprocessing for QA check}
+\usage{
+  qaPreprocess(db = .db, gs, gs.name = "default gatingSet",
+    metaFile, fcs.colname = "name", date.colname = NULL,
+    date.format = "\%m/\%d/\%y", ...)
+}
+\arguments{
+  \item{gs}{A \code{\link[=GatingSet-class]{GatingSet}}
+  containing multiple \code{gating hierarchies}}
+
+  \item{gs.name}{A character scalar giving the name of the
+  GatingSet.}
+
+  \item{metaFile}{A character scalar giving the file path
+  of the sample annotation data, which is a csv spreadsheet
+  contains the meta information.  Each row corresponds to
+  one FCS file and The QUALIFIER package looks for the FCS
+  filename from "name" column of the spreadsheet.}
+
+  \item{fcs.colname}{A character scalar indicating column
+  name that specify FCS file names in annotation data.}
+
+  \item{date.colname}{A character scalar indicating column
+  names that contains date information which are
+  automatically formatted to date object in R}
+
+  \item{date.format}{A character scalar indicating the
+  format of date column , default is "\%m/\%d/\%y"..  see
+  \link{as.Date} for more details.}
+
+  \item{...}{other arguments passed to \link{getQAStats}}
+
+  \item{db}{An \code{environment} storing all the QA data.
+  By default it is an hidden global environment
+  \code{.db}.}
+}
+\value{
+  a list of elements stored in the data environment.
+}
+\description{
+  A convenient wrapper that does \link{saveToDB},
+  \link{getQAStats} in one call
+}
+\examples{
+\dontrun{
+#prepare the data environment
+db<-new.env()
+initDB(db)
+
+qaPreprocess(db=db,gs=G
+			,metaFile=metaFile
+			,fcs.colname="FCS_Files"
+			,date.colname=c("RecdDt","AnalysisDt")
+			)
+
+}
+}
+
