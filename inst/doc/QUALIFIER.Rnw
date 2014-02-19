@@ -1,0 +1,375 @@
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+%\VignetteIndexEntry{Quality assessment for gated Flow Cytometry Data}
+%\VignetteDepends{flowWorkspace,hwriter}
+%\VignetteKeywords{QA,svg,flowCore}
+%\VignettePackage{QUALIFIER}
+\documentclass[11pt]{article}
+
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+\usepackage{times}
+
+\usepackage{graphicx}
+%\usepackage{subfigure}
+
+\textwidth=6.2in
+\textheight=8.5in
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textsf{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+
+
+\title{QUALIFIER: Quality Assessment of Gated Flow Cytometry Data}
+\author{Mike Jiang, Greg Finak}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent \textbf{Background}
+  The current \Rpackage{flowQ} package does the quality assessment on the ungated FCM data. However, there is a need to
+  identify deviant samples by monitoring the consistencies of the underlying statistical properties of different gated cell 
+  populations (such as white blood cells, lymphacytes, monocytes etc). The \Rpackage{flowQ} package was also not designed for dealing with
+  large datasets. To meet these needs, We developed \Rpackage{QUALIFIER} package using the gating template created in flowJo and performing
+  QA checks on different gated populations. It divides the data preprocessing from the actual outlier detection process so that the statistics
+  are calcuated all at once and the outlier detection and visualization can be done more efficiently and interactively.
+  \Rpackage{ncdfFlow} is used to solve the memory limit issue for large datasets. 
+
+
+\noindent \textbf{keywords} Flow cytometry, Quality Assessment, high throughput, svg, flowWorkspace, ncdfFlowSet
+\end{abstract}
+
+<<loadPackage-QUALIFIER, echo=FALSE,results=hide>>=
+library(QUALIFIER)
+QUALIFIER:::qa.par.set("idCol","id")
+QUALIFIER:::qa.par.get("idCol")
+@
+
+\section{Parsing the QA gating template}
+\Rfunction{parseWorkspace} function from \Rpackage{flowWorkspace} package is used to parse the flowJo workspace.
+Since we are only interested in the gating strategy (gates defined in the template),\Robject{execute} can be set as FALSE  
+to skip the actual gating process. \Robject{useInternal} is set as TRUE to use internal structure (c++) for faster parsing. 
+Please see the documentation of \Rpackage{flowWorkspace} package for more details regarding how to use \Rfunction{parseWorkspace} function. 
+<<parseWorkspace, eval=FALSE, echo=TRUE,results=verbatim>>=
+ws<-openWorkspace("./data/QA_MFI_RBC_bounary_eventsV3.xml")##should replace with your own xml workspace file path
+GT<-parseWorkspace(ws,execute=FALSE,useInternal=TRUE)
+@
+
+\section{Apply the gating template to the data}
+Then gating hierarchy \Robject{gh\_template} containing the actual template gates is extracted
+from the result \Robject{GatingSet} "\Robject{GT}". 
+<<gh_template, eval=FALSE, echo=TRUE,results=verbatim>>=
+gh_template<-GT[[1]]					
+@
+
+The \Rfunction{GatingSet} method here is the contructor that takes a \Robject{gatingHierarchy} object as the template and a list of FCS file names (\Robject{filenames}) that need the quality assurance.
+The result "G" is the \Robject{GatingSet} that contains the gated data and some of the cell population statistics that can be viewed by \Robject{getPopStats} method.
+<<gh_template, eval=FALSE, echo=TRUE,results=verbatim>>=
+##datapath is the path where FCS files stores
+G<-GatingSet(gh_template,filenames,path="./data")
+getPopStats(G[[1]])
+@
+Optionally, \Robject{isNcdf} can be set to TRUE to support netCDF storage of large flow datasets when memory resource is limited. 
+
+\section{Calculating the statistics}
+After flow data is gated, the statistics of the gated data need to be extracted and saved before the QA checks. 
+\Robject{db} is an environment that serves as a container storing all the QA data and results.
+Firsly, \Rfunction{initDB} function initializes and creates the data structures for QA. 
+Then \Rfunction{qaPreprocess} is a convenient wrapper that calls underlining routines (\Rfunction{getQAStats},\Rfunction{saveToDB})
+to calculates/extracts statistics of gated cell populations and save them along with the gating set and the FCS meta data.
+\Robject{metaFile} is a csv file that contains the extra annoations about each FCS file.It should at least have one column
+speficifying FCS file names.
+
+<<getQAStats, eval=FALSE ,echo=true, results=verbatim>>=
+db<-new.env()
+initDB(db)
+qaPreprocess(db=db,gs=G
+			,metaFile="./data/FCS_File_mapping.csv" #should replace with your own FCS meta data file path
+			,fcs.colname="FCS_Files"
+			,date.colname=c("RecdDt","AnalysisDt")
+	)
+@
+\Robject{fcs.colname} and \Robject{date.colname} are the arguments to identify the columns in the meta data (the flat table stored as a csv file)
+that specifies the FCS filenames and the dates (to be formatted as to "\%m/\%d/\%y"). 
+Once the preprocessing steps are finished, the data are ready for quality assessments. 
+
+\section{Defining qaTasks} 
+<<loadData, echo=FALSE, results=hide>>=
+data("ITNQASTUDY")
+@
+
+\Rfunction{read.qaTask} reads external csv spreadsheet that contains the descriptions of each QA task and creates a list of \Rclass{qaTask} objects. 
+
+<<read.qaTask, echo=true, results=verbatim>>=
+checkListFile<-file.path(system.file("data",package="QUALIFIER"),"qaCheckList.csv.gz")
+qaTask.list<-read.qaTask(db,checkListFile=checkListFile)
+qaTask.list[1:2]
+@
+The \Rclass{qaTask} can also be created individually by the contructor \Rfunction{makeQaTask}.
+
+\section{Quality assessment and visualiztion} 
+\Rfunction{qaCheck} and \Rfunction{plot} are the two main methods to perform the quality assessment and visualize the QA results.
+They both use the information stored in \Robject{qaTask} object 
+and the \Robject{formula}, which is given either explicitly by the argument or implicitly by the \Robject{qaTask} object.
+It is generally of the form y $\sim$ x | g1 * g2 * ... , where y is the statistics to be checked in this QA and must be one of the four types:
+			 
+				"MFI": 
+					Median Fluorescence Intensity of the cell population specified by \Rclass{qaTask},
+			
+				"proportion": 
+						the percentage of the cell population specified by \Rclass{qaTask} in the parent population, 
+			
+				"count": 
+						the number of events of the cell population specified by \Rclass{qaTask},
+			
+				"spike": 
+						the variance of intensity over time of each channel, which indicates the stability of the fluorescence intensity.
+
+x specifies the variable plotted on x-axis (such as date) in the \Rfunction{plot} method.
+
+g1, g2, ... are the conditioning variables, which divide the data into subgroups and 
+apply the outlier detection whitin each individual group or plot the subgroups in different panels.
+They may also be omitted, in which case the outlier detection is peformed in the entire dataset.
+
+For example, RBC Lysis efficiency (percentage of WBC population) check is defined by \Rclass{qaTask} .
+<<qaTask-RBCLysis, results=verbatim>>=
+qaTask.list[["RBCLysis"]]
+@
+
+According to the formula stored in \Rclass{qaTask}, it uses the statistical property "proportion" and groups 
+the data by "Tube" (or staining panel). "RecdDt" is only for the plotting purpose (specifing the x-axis). Cell population is defined as "WBC\_perct"
+<<qaCheck-RBCLysis, results=verbatim>>=
+qaCheck(qaTask.list[["RBCLysis"]]
+       ,outlierfunc=list(func = outlier.cutoff
+                        ,args =  list(lBound=0.8)
+                       )
+      )
+@
+
+\Rfunction{qaCheck} reads all the necessary information about the gated data from \Rclass{qaTask} object.
+Users only needs to specificy how the outliers are called. This is done by 
+providing an outlier detection function \Rfunction{outlierfunc} that takes a numeric vector as input and returns a logical vector as the output.
+Here \Rfunction{outlier.cutoff} provided by the package is used and threshold "lBound" is specified ("less than", use uBound for "larger than"). 
+
+After the outliers are called, the results can be plotted by \Rfunction{plot} method.
+<<plot-RBCLysis, fig=true, results=verbatim>>=
+plot(qaTask.list[["RBCLysis"]],xlab="Record Date",ylab="percent")
+@
+
+By default all the data are plotted, argument "subset" can be used to visualize a small subset.
+ 
+<<plot-RBCLysis-subset, fig=true, results=verbatim>>=
+plot(qaTask.list[["RBCLysis"]],subset=Tube=='CD8/CD25/CD4/CD3/CD62L',xlab="Record Date",ylab="percent")
+@
+
+\Rfunction{clearCheck} is the method to removes the outlier results detected by the previous \Rfunction{qaCheck} call for the specific qaTask.
+<<clearCheck,results=verbatim>>=
+clearCheck(qaTask.list[["RBCLysis"]])
+@
+
+With \Robject{scatterPlot} flag set as true and  \Robject{subset} properly specified plot method can generate scatter plots for the selected FCS files,
+<<plot-RBCLysis-subset2, fig=true, results=verbatim,eval=FALSE>>=
+plot(qaTask.list[["RBCLysis"]],subset=name=='06087181_F01_I010.fcs',scatterPlot=TRUE)
+@
+\includegraphics{QUALIFIER-plot-subset2}			
+
+x term in the formula is normally ignored in \Rfunction{qaCheck}. However, when "plotType" of the 
+\Rfunction{qaTask} is "bwplot", it is used as the conditioning variable that divides the data into subgroups,
+ within which the \Rfunction{outlierfunc} is applied.   
+<<qaTask-MNC,  results=verbatim>>=
+qaTask.list[["MNC"]]
+@
+
+This qaTask detects the significant variance of MNC cell population percentage among aliquots, which have the same "coresampleid".
+Plot type of this object tells the method to group data by "coresampleid".   
+<<qaCheck-MNC,  results=verbatim>>=
+qaCheck(qaTask.list[["MNC"]],z.cutoff=1.5)
+@
+
+Interquartile Range based outlier detection function is used to detect outliers
+
+<<plot-MNC, fig=true, results=verbatim>>=
+plot(qaTask.list[["MNC"]],proportion~factor(coresampleid),xlab="Sample ID",ylab="percent",scales=list(x=list(rot=45)))
+@
+
+The red circles in the boxplot indicate the possible outlier samples and the box of red color indicates the entire sample group
+has significant variance and is marked as the group outlier. By default \Rfunction{qaCheck} uses normal-distribution-based outlier function to detect group outliers.  
+User-defined function can also supplied through \Robject{gOutlierfunc} argument.Again the function should take a numeric vector as input and returns a logical vector as the output.
+The formula supplied here in the plot method overwrites the one stored in the qaTask object, thus change the way of viewing the data.
+
+With \Robject{scatterPlot} and \Robject{subset} arguments, scatter plots can be generated for the selected FCS files or sample groups,
+<<plot-MNC-scatter, fig=true, results=verbatim,eval=FALSE>>=
+
+plot(qaTask.list[["MNC"]]
+		,scatterPlot=TRUE
+		,subset=coresampleid==11730)
+@
+
+\includegraphics{QUALIFIER-plot-MNC-scatter}	
+		
+We can also apply simple aggregation to the statisics through the formula.
+<<qaTask-BoundaryEvents, results=verbatim>>=
+qaTask.list[["BoundaryEvents"]]
+@
+
+Here the default formula only extracts the "proportion" from each individual channel.
+In order to check the total percentage of boundary events of all channels for each fcs file,
+we can write a new formula by applying aggregation function "sum" to "proportion" and group the data
+by fcs file ("name" in this case).
+
+<<qaCheck-BoundaryEvents,  results=verbatim>>=
+qaCheck(qaTask.list[["BoundaryEvents"]]
+        ,sum(proportion) ~ RecdDt | name
+        ,outlierfunc=list(func = outlier.cutoff
+                          ,args =list(uBound=0.0003)
+                          )
+        )
+@
+
+And we still can visualize the results chanel by chanel.
+<<plot-BoundaryEvents, fig=true, results=verbatim>>=		
+plot(qaTask.list[["BoundaryEvents"]],proportion ~ RecdDt | channel,xlab="Record Date",ylab="percent")
+@
+
+ 
+Another three examples:
+QA check of Fluorescence stability overtime using t-distribution based outlier detection function.     
+<<qaCheck-MFIOverTime, fig=true, results=verbatim>>=
+qaCheck(qaTask.list[["MFIOverTime"]]
+		,rFunc= list (func = rlm
+		              ,args = list(z.cutoff=3)
+                  )
+		)
+
+plot(qaTask.list[["MFIOverTime"]]
+		,y=MFI~RecdDt|stain
+		,subset=channel%in%c('FITC-A')
+		,rFunc=rlm
+		,scales=list(y=c(relation="free"))
+		,xlab="Record Date"
+	)
+@
+
+Note that the robust linear regression is applied in each group in order to capture the significant MFI change (highlighted in red color,if pvalues<0.05) over time.
+The individual outliers within each group are detected based on the residue.
+All the lattice options (like \Robject{scales} here in this example) can be passed to control the appearance of trellis plot,see the documentation of \Rpackage{lattice} for more details.
+
+<<plot-spike, fig=true, results=verbatim>>=
+qaCheck(qaTask.list[["spike"]]
+			,outlierfunc = list (func = outlier.t
+                                ,args = list(alpha=0.00001)
+                                ) 
+                
+			)
+
+plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'&channel%in%c('FITC-A')
+		,xlab="Record Date"
+	)
+
+@
+
+When monitoring the total number of events for each tube, a pre-determined events number can be provided as the threshold to the qaCheck method.
+<<tubesEvents, results=hide,echo=FALSE>>=
+tubesEvents <- read.csv(file.path(system.file("data",package="QUALIFIER"),"tubesevents.csv.gz"),row.names=1)
+tubesEvents <- QUALIFIER:::.TubeNameMapping(db,tubesEvents=tubesEvents[,3,drop=F])
+@
+\Robject{tubesEvents} pass to the argument of \Rfunction{qaCheck} could be a one-column data frame or a named list/vector. 
+Threshold values are stored in the column or list/vecor and conditioning values stored in rownames or names of the list/vector.
+<<tubesEvents, results=verbatim>>=
+tubesEvents
+@
+
+<<plot-NumberOfEvents, fig=true, results=verbatim>>=
+qaCheck(qaTask.list[["NumberOfEvents"]]
+		,formula=count ~ RecdDt | Tube
+		,outlierfunc = list(func = outlier.cutoff
+		                    ,args = list(lBound = 0.8 * tubesEvents)
+                        )
+		  )
+plot(qaTask.list[["NumberOfEvents"]]
+		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
+		,xlab="Record Date"
+		,ylab="Cell counts"
+	)
+@
+
+
+<<plot-RedundantStain, fig=true, results=verbatim>>=
+qaCheck(qaTask.list[["RedundantStain"]]
+        ,gOutlierfunc = list(func = outlier.norm
+                            , args =list(z.cutoff = 1)
+                            )
+         )
+plot(qaTask.list[["RedundantStain"]]
+		,y=proportion~factor(coresampleid)|channel:stain
+		,subset=stain%in%c('CD8')
+		,scales=list(x=list(cex=0.5,rot=45))
+		,xlab="Sample ID"
+		,ylab="percent"
+	)
+@
+
+\section{Creating quality assessment report}
+Besides the interactive visualization provided by \Rfunction{plot} method,we also provide one routine to generate  
+all plots in one report.This function reads the QA results calculated by \Rfunction{qaCheck} and the meta information of each QA task provided in spreadsheet qaCheckList and 
+generate the summary tables and svg plots. Svg plots provide tooltips containing the detail information about each sample as and 
+hyperlinks of densityplot for each individual FCS file.  
+
+<<qa.report,eval=FALSE, echo=true, results=verbatim>>=
+qaReport(qaTask.list
+		,outDir="~/temp"
+		,plotAll=FALSE
+		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
+		)
+
+@
+
+\Robject{plotAll} is the argument to control the plotting of the individual scatter plot for each FCS file. If TRUE, scatter plots for all the FCS files are generated. 
+If FALSE, only the FCS files marked as outliers will be plotted. When it is set to "none", no scatter plot will be generated, which is helpful to provide a quick preview of the html report.
+\Robject{subset} is the filter to only generate the report on a subset of flow data.
+
+Note that if there is need to adjust the QA plot for each indivdiual qaTask in the report, the arguments must be stored in qaTask before qaReport method is called.
+If there is no outlier is detected, the qaTask is not plotted by default. In order to change this setting, \Rfunction{htmlReport} can be set as TRUE to plot the qaTask regardlessly.      
+This is particually useful for the task that tracks the longitudinal trend instead of the individual outliers.
+Besides the lattice arguments that can be configured by \Rfunction{qpar} (for the summary xyplot and bwplot) and \Rfunction{scatterPar} (for the individual FCS xyplot).
+\Robject{xlog},\Robject{ylog} flag can be set for scatter plot to transform the flow data to log scale for the proper display of the stained channels.
+<<qa.report,eval=FALSE, echo=true, results=verbatim>>=
+htmlReport(qaTask.list[["MFIOverTime"]])<-TRUE
+rFunc(qaTask.list[["MFIOverTime"]])<-rlm
+scatterPar(qaTask.list[["MFIOverTime"]])<-list(xlog=TRUE)
+scatterPar(qaTask.list[["BoundaryEvents"]])<-list(xlog=TRUE)
+scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
+qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
+@
+
+Here is the \href{http://mikejiang.github.com/QUALIFIER/qaReport/new/index.html}{example} of the QA report.
+ 
+ 
+\section{Conclusion}
+By the formula-based \Rfunction{qaCheck} and \Rfunction{plot} methods, different QA tasks 
+can be defined and performed in a generic way.
+And \Rfunction{plot} only reads the outlier detection results pre-calculated by \Rfunction{qaCheck},
+which reduces the cost of interactive visualization.
+
+Two kinds of lattice plots are currently supported:xyplot and bwplot(boxplot), depending on the \Robject{plotType} in \Rfunction{qaTask} object.
+When the output path is provided by \Robject{dest}, the svg plot is generated. 
+In svg plot, each dot or box (or only the one marked as outliers) is annotated by the tooltip 
+or hyperlink, which further points to the individual density plot of the gated population.
+
+\clearpage
+%\bibliographystyle{plainnat} 
+%\bibliography{cytoref}
+\end{document}
