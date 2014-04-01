@@ -62,7 +62,9 @@ setMethod("qaReport", signature=c(obj="qaTask"),
 		function(obj,...){
 			
 #			browser()
-			qaReport(list(obj),...)
+            taskList <- list(obj)
+            names(taskList) <- as.vector(QUALIFIER:::getName(obj))
+			qaReport(taskList, ...)
 		})
 
 qaWrite.list<-function(x,page,...){
@@ -85,53 +87,61 @@ qaWrite.list<-function(x,page,...){
 			
 			closePage(page, splash=FALSE)
 		}
-#' @importFrom reshape cast melt		
-qaWrite.summary<-function(x,p,gsid=NULL,...){
-#	browser()
+# @importFrom reshape cast melt		
+qaWrite.summary <- function(x,p,gsid=NULL,...){
+#  browser()   
+    idColName <- qa.par.get("idCol")
+    
 	hwrite("Summary",p,heading=1)
 	
 	taskTbl<-do.call(rbind,lapply(names(x),function(y)data.frame(qaTask=y,qaID=qaID(x[[y]]))))
 	db<-getData(x[[1]])
-	
+
+	if(is.null(gsid))
+		gsid<-max(db$gstbl$gsid)
 	curGS<-db$gs[[gsid]]
 	anno<-pData(curGS)
-	
-	m.outResult<-merge(db$outlierResult,db$stats,by.x="sid",by.y = idColName)
-	m.outResult<-merge(m.outResult,taskTbl,by.x="qaID",by.y="qaID")
-	m.outResult<-merge(m.outResult,anno[,c("id","name")],by.x = idColName, by.y = idColName)
-	
-	castResult<-cast(m.outResult,name~qaTask)
-	castResult<-as.data.frame(castResult)
-	castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
-	castResult<-castResult[order(castResult$subTotal,decreasing=T),]
-	castResult$name<-as.character(castResult$name)
-	castResult<-rbind(castResult,c(name="Total",colSums(castResult[,-1])))
-	rownames(castResult)<-NULL#1:nrow(castResult)
-	hwrite(
-			paste(hwrite("hide/show table"#add toggle word
-							,onclick=paste("toggleTable(",db$objcount,")",sep="")
-							,link="#"
-							,class="showtable"
-					)
-					,hwrite(#encapsulate into div in order to have an id
-							hwrite(castResult#output table
-									,row.class="firstline"
-									,col.class=list("name"="firstcolumn",'subTotal'="lastcolumn")
-							)
-							,div=TRUE
-							,style="display: none;"
-							,id=paste("table",db$objcount,sep="_")
-					)
-					
-					,sep=""
-				)
-			,p
+    
+#    db$outlierResult
+      
+	m.outResult <- merge(db$outlierResult,db$stats,by = "sid")
+	m.outResult <- merge(m.outResult,taskTbl,by="qaID")
+	m.outResult <- merge(m.outResult,anno[,c(idColName,"name")],by = idColName)
+	if(nrow(m.outResult) > 0){
+      castResult <- cast(m.outResult, formula = name~qaTask)
+      castResult<-as.data.frame(castResult)
+      castResult$subTotal<-rowSums(castResult[,-1,drop=FALSE])
+      castResult<-castResult[order(castResult$subTotal,decreasing=T),]
+      castResult$name<-as.character(castResult$name)
+      castResult<-rbind(castResult,c(name="Total",colSums(castResult[,-1])))
+      rownames(castResult)<-NULL#1:nrow(castResult)
+      hwrite(
+          paste(hwrite("hide/show table"#add toggle word
+                  ,onclick=paste("toggleTable(",db$objcount,")",sep="")
+                  ,link="#"
+                  ,class="showtable"
+              )
+              ,hwrite(#encapsulate into div in order to have an id
+                  hwrite(castResult#output table
+                      ,row.class="firstline"
+                      ,col.class=list("name"="firstcolumn",'subTotal'="lastcolumn")
+                  )
+                  ,div=TRUE
+                  ,style="display: none;"
+                  ,id=paste("table",db$objcount,sep="_")
+              )
+              
+              ,sep=""
+          )
+          ,p
 #			,div=TRUE
 #			,style="display: none;"
 #			,id=paste("section",db$objcount,sep="_")
-	
-		)
-#					
+      
+      )
+      
+    }
+	#					
 }		
 #TODO:multi-gs is not fully supported in qaReport yet
 #' @importFrom hwriter closePage hwrite openPage
@@ -144,20 +154,20 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 			anno<-pData(curGS)
 			curQaID<-qaID(x)
 #			browser()
-			outResult<-base::subset(db$outlierResult,qaID==curQaID)
-			outResult<-merge(outResult,db$stats[,c("sid",idColName,"channel")])
-			outResult<-merge(outResult,anno)
+			outResult <- base::subset(db$outlierResult,qaID==curQaID)
+			outResult <- merge(outResult, db$stats[,c("sid",idColName,"channel"), with = FALSE], by = "sid")
+			outResult <- merge(outResult,anno, by = idColName)
 
-			colnames(outResult)[colnames(outResult)=="name"]<-"fcsFile"
-			if(nrow(outResult)>0)
-				outResult$qaTask<-getName(x)
+            outResult <- rename(outResult, c("name" = "fcsFile"))
+			if(nrow(outResult) > 0)
+				outResult$qaTask <- getName(x)
 			
-			gOutResult<-base::subset(db$GroupOutlierResult,qaID==curQaID)
-			gOutResult<-merge(gOutResult,db$stats)
-			gOutResult<-merge(gOutResult,anno)
-			nFscFailed<-length(unique(outResult$fcsFile))
-			if(nrow(gOutResult)>0)
-				gOutResult$qaTask<-getName(x)			
+			gOutResult <- base::subset(db$GroupOutlierResult,qaID==curQaID)
+			gOutResult <- merge(gOutResult,db$stats, by = "sid")
+			gOutResult <- merge(gOutResult,anno, by = idColName)
+			nFscFailed <- length(unique(outResult$fcsFile))
+			if(nrow(gOutResult) > 0)
+				gOutResult$qaTask <- getName(x)			
 	
 			
 			hwrite(paste(description(x)
@@ -413,7 +423,7 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 								
 #										##table+image
 #
-								
+#								browser()
 		
 								plotCallStr<-quote(plot(x
 														,formula1
@@ -495,10 +505,10 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 					)
 				}else
 				{
-#					browser()
+					
 					#if only one conditioning variable
 					#simply order by it and output the fcsfile list
-					if(length(formuRes$groupBy)==0)
+					if(length(formuRes$groupBy) == 0)
 					{
 
 						castResult<-eval(substitute(unique(u[,c(w),drop=FALSE])
@@ -512,28 +522,28 @@ qaWrite.task<-function(x,p,outDir,plotAll,gsid,Subset=NULL){
 						
 					}else
 					{
-						groupBy<-formuRes$groupBy
+						groupBy <- formuRes$groupBy
 
-						castResult<-eval(substitute(u[order(u$v),c(w,v)]
+						castResult <- eval(substitute(u[order(u$v),c(w,v)]
 													,list(u=as.symbol("outResult"),v=groupBy,w="fcsFile")
 												)
 											)
 
-						gcastResult<-eval(substitute(u[order(u$v),c(w,v)]
+						gcastResult <- eval(substitute(u[order(u$v),c(w,v)]
 														,list(u=as.symbol("gOutResult"),v=groupBy,w=groupField)
 												)
 										)
 					}
 					
-					
+#                    browser()
 					
 					##make sure the w and h pass to plot and large enough to display strip text
 					thisCall<-	quote(
 										plot(x
-											,y=getFormula(x)
-											,plotAll=plotAll
-											,dest=imageDir
-											,width=27,height=13
+											,y = getFormula(x)
+											,plotAll = plotAll
+											,dest = imageDir
+											,width = 27, height = 13
 											)
 										)
 					

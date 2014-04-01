@@ -205,10 +205,42 @@ makeQaTask <- function(db=.db,qaName,description,qaLevel,pop,formula, type, plot
 #' }
 read.qaTask <-function(checkListFile, ...)
 {
-  df<-read.csv(checkListFile)
+  if(tools::file_ext(checkListFile) == "gz"){
+    df <- read.csv(checkListFile)
+  }else
+  {
+    dt <- fread(checkListFile)
+    df <- as.data.frame(dt)
+  }
   .read.qaTask(df,...)
 }
 
+#' gating arguments parser (copied from openCyto in order to drop the dependence for ITN, eventually we want to merge them)
+#' 
+#' parsing the arguments read from `args` columns of csv template into 
+#' list of paired arguments
+.argParser <- function(txt, split = TRUE) {
+  # trim whitespaces at beginning and the end of string
+  txt <- gsub("^\\s*|\\s*$", "", txt)
+  
+  if (split) {
+    paired_args <- paste("c(", txt, ")")
+    paired_args <- try(parse(text = paired_args), silent = TRUE)
+    if (class(paired_args) == "try-error") {
+      errmsg <- attr(paired_args, "condition")
+      msg <- conditionMessage(errmsg)
+      stop("invalid gating argument:\n", msg)
+    }
+    
+    paired_args <- as.list(as.list(paired_args)[[1]])[-1]
+    names(paired_args) <- names(paired_args)
+  } else {
+    paired_args <- as.symbol(txt)
+    paired_args <- list(paired_args)
+  }
+  
+  paired_args
+}
 #' construct qatask from a data.frame
 .read.qaTask<-function(df,db=.db)
 {
@@ -238,7 +270,7 @@ read.qaTask <-function(checkListFile, ...)
                             outlierFunc_args <- curRow["outlierFunc_args"]
                             
                             if(!is.na(outlierFunc_args))
-                              outlierFunc_args <- openCyto:::.argParser(outlierFunc_args)
+                              outlierFunc_args <- .argParser(outlierFunc_args)
                             
                           }else{
                             message("Outlier function is not specified!")
@@ -261,7 +293,7 @@ read.qaTask <-function(checkListFile, ...)
                           {
                             goutlierFunc_args <- curRow["goutlierFunc_args"]
                             if(!is.na(aoutlierFunc_args))
-                              outlierFunc_args <- openCyto:::.argParser(outlierFunc_args)
+                              outlierFunc_args <- .argParser(outlierFunc_args)
                              
                           }else{
                             goutlierFunc <- outlier.norm

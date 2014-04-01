@@ -20,9 +20,80 @@
 #' 
 #' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
 #' 
+#' @examples 
+#' db <- new.env()
+#' initDB(db)
 #' @export
 initDB <- function(db=.db){
 	createDbSchema(db)
+}
+
+#' save/load the data environment to/from disk
+#' 
+#' save and load the data environment that contains both statistics and GatingSets.
+#' 
+#' 
+#' @param db An \code{environment} storing all the QA data. By default it is an hidden global environment \code{.db}.
+#' @param path \code{character} data path that stores the db.
+#' @param cdf \code{character} the option to control cdf file operation. see \link{save_gs} for more details.
+#' @param overwrite \code{logical} whether to overwrite the existing folder
+#' @param ... other arguments passed to \link{save_gs}
+#' @examples
+#' \dontrun{
+#' save_db(db, path = "./PreprocessedData")
+#' db <- load_db(path = "./PreprocessedData")
+#' } 
+#' @export
+#' @aliases load_db save_db
+#' @rdname save_db
+save_db <- function(db = .db, path, overwrite = FALSE, cdf = "link",...){
+  if (file.exists(path)) {
+    path <- normalizePath(path, mustWork = TRUE)
+    if (!overwrite) {
+      stop(path, "' already exists!try to use overwrite = TRUE to overwrite it.")
+    }
+  }
+  else {
+    dir.create(path = path)
+    path <- normalizePath(path, mustWork = TRUE)
+  }
+  
+  message("saving db ...")
+  saveRDS(db, file = file.path(path, "db.rds"))
+#  browser()
+  gsids <- db$gstbl[, "gsid"]
+  nGS <- length(gsids)
+  if(!setequal(1:nGS, gsids))
+    stop("Can't save the corrupted db!")
+  
+  l_ply(gsids, function(gsid){
+        message("saving gs ", gsid)
+        suppressMessages( 
+          save_gs(db$gs[[gsid]], file.path(path, gsid), cdf = cdf, overwrite = overwrite, ...)
+        )
+      })
+  
+  message("Done\nTo reload it, use 'load_db' function\n")
+  
+}
+#' @export
+#' @rdname save_db
+load_db <- function(path){
+  path <- normalizePath(path, mustWork = TRUE)
+  if (!file.exists(path)) 
+    stop(path, "' not found!")
+  files <- list.files(path)
+  message("loading db ...")
+  db <- readRDS(file.path(path, "db.rds"))
+  gsids <- db$gstbl[, "gsid"]
+  l_ply(gsids, function(gsid){
+        message("loading gs ", gsid)
+        suppressMessages( 
+            db$gs[[gsid]] <- load_gs(file.path(path, gsid))
+        )
+      })
+  message("Done\n")
+  db
 }
 
 #' Preprocessing for QA check
@@ -40,7 +111,9 @@ initDB <- function(db=.db){
 #' @param fcs.colname A character scalar indicating column name that specify FCS
 #'  file names in annotation data.
 #' @param date.colname A character scalar indicating column names that contains
-#'  date information which are automatically formatted to "\%m/\%d/\%y".
+#'  date information which are automatically formatted to date object in R
+#' @param  date.format A character scalar indicating the format of date column , default is "\%m/\%d/\%y"..
+#'                      see \link{as.Date} for more details. 
 #' @param ... other arguments passed to \link{getQAStats}
 #' 
 #' @return a list of elements stored in the data environment.
@@ -60,11 +133,11 @@ initDB <- function(db=.db){
 #' 
 #'}
 #' @export 
-qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL,...)
+qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL, date.format = "%m/%d/%y", ...)
 {
 		
 	##associate the anno with gating set and save them in db
-	gsid <- saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname)
+	gsid <- saveToDB(db,gs,gs.name,metaFile,fcs.colname,date.colname, date.format)
 		
 	#extract stats from gating set named as "G" that was stored in db
 #	browser()
@@ -76,30 +149,43 @@ qaPreprocess <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.coln
 }
 
 #' insert javascript into svg to enable interactity (e.g.tooltips, highlight and links)
-.postProcessSVG<-function(sfile)
+#' @importFrom XML xmlTreeParse xmlRoot xmlNode xmlCDataNode addChildren saveXML xmlGetAttr xmlAttrs<- 
+.postProcessSVG <- function(sfile)
 {
 
-#	browser()
+
 	
-	srcFile<-list.files(system.file("javascript",package="QUALIFIER"),pattern="highlight.js",full.names=TRUE)
-	srcFile<-file(srcFile, "r")
-	srcCode<-readLines(srcFile)
+	srcFile <- list.files(system.file("javascript",package="QUALIFIER")
+                          , pattern="highlight.js"
+                          , full.names=TRUE )
+	srcFile <- file(srcFile, "r")
+	srcCode <- readLines(srcFile)
 	
 	close(srcFile)
+
+	doc <- xmlTreeParse(sfile, useInternalNodes = FALSE, addAttributeNamespaces = TRUE)
 	
-	doc = xmlParse(sfile)
-	
-	top<-xmlRoot(doc)
-	
-	
-	oldNode<-top[["script"]]
-	newNode<-xmlNode("script",attrs=c(type="text/ecmascript"))
-	newNode<-addChildren(newNode,xmlCDataNode(paste(srcCode,collapse="\n")))
-	
-	replaceNodes(oldNode,newNode)
-		
-	saveXML(top,sfile)
-	
+	top <- xmlRoot(doc)
+
+	newNode <- xmlNode("script",attrs=c(type="text/ecmascript"))
+	newNode <- addChildren(newNode, xmlCDataNode(paste(srcCode,collapse="\n")))
+    top[["script"]] <- newNode
+    
+    #update xlink with onclick event
+
+    anchor_ind <- grep("a", names(top))
+    for(thisInd in anchor_ind)
+    {
+        thisNode <- top[[thisInd]]
+        class(thisNode)
+        imgSrc <- xmlGetAttr(thisNode, "xlink:href")
+        newNode <- thisNode[["circle"]]
+        xmlAttrs(newNode) <- c(onclick = paste("showPlot(evt, ", imgSrc, ")", sep = "'"))
+        top[[thisInd]] <- newNode
+    }
+    saveXML(top, sfile)
+
+    
 }
 
 matchStatType <- function(db,formuRes)
@@ -160,7 +246,7 @@ matchStatType <- function(db,formuRes)
 #'}
 
 #' @export 
-saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL)
+saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="name",date.colname=NULL, date.format)
 {
 	
 	
@@ -172,18 +258,14 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		
 	if(!missing(metaFile))
 	{
-		annoData_csv<-read.csv(metaFile)
-		annoData<-merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname)
+		dt <- fread(metaFile)
+        annoData_csv <- as.data.frame(dt)
+		annoData <- merge(annoData,annoData_csv,by.x="name",by.y=fcs.colname, suffixes = c("", ".y"))
 	}
-#browser()
+
     #generate id column if not present
 	if(!idColName%in%colnames(annoData))
 	  annoData[,idColName] <- 1:nrow(annoData)
-#		browser()
-#	if(!fcs.colname%in%colnames(annoData))
-#		stop("column that specify FCS file names is missing in annotation data!")
-#	#rename the fcs filename column so that it can be fit into flowSet pData slot
-#	colnames(annoData)[which(colnames(annoData)==fcs.colname)]<-"name"
 
 	#format date columns
 #	browser()
@@ -192,10 +274,14 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 		if(!all(date.colname%in%colnames(annoData)))
 			warning("date column not found in annotation data!")
 		else
-			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F],function(x){
+			annoData[,date.colname]<-sapply(annoData[,date.colname,drop=F]
+                                                        ,function(x){
 #																			browser()
-																			as.Date(as.character(x),"%m/%d/%y")
-																		}
+											                thisDate <- as.Date(as.character(x), format = date.format)
+                                                            if(is.na(thisDate))
+                                                              stop(as.character(x), " can't be converted to ", date.format)
+                                                            thisDate
+										    }
 											,simplify=FALSE)
 	
 	}
@@ -304,7 +390,7 @@ saveToDB<-function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname="n
 #' @rdname qaCheck-methods
 #' @aliases queryStats,qaTask-method
 setMethod("queryStats", signature=c(x="qaTask"),
-		function(x,y,subset,pop,gsid=NULL,...){
+		function(x,y,subset,pop,gsid=NULL, type = x@type,...){
 			
 			if(missing(y))
 				y<-getFormula(x)
@@ -316,9 +402,9 @@ setMethod("queryStats", signature=c(x="qaTask"),
 				pop<-getPop(x)
 			
 			if(missing(subset))
-				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, ...)
+				res<-.queryStats(db,statsType=statsType,pop=pop,gsid=gsid, type = type, ...)
 			else
-				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, ... )
+				res<-.queryStats(db,statsType=statsType,substitute(subset),pop=pop,gsid=gsid, type = type, ... )
 			
 			if(nrow(res)!=0)
 			{
@@ -333,7 +419,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 			res
 		})
 
-.queryStats<-function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
+.queryStats <- function(db,Subset,statsType=NULL,pop=character(0),gsid, ...)
 {
 	
 
@@ -352,7 +438,7 @@ setMethod("queryStats", signature=c(x="qaTask"),
 		ret_anno<-pData(db$gs[[gsid]])
 		ret_anno$gsid=gsid
 	}
-	ret_stats<-db$stats
+	ret_stats <- db$stats
 	
 #	browser()
 	#filter by subset ,use eval instead of subset since subset is now a filtering argument instead of the function 

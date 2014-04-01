@@ -3,7 +3,8 @@
 \title{Save the gating set and annotation data into the data environment.}
 \usage{
   saveToDB(db = .db, gs, gs.name = "default gatingSet",
-    metaFile, fcs.colname = "name", date.colname = NULL)
+    metaFile, fcs.colname = "name", date.colname = NULL,
+    date.format)
 }
 \arguments{
   \item{db}{An \code{environment} storing all the QA data.
@@ -27,7 +28,11 @@
 
   \item{date.colname}{A character scalar indicating column
   names that contains date information which are
-  automatically formatted to "\%m/\%d/\%y".}
+  automatically formatted to date object in R}
+
+  \item{date.format}{A character scalar indicating the
+  format of date column , default is "\%m/\%d/\%y"..  see
+  \link{as.Date} for more details.}
 }
 \value{
   An unique id for \code{GatingSet} that is generated

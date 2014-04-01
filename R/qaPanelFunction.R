@@ -108,16 +108,6 @@ panel.xyplotEx <-
 		if(!is.null(dest))
 		{
 			###add svg anno
-#			rFunc<-list(...)$rFunc
-#			subscripts<-list(...)$subscripts
-
-#			plotObjs<-list(...)$plotObjs
-#			plotAll<-list(...)$plotAll
-#			statsType<-list(...)$statsType
-#			scatterPar<-list(...)$scatterPar
-#			db<-list(...)$db
-#			if(is.null(plotAll))
-#				plotAll=FALSE
 #		browser()
 			rowIds<-subscripts
 			#should not subset df since subscripts are global indices to the original dataframe
@@ -129,12 +119,10 @@ panel.xyplotEx <-
 					curRowID<-rowIds[i]
 					curOutRow<-df[curRowID,]
 #					browser()
-					FileTips<-paste(highlight,"=",curOutRow[highlight]," file=",curOutRow$name,sep="")
+					FileTips <- paste(highlight,"=",curOutRow[, highlight, with = FALSE]," file=",curOutRow$name,sep="")
 					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
-							,channel=as.character(curOutRow$channel)
-							,stats=statsType)
+					paths <- "f"
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -143,21 +131,16 @@ panel.xyplotEx <-
 						if(curOutRow$outlier||plotAll==TRUE)
 						{
 							##save the individual plot obj
-#						browser()
+#                            browser()
 							assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
-							
-#						png(file.path(dest,paths))
-#						qa.GroupPlot(db,curOutRow)
-#						dev.off()
-#						dev.set(2)
 							
 							setSVGShapeURL(paths)	
 						}
 					}
 					
 					
-					panel.points(x = if (jitter.x) jitter(x[i], factor = factor, amount = amount) else x[i],
-							y = if (jitter.y) jitter(y[i], factor = factor, amount = amount) else y[i],
+					panel.points(x = if (jitter.x) jitter(x[i], factor = factor, amount = amount) else x[i]
+							, y = if (jitter.y) jitter(y[i], factor = factor, amount = amount) else y[i],
 							cex = cex,
 							fill = fill,
 							font = font,
@@ -257,7 +240,6 @@ panel.xyplot.qa<-function(x,y,rFunc=NULL,...){
 	if(!is.null(rFunc))
 	{
 		
-#											x1<-as.Date(x,"%m/%d/%y")
 		reg.res<-try(rFunc(y~x),silent=TRUE)
 		if(all(class(reg.res)!="try-error"))
 		{
@@ -350,23 +332,26 @@ panel.bwplotEx <-
 	
 	if (!notch) notch.frac <- 0
 	
-	rowIds<-subscripts
-	df<-df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
-	
-#	browser()
+	rowIds <- subscripts
+	df <- df[rowIds,]#we do need subsetting here since boxplot does not use groups argument to superpose plot
+#	browser()    
+    #make sure groupBy is factorized
+    df[, (groupBy):= factor(df[, get(groupBy)])]
+    
 	if (horizontal)
 	{
-		blist <-
-				tapply(x, factor(y, levels = levels.fos),
-						stats,
-						coef = coef,
-						do.out = do.out)
-		blist.stats <- t(sapply(blist, "[[", "stats"))
-		blist.out <- lapply(blist, "[[", "out")
-		blist.x <- lapply(blist, "[[", "x")
-#		browser()
-		
-		blist.height <- box.width # box.ratio / (1 + box.ratio)
+      blist <-
+               tapply(x, factor(y, levels = levels.fos),
+                                   stats,
+                                   coef = coef,
+                                   do.out = do.out)
+         blist.stats <- t(sapply(blist, "[[", "stats"))
+         blist.out <- lapply(blist, "[[", "out")
+         blist.x <- lapply(blist, "[[", "x")
+        
+         
+         blist.height <- box.width # box.ratio / (1 + box.ratio)
+
 		if (varwidth)
 		{
 			maxn <- max(table(y))
@@ -404,9 +389,11 @@ panel.bwplotEx <-
 		
         df[,{
 
-              i <- .GRP
+              thisGroupFactor <- .BY[[1]]
+              i <- as.integer(thisGroupFactor)
+              curGroupID <- as.character(thisGroupFactor)
               curGroup <- .SD
-              curGroupID <- as.character(.BY[[1]])
+              
       		  population<-as.character(curGroup[1,population])
 			groupTips<-paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
 					, " Tube=",curGroup$Tube[1],sep="")
@@ -420,10 +407,7 @@ panel.bwplotEx <-
 				if(cur.btw.groups.outliers||plotAll==TRUE)
 				{
 #				browser()
-					paths<-QUALIFIER:::.FileNameGen(prefix="s"
-							,ID=curGroupID
-							,population=population
-							,stats.=statsType)
+					paths <- "s"
 					
 					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
@@ -514,11 +498,7 @@ panel.bwplotEx <-
 						FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
 						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 						#				browser()
-						paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
-								,channel=as.character(curOutRow$channel)
-#								,stats=as.character(curOutRow$stats)
-								,stats=statsType
-									)
+						paths <- "f"
 						if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
 						paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
 						
@@ -550,16 +530,16 @@ panel.bwplotEx <-
 	}
 	else
 	{
-#		browser()
-		blist <-
-				tapply(y, factor(x, levels = levels.fos),
-						stats,
-						coef = coef,
-						do.out = do.out)
-		blist.stats <- t(sapply(blist, "[[", "stats"))
-		blist.x <- lapply(blist, "[[", "x")
-        
-		blist.height <- box.width # box.ratio / (1 + box.ratio)
+      blist <-
+          tapply(y, factor(x, levels = levels.fos),
+              stats,
+              coef = coef,
+              do.out = do.out)
+      blist.stats <- t(sapply(blist, "[[", "stats"))
+      blist.x <- lapply(blist, "[[", "x")
+      
+      blist.height <- box.width # box.ratio / (1 + box.ratio)
+#      browser()
 		if (varwidth)
 		{
 			maxn <- max(table(x))
@@ -591,12 +571,13 @@ panel.bwplotEx <-
 		## append NA-s to demarcate between boxes
 		xs <- cbind(xbnd, NA_real_)
 		ys <- cbind(ybnd, NA_real_)
-		
+#		browser()
 		df[,{
 #              browser()
-                i <- .GRP
+                thisGroupFactor <- .BY[[1]]
+                i <- as.integer(thisGroupFactor)
+                curGroupID <- as.character(thisGroupFactor)
     			curGroup <- .SD
-    			curGroupID <- as.character(.BY[[1]])
     			population <- as.character(curGroup[1,population])
     			groupTips <- paste("pid=",curGroup$pid[1], " ",groupBy,"=",curGroupID
     					, " Tube=",curGroup$Tube[1],sep="")
@@ -609,19 +590,18 @@ panel.bwplotEx <-
     			{
     				if(cur.btw.groups.outliers||plotAll==TRUE)
     				{
-    #				browser()
-    					paths<-QUALIFIER:::.FileNameGen(prefix="s"
-    							,ID=curGroupID
-    							,population=population
-    							,stats.=statsType)
-    					
+#    				browser()
+    					paths <- "s"    					
     					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
-    					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
+    					paths <- tempfile(pattern=paths,tmpdir="individual",fileext=".png")
     					
     					##can't print right away since there is issue with embeded lattice plot
     					##some how it alter the viewport or leves of parent lattice object 
     #				browser()
-    					curPlotObj<-qa.GroupPlot(db,curGroup,statsType=statsType,par=scatterPar)
+    					curPlotObj <- qa.GroupPlot(db, curGroup
+                                                  , statsType = statsType
+                                                  , par = scatterPar
+                                                  )
     					if(!is.null(curPlotObj))
     					{
     						assign(basename(paths),curPlotObj,envir=plotObjs)
@@ -703,11 +683,7 @@ panel.bwplotEx <-
     					FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
     					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
     	#				browser()
-    					paths<-QUALIFIER:::.FileNameGen(prefix="f",ID=curOutRow[[eval(qa.par.get("idCol"))]],population=as.character(curOutRow$population)
-    						,channel=as.character(curOutRow$channel)
-    #						,stats=as.character(curOutRow$stats)
-    						,stats=statsType
-    						)
+    					paths <- "f"
     					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
     					paths<-tempfile(pattern=paths,tmpdir="individual",fileext=".png")
     
@@ -719,7 +695,7 @@ panel.bwplotEx <-
     					setSVGShapeURL(paths)
     					
     				}
-    #				browser()
+    				
     				panel.points(x = levels.fos[i],
     					y = curOut,
     					pch = plot.symbol$pch,
@@ -771,105 +747,28 @@ boxplot.statsEx<-function (x, coef = 1.5, do.conf = TRUE, do.out = TRUE)
 										nna] else numeric())
 }
 
-#TODO:move this to flowViz as well
-##right now in QUALIFIER I replace all the 1-D density plot with xyplot instead.
-#qa.panel.densityplot<-function(x,y,frames,filter,channel,channel.name,overlap,...)
-qa.panel.densityplot<-function(...)
+
+
+#parse outlier flag and mark outliers by gate color 
+panel.xyplot.flowsetEx <- function(x
+                                  , outlier
+                                  , gp
+                                  ,...)
 {
-
-	y=list(...)$y
-	filter=list(...)$filter
-
-	
-	
-
-#browser()
-#try to manipulate ... before pass it to the call
-#	call.f<-match.call(expand.dots = F)
-#	args<-call.f$...
-#	ls(args$frames)
-#	do.call("panel.densityplot.flowset",as.list(args))
-	panel.densityplot.flowset(...)
-	#add gate label
-	ny <- nlevels(y)
-	for (i in rev(seq_len(ny))){
-#					browser()			
-		
-		curFres<-filter[[i]]
-		p.stats<-flowCore::summary(curFres)@p
-		#remove stats for "rest" pop(usually the first one) from mulitfilterResults produced by filters such as curv2Filter
-		if(length(p.stats)>1)
-			p.stats<-p.stats[-1]
-		p.stats<-sprintf("%.2f%%",p.stats*100)
-		
-		bounds<-gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
-		
-		
-		for(j in 1:length(bounds))
-		{
-			
-			panel.text(
-					x=mean(bounds[[j]]),
-					y=i-0.02,
-					labels=p.stats[j], 
-					col="black",
-					alpha=1,
-					linheight=1,
-					font=1,
-					cex=0.7
-#					,...
-			)
-		}
-	}	
-	
-	
-}
-# mark outliers by by gate color
-panel.xyplot.flowframeEx <- function (gp,outlier=TRUE, ...) 
-{
-	
-	if(!is.null(outlier))
-	{
-		gp$gate$col<-ifelse(outlier,"red","black")	
-	}else
-	{
-		gp$gate$col<-"black"
-	}
-	flowViz:::panel.xyplot.flowframe(gp=gp,...)	
+#  browser()
+  nm <- as.character(x)
+  if (length(nm) < 1) return()
+  
+  thisOutlier <- outlier[[nm]]
+  if(!is.null(thisOutlier))
+  {
+    gp$gate$col<-ifelse(thisOutlier,"red","black")	
+  }else
+  {
+    gp$gate$col<-"black"
+  }
+  panel.xyplot.flowset(x,gp = gp, ...)  
 }
 
-##this is copied from flowViz just for dispatching
-##and the only change is to pass outlier flag to panel.xyplot.flowframeEx
-panel.xyplot.flowsetEx <- function(x,
-		frames,
-		filter=NULL,
-		channel.x,
-		channel.y,
-		...)
-{
-#	browser()
-	nm <- as.character(x)
-	if (length(nm) < 1) return()
-	## 'filter' either has to be a single filter, or a list of filters matching
-	## the flowSet, or a filterResultList.
-	if(!is.null(filter)){
-		if(!is.list(filter)){
-			if(is(filter, "filter")){
-				filter <- lapply(seq_along(nm), function(x) filter)
-				names(filter) <- nm
-			}
-		}else if(!is(filter, "filterResultList"))
-			filter <- as(filter, "filterResultList")
-		if(!(nm %in% names(filter) || !is(filter[[nm]] ,"filter"))){
-			warning("'filter' must either be a filterResultList, a single\n",
-					"filter object or a named list of filter objects.",
-					call.=FALSE)
-			filter <- NULL
-		}
-	}
-	x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
-	y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-	
-#		browser()
-	panel.xyplot.flowframeEx(x, y, frame=frames[[nm]], outlier=list(...)$pd[nm,"outlier"],filter=filter[[nm]], ...)
-}
+
+

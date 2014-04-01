@@ -17,14 +17,7 @@
   pop:a character scalar indicating the population name.If
   provided,it overwrites the pop slot in qaTask object.
 
-  isTerminal:a logical scalar indicating whether the pop is
-  at the terminal node of the gating path.
-
-  fixed:a logical scalar indicating whether the pop name is
-  matched as it is .By default it is FALSE,which matches
-  the gating path as the regular expression
-
-  subset:a logical expression as a filter. see
+ subset:a logical expression as a filter. see
   \code{\link{qaCheck}} for more details.
 
   width,height:size specification for the svg output.
@@ -48,8 +41,17 @@
   density(scatter) plot is plotted instead of the summary
   plot(xyplot/bwplot)
 
+ scatterPar: A list storing all the fliwViz arguments. see
+  \link[flowViz:xyplot]{xyplot}
+
   par:A list storing all the lattice arguments.If
-  provided,it overwrites the par slot of qaTask object.}
+  provided,it overwrites the par slot of qaTask object.
+
+  outerStrip: a \code{logical} indicating whether to enable
+  \link[latticeExtra:useOuterStrips]{useOuterStrips}
+
+  strip.lines,strip.left.lines: arguments passed to
+  \link[latticeExtra:useOuterStrips]{useOuterStrips}}
 }
 \description{
   plot the statistics for a particular cell population of a

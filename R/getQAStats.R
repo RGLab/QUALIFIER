@@ -122,6 +122,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 #' @param pops a \code{numeric} or \code {character} vector as the population indices specifing a subset of populations to extract stats from
 #' @param isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
 #' it is automatically set to TRUE when isMFI is TRUE
+#' @importFrom Biobase rowMedians
 .getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, ...){
 			
     			message("reading GatingHierarchy:",getSample(obj))
@@ -132,8 +133,8 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
     			#check if data is gated
     			isGated <- obj@flag
                 
-    			nodes<-getNodes(obj, showHidden = TRUE)
-                nodePaths<-getNodes(obj,isPath=T, showHidden = TRUE)
+    			nodes<-getNodes(obj, isPath = FALSE, showHidden = TRUE)
+                nodePaths<-getNodes(obj, isPath = TRUE, showHidden = TRUE)
                 #convert to QUALIFIER's path
                 nodePaths[1]<-paste("/",nodePaths[1],sep="")
                 nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
@@ -146,6 +147,12 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                     nodePaths <- nodePaths[pops]
                   }else{
                     nodes <- nodes[match(pops,nodes)]
+                    
+                    #validity check for pops
+                    invalidNodes <- is.na(nodes)
+                    if(any(invalidNodes))
+                      stop("Invalid pops:", paste0(pops[invalidNodes]))
+                    
                     nodePaths <- nodePaths[match(pops,nodes)]
                   }
                   

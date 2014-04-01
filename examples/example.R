@@ -1,12 +1,12 @@
 
 library(QUALIFIER)
-#library(flowWorkspace)
-#unloadNamespace("QUALIFIER")
-#unloadNamespace("flowWorkspace")
-lapply(list.files("/home/wjiang2/rglab/workspace/QUALIFIER/R",pattern=".R",full=T),source)
 
-#outDir<-file.path(localDir,"workspace/flowQA/output/ITN029_339")
-#dest<-file.path(outDir,"trellis_plot/")
+
+#save_db(db, path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData", overwrite = T, cdf = "copy")
+db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+qaTask.list <- db$qaTaskList
+
+
 
 ###############################################################################
 #1.parse gating template
@@ -14,9 +14,8 @@ lapply(list.files("/home/wjiang2/rglab/workspace/QUALIFIER/R",pattern=".R",full=
 ws<-openWorkspace("/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/QA_template.xml")
 GT<-parseWorkspace(ws
 					,name=2
-					,execute=T
+					,execute=F
 					,subset=1
-					,useInternal=T
 					)
 gh_template<-GT[[1]]					
 getPopStats(gh_template)[,2:3]
@@ -32,9 +31,9 @@ datapath<-"/shared/silo_researcher/Gottardo_R/mike_working/ITN029ST/"
 newSamples<-list.files(datapath)[1:200]
 length(newSamples)
 G<-GatingSet(gh_template
-			,newSamples[1:10]
+			,newSamples[1:100]
 			,path=datapath
-#			,isNcdf=FALSE
+			,isNcdf=T
 #			,dMode=4
 			)
 getPopStats(G[[1]])[,2:3]
@@ -53,8 +52,9 @@ qaPreprocess(db=db,gs=G
 		,date.colname=c("RecdDt","AnalysisDt")
 		,nslave=1
 #		,type="SOCK"
-#		,isMFI=T,isSpike=T
+		,isMFI=T,isSpike=T, isChannel = T
 )
+getQAStats(G[[1]],isMFI=T,isSpike=T)
 #colnames(pData(db$gs[[1]]))
 #pData(G)
 #head(db$stats)
@@ -126,7 +126,7 @@ clearCheck(qaTask.list[["NumberOfEvents"]])
 
 
 ##add new aggregated stats
-.addStats(qaTask.list[["BoundaryEvents"]]
+QUALIFIER:::.addStats(qaTask.list[["BoundaryEvents"]]
 		,definition=sum(proportion)~RecdDt|fileid+gsid
 		,pop="/root/MNC/margin"
 		,statName="sum.prop"
@@ -188,15 +188,23 @@ qaCheck(qaTask.list[["MFIOverTime"]]
 #		,z.cutoff=10
 )
 
+head(subset(
+        queryStats(qaTask.list[["MFIOverTime"]]
+#            ,y=sum.prop ~ RecdDt 
+            ,pop="MFI"
+#							,subset=value>0&id==806
+        )
+        ,outlier==TRUE)
+)
 plot(qaTask.list[["MFIOverTime"]]
-		,y=MFI~RecdDt|stain
+#		,y=MFI~RecdDt|stain
 		,subset=channel%in%c('APC-A')
-#				&stain=="Va24"
-#				&id==806
-		,rFunc=rlm
-		,scales=list(format="%m/%d/%y")
-#		,scatterPlot=TRUE
-		,scatterPar=list(xlog=F)
+				&stain=="CD62L APC-A"
+##				&id==806
+#		,rFunc=rlm
+#		,scales=list(format="%m/%d/%y")
+##		,scatterPlot=TRUE
+#		,scatterPar=list(xlog=F)
 #		,dest="image"
 
 )
@@ -205,7 +213,8 @@ clearCheck(qaTask.list[["MFIOverTime"]])
 
 
 qaCheck(qaTask.list[["RBCLysis"]]
-		,outlierfunc=list(func=outlier.cutoff,args=list(lBound=0.8))
+		,outlierfunc=list(func=outlier.cutoff
+                        ,args=list(lBound=0.9))
 )
 
 subset(
@@ -217,26 +226,27 @@ plot(qaTask.list[["RBCLysis"]]
 #		,subset=Tube=='CD8/CD25/CD4/CD3/CD62L'
 #				&id%in%c(270)
 #		, RecdDt~proportion | Tube
-		,scales=list(format="%m/%d/%y")
-		,ylab="percent"
+#		,scales=list(format="%m/%d/%y")
+#		,ylab="percent"
 #		,scatterPlot=T
 #		,scatterPar=list(stat=T
 #						,xbin=128)
 #		,horiz=T
 #		,dest="image"
-		,highlight="coresampleid"
+#		,highlight="coresampleid"
 #		,plotAll="none"
-		,width=27,height=13
+#		,width=27,height=13
 )	
 
 clearCheck(qaTask.list[["RBCLysis"]])
 
 
 qaCheck(qaTask.list[["spike"]]
-#		,outlierfunc=outlier.t
-#		,z.cutoff=3
-#		,alpha=0.001
-#		,isLower=FALSE
+		,outlierfunc = list(func = outlier.t
+                  		    ,args = list(alpha=0.001
+                                        ,isLower=FALSE)
+                          )
+		
 )
 plot(qaTask.list[["spike"]]
 		,y=spike~RecdDt|channel
@@ -260,7 +270,7 @@ plot(qaTask.list[["spike"]],y=spike~RecdDt|channel
 
 qaCheck(qaTask.list[["MNC"]]
 #		,Subset=coresampleid%in%c(11730,8780)
-#		,z.cutoff=1
+#		,z.cutoff=0.1
 )
 
 plot(qaTask.list[["MNC"]]
@@ -275,15 +285,15 @@ plot(qaTask.list[["MNC"]]
 #		,par=list(xlab="coresampleid")
 #		, coresampleid ~proportion
 #		,par=list(horiz=TRUE)
-		,subset=coresampleid%in%c(
-#									11730
-									8780
-		)
+#		,subset=coresampleid%in%c(
+##									11730
+#									8780
+#		)
 #		,scatterPlot=TRUE
 		,scatterPar=list(xbin=128
 						,stat=T)
-#		,dest="image"
-#		,plotAll=TRUE
+		,dest="~/rglab/workspace/QUALIFIER/output/image"
+		,plotAll=F
 )
 #scatter for one sample
 plot(qaTask.list[["MNC"]]
@@ -329,14 +339,34 @@ highlight(qaTask.list[["BoundaryEvents"]])<-"coresampleid"
 #scatterPar(qaTask.list[["RedundantStain"]])<-list(xlog=TRUE)
 qpar(qaTask.list[["RedundantStain"]])<-list(scales=list(x=list(relation="free")))
 
+#modify functions within package namespace
+funcToinsert <- ".postProcessSVG" 
+funcSym <- as.symbol(funcToinsert)
+eval(substitute(environment(ff) <- getNamespace("QUALIFIER"), list(ff = funcSym)))
+assignInNamespace(funcToinsert, eval(funcSym), ns = "QUALIFIER")
 
-											
 
+db <- load_db(path = "/home/wjiang2/rglab/workspace/QUALIFIER/output/preprocessedData")
+qaTask.list <- db$qaTaskList
+db$stats[sid == 3, value:= 0.1]
+qaCheck(qaTask.list[["MNC"]] 
+        , gOutlierfunc=list(func=outlier.norm
+                            ,args=list(alpha=0.1))
+        )
+         
 
-qaReport(qaTask.list[1]
-		,outDir="~/rglab/workspace/QUALIFIER/output"
-		,plotAll="none"
-#		,subset=as.POSIXlt(RecdDt)$year==(2007-1900)
-		)
+plot(qaTask.list[["MNC"]]
+#    , dest = "rglab/workspace/QUALIFIER/output/image"
+#    , plotAll = "none"
+#    , scatterPlot = T
+#    , subset = participantid == "002005"
+#    , scatterPar = list(xbin = 32)
+    )
+  
+    
+qaReport(qaTask.list, outDir = "rglab/workspace/QUALIFIER/output/"
+          , plotAll = T
+            , subset = participantid == "002005"
+          )
 
 

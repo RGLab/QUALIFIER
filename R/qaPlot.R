@@ -1,12 +1,3 @@
-.FileNameGen<-function(prefix=NA,ID=NA,population=NA,channel=NA,stain=NA,stats=NA,...)
-{
-	fileName<-c(prefix,ID,basename(population),channel,stain,stats,...)
-	fileName<-fileName[!is.na(fileName)]
-	paste(fileName,collapse="_")
-	
-}
-
-
 ##group plot for each sampleID or other aggregation ID
 qa.GroupPlot<-function(db,df,statsType,par)
 {
@@ -25,140 +16,148 @@ qa.GroupPlot<-function(db,df,statsType,par)
 	if(is.null(ylog))
 		ylog<-FALSE
 	
-	pop<-unique(as.character(df$population))
+	pop <- unique(as.character(df$population))
 	if(length(pop)>1)
 		stop("not the same population in lattice group plot!")
 #	browser()
 	#extract flowFrame and gate from each gating hierarchy
-	frlist<-apply(df,1,function(curRow){
+	frlist <- apply(df,1,function(curRow){
 
 		#get the parent population for the scatter plot
-				
-		gsid<-as.integer(curRow[["gsid"]])
-		curGS<-db$gs[[gsid]]
-		curSampleInd<-which(sampleNames(curGS)%in%curRow["name"])
-		curGh<-curGS[[curSampleInd]]
-		curNode<-as.character(curRow["node"])
-#				browser()
 		
-#		if(is.na(curNode))
-#		{
-#			curPop<-curRow["population"]
-#			
-#		}	
-		curGate<-getGate(curGh,curNode)
-		parentNode<-getParent(curGh,curNode)
-		parentNodeInd<-which(getNodes(curGh, showHidden = TRUE)%in%parentNode)
-		if(length(parentNodeInd)>0)
-		{
-			fr<-getData(curGh,parentNodeInd)
-		}else
-		{
-			fr<-getData(curGh)
-		}
-		list(frame=fr,gate=curGate)
+		gsid <- as.integer(curRow[["gsid"]])
+		curGh <- db$gs[[gsid]][[curRow["name"]]]
+		curNode <- as.character(curRow["node"])
+	
+		curGate <- getGate(curGh, curNode)
+        
+        curProp <- getProp(curGh, curNode, flowJo = FALSE)
+        fr_pd <- pData(parameters(getData(curGh, use.exprs = FALSE)))
+        thiscolnames <- fr_pd[, "name"]
+#        browser()
+        
+        if(!extends(class(curGate),"filter")){
+          if(statsType=="count"&&pop=="/root")##total cell count
+          {
+            param <- c("FSC-A", "SSC-A")  
+          }else if(statsType=="spike"){
+            chnl <- unique(as.character(df[,channel]))
+            if(length(chnl)>1)
+              stop("can't display multiple channels at a time!")
+            
+            timeChnl <- thiscolnames[grep("time",thiscolnames, ignore.case=T)]
+            param <- c(timeChnl, chnl)
+          }else{
+            stop ("How do you end up to here?")
+          }    
+        }else
+          param <- as.vector(parameters(curGate))
+          if(length(param) == 1 && type == "xyplot"){
+            sscChnl <- thiscolnames[grep("SSC",thiscolnames, ignore.case=T)]
+            param <- c(param, sscChnl)
+          }
+            
+        if(curNode == "root"){
+          fr <- getData(curGh, j = param)
+        }else{
+          parentNode <- getParent(curGh, curNode)
+          fr <- getData(curGh,parentNode, j = param)
+        }
+		list(frame = fr ,gate = curGate, stats = curProp, param = param)
 	})
-	names(frlist)<-df[,"name"]
-#	browser()
+	names(frlist) <- df[["name"]]
+	
 	#merge frames into flowSet for flowViz plot
-	fs1<-flowSet(lapply(frlist,"[[","frame"))
-	#append outlier flags
-	if(!"outlier"%in%colnames(df))
-		df$outlier<-FALSE
-	pData(fs1)$outlier<-df$outlier
-	varMetadata(fs1)["outlier",]<-"outlier"
+	fs1 <- flowSet(sapply(frlist,"[[","frame"))
 
 	#extract gates from the list
-	gates<-lapply(frlist,"[[","gate")
+	gates <- sapply(frlist,"[[","gate")
+    stats <- sapply(frlist,"[[","stats", simplify = FALSE)
+    param <- sapply(frlist,"[[","param", simplify = FALSE)[[1]]
 #	browser()
-	thisCall<-NULL
+	thisCall <- NULL
 	if(statsType=="count"&&pop=="/root")##total cell count
 	{
 		##individual xyplot without gate
-		thisCall<-xyplot(`SSC-A`~`FSC-A`,data=fs1,smooth=FALSE)
+        t1 <- flowWorkspace:::mkformula(param)
+		thisCall <- quote(xyplot(t1, data=fs1))
 	}else
 	{
 					
 			
 		if(statsType=="spike")
 		{
-			chnl<-unique(as.character(df$channel))
-			fres<-NULL
-			if(length(chnl)>1)
-				stop("can't display multiple channels at a time!")
-			else
-			yterm<-as.symbol(chnl)
-			xterm<-as.symbol(colnames(fs1[[1]])[grep("time",colnames(fs1[[1]]),ignore.case=T)])
-			t1<-substitute(y~x,list(y=yterm,x=xterm))
+			
+            gates <- NULL
+            xterm <- as.symbol(param[1])
+            yterm <- as.symbol(param[2])
+            
+            t1<-substitute(y~x,list(y=yterm,x=xterm))
+            
+			
 		}else
 		{
 	
-			fres<-filter(fs1,gates)
+
 			if(type=="xyplot")
 			{
 				
-				if(length(parameters(fres[[1]]))==2)
-				{
-					xterm<-as.symbol(parameters(gates[[1]])[1])
-					yterm<-as.symbol(parameters(gates[[1]])[2])
-				}else
-				{
-					xterm<-as.symbol(parameters(gates[[1]])[1])
-					yterm<-as.symbol(flowCore::colnames(fs1)[grep("SSC",flowCore::colnames(fs1))])
-				}
+				xterm <- as.symbol(param[1])
+				yterm <- as.symbol(param[2])
+
 				t1<-substitute(y~x,list(y=yterm,x=xterm))
 				
 			}else
 			{
-				xterm<-as.symbol(parameters(fres[[1]])[1])
+				xterm<-as.symbol(param[1])
 				t1<-substitute(~x,list(x=xterm))
-				yterm<-NULL
+				yterm <- NULL
 			}
 		}
 #		browser()
-		t1<-as.formula(t1)		
+		t1 <- as.formula(t1)		
 		#unfortunately	we have to manually transform the data here since flowViz does not take the scale argument
 		if((is.logical(xlog)&&xlog)||!is.logical(xlog))
 		{
-			res<-reScaleData(fs1,fres,xterm,xlog)
+			res <- reScaleData(fs1,gates,xterm,xlog)
 		#			browser()
 			fs1<-res$fs
-			fres<-res$fres
+            gates<-res$gates
 		}
 		if((is.logical(ylog)&&ylog)||!is.logical(ylog))
 		{
-			res<-reScaleData(fs1,fres,yterm,ylog)
+			res<-reScaleData(fs1,gates,yterm,ylog)
 		#			browser()
 			fs1<-res$fs
-			fres<-res$fres
+            gates<-res$gates
 		}
 		
 #		browser()
-
-		if(type=="xyplot")
-			thisCall<-quote(
+        if(!"outlier"%in%colnames(df))
+        		outlier <- rep(FALSE, nrow(df))
+        outlier <- df[, outlier]
+        names(outlier) <- df[, name]	
+        
+		if(type == "xyplot")
+			thisCall <- quote(
 							xyplot(t1
-									,fs1
-									,filter=fres
-									,pd=pData(fs1)
-									,panel=panel.xyplot.flowsetEx
+									, fs1
+									, filter = gates
+                                    , stats = stats
+									, outlier = outlier
+									, panel = panel.xyplot.flowsetEx
 									)
 						)
-		
-		thisCall<-as.call(c(as.list(thisCall),par))
-		thisCall<-eval(thisCall)			
-	
 	}
-	
-			
-			
+    thisCall <- as.call(c(as.list(thisCall),par))
+    thisCall <- eval(thisCall)
 	
 	return(thisCall)
 	
 }
 
 
-reScaleData<-function(fs,fres,channel,logScale)
+reScaleData<-function(fs,gates,channel,logScale)
 {
 	#set the logbase if neccessary
 	if(!is.logical(logScale))
@@ -178,17 +177,17 @@ reScaleData<-function(fs,fres,channel,logScale)
 		fs <- eval(parse(text=paste("flowCore::transform(fs,`",channel,"`=log(`",channel,"`,base=",logbase,"))",sep="")))
 
 		#log transform the filter result
-		if(!is.null(fres))
-			fres<-lapply(fres,function(curFres){
-						max<-curFres@filterDetails[[1]]$filter@max
-						curFres@filterDetails[[1]]$filter@max<-log(max,logbase)
-						min<-curFres@filterDetails[[1]]$filter@min
+		if(!is.null(gates))
+          gates<-sapply(gates,function(curFilter){
+						max <- curFilter@max
+                        curFilter@max <- log(max,logbase)
+						min <- curFilter@min
 #						browser()
 						#make sure to keep the the name of the scalar value in order for the flowViz plot properly
 						min1<-max(0,log(min,logbase))
-						names(min1)<-names(min)
-						curFres@filterDetails[[1]]$filter@min<-min1
-						curFres
+						names(min1) <- names(min)
+                        curFilter@min <- min1
+                        curFilter
 					})
 						
 	}
@@ -198,7 +197,7 @@ reScaleData<-function(fs,fres,channel,logScale)
 	ats<- seq(from=max(0,min(rg.new)),to=max(rg.new),length.out=5)
 	labels<-round(logbase^ats)
 	
-	list(fs=fs,fres=fres,scales=list(labels=labels,at=ats))
+	list(fs=fs,gates=gates,scales=list(labels=labels,at=ats))
 }
 #'plot the statistics for a particular cell population of a group of samples
 #'
@@ -232,12 +231,6 @@ reScaleData<-function(fs,fres,channel,logScale)
 #'pop:a character scalar indicating the population name.If provided,it
 #'overwrites the pop slot in qaTask object.
 #'
-#'isTerminal:a logical scalar indicating whether the pop is at the terminal
-#'node of the gating path.
-#'
-#'fixed:a logical scalar indicating whether the pop name is matched as it is
-#'.By default it is FALSE,which matches the gating path as the regular
-#'expression
 #'
 #'subset:a logical expression as a filter. see \code{\link{qaCheck}} for more
 #'details.
@@ -260,10 +253,14 @@ reScaleData<-function(fs,fres,channel,logScale)
 #'scatterPlot: a logical scalar. When TRUE, the density(scatter) plot is
 #'plotted instead of the summary plot(xyplot/bwplot)
 #'
+#' scatterPar: A list storing all the fliwViz arguments. see \link[flowViz:xyplot]{xyplot}
+#' 
 #'par:A list storing all the lattice arguments.If provided,it overwrites the
 #'par slot of qaTask object.
 #'
-
+#' outerStrip: a \code{logical} indicating whether to enable \link[latticeExtra:useOuterStrips]{useOuterStrips}
+#' 
+#' strip.lines,strip.left.lines: arguments passed to \link[latticeExtra:useOuterStrips]{useOuterStrips}  
 #'@author Mike Jiang,Greg Finak
 #'
 #'Maintainer: Mike Jiang <wjiang2@@fhcrc.org>
@@ -311,7 +308,8 @@ setMethod("plot", signature=c(x="qaTask"),
             
 		})
 #' @importFrom RSVGTipsDevice devSVGTips
-plot.qaTask<-function(qaObj,y,subset,pop,width,height
+#' @importFrom latticeExtra useOuterStrips
+plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
 						,dest = NULL,rFunc = NULL,plotAll = FALSE
 						,scatterPlot = FALSE,gsid = NULL
@@ -320,7 +318,10 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
                         ,highlight
                         , between = list(x = 0.2,y = 0.2)
                         , axis= axis.grid
-						,...)
+                        , outerStrip = FALSE 
+                        , strip.lines = 2
+                        , strip.left.lines = 3
+						, ...)
 {
 #  browser()
   #assign null to formula if it is missing
@@ -427,9 +428,9 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 	
 	
 #	browser()
-	plotObjs=new.env()
+	plotObjs <- new.env()
 	if(scatterPlot)
-			thisCall<-qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
+			thisCall <- qa.GroupPlot(db=db,df=res,statsType=statsType,par=scatterP)
 	else
 	{#otherwise, plot the summary plot (either xyplot or bwplot)
 				
@@ -506,7 +507,17 @@ plot.qaTask<-function(qaObj,y,subset,pop,width,height
 		#append the par list
 		thisCall <- as.call(c(as.list(thisCall),par))
 #		browser()
+        
 		thisCall <- eval(thisCall)
+        
+        if(outerStrip){
+          thisCall <-  eval(quote(useOuterStrips(thisCall
+                                                 , strip.lines = strip.lines
+                                                 , strip.left.lines = strip.left.lines
+                                                  )
+                                   )
+                             )
+        }
 #		print(thisCall)
 	}
 	
