@@ -12,7 +12,7 @@ Imports:
 Collate: 'AllGenerics.R' 'AllClasses.R' 'AllFunctions.R' 'outlier.R'
         'qaPanelFunction.R' 'trellisPlot.R' 'qaCheck.R' 'qaPlot.R'
         'qaTask-accessor-Methods.R' 'getQAStats.R' 'addStats.R'
-        'qaReport.R' 'utils.R' 'data.R'
+        'qaReport.R' 'utils.R' 'data.R' 'db.R'
 Description: Provides quality control and quality assessment tools for
         gated flow cytometry data.
 License: Artistic-2.0
