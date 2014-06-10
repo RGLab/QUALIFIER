@@ -1,7 +1,7 @@
 Package: QUALIFIER
 Type: Package
 Title: Quality Control of Gated Flow Cytometry Experiments
-Version: 1.9.21
+Version: 1.9.22
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends:
@@ -28,4 +28,4 @@ Collate:
 Description: Provides quality control and quality assessment tools for gated
     flow cytometry data.
 License: Artistic-2.0
-biocViews: Infrastructure, Flowcytometry, CellBasedAssays
+biocViews: Infrastructure, FlowCytometry, CellBasedAssays
