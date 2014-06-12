@@ -385,10 +385,16 @@ saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname=
   	
 }
 
+
+#' @description 
 #' \code{queryStats} method queries stats entries from db by qaTask object and formula
+#' 
+#' @param x a \code{qaTask} object
 #' @export 
 #' @rdname qaCheck-methods
 #' @aliases queryStats,qaTask-method
+setGeneric("queryStats",function (x, ...)standardGeneric("queryStats"))
+
 setMethod("queryStats", signature=c(x="qaTask"),
 		function(x,y,subset,pop,gsid=NULL, type = x@type,...){
 			

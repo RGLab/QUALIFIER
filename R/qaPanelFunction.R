@@ -2,7 +2,6 @@
 
 # add svg anno to the original panel function for xyplot of lattice package
 # individual oultiers are colored based on the groups argument which passed through oultier column of dfframe
-#' @importFrom RSVGTipsDevice setSVGShapeToolTip setSVGShapeURL
 panel.xyplotEx <-
 		function(x, y, type = "p",
 				groups = NULL,
@@ -120,7 +119,7 @@ panel.xyplotEx <-
 					curOutRow<-df[curRowID,]
 #					browser()
 					FileTips <- paste(highlight,"=",curOutRow[, highlight, with = FALSE]," file=",curOutRow$name,sep="")
-					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
+					RSVGTipsDevice::setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 					#				browser()
 					paths <- "f"
 					
@@ -134,7 +133,7 @@ panel.xyplotEx <-
 #                            browser()
 							assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 							
-							setSVGShapeURL(paths)	
+							RSVGTipsDevice::setSVGShapeURL(paths)	
 						}
 					}
 					
@@ -399,7 +398,7 @@ panel.bwplotEx <-
 					, " Tube=",curGroup$Tube[1],sep="")
 			cur.btw.groups.outliers<-unique(curGroup$gOutlier)
 			if(!is.null(dest))
-				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
+				RSVGTipsDevice::setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
 			##lattice plot for outlier group
 #			browser()
 			if(plotAll!="none"&&!is.null(dest))
@@ -420,7 +419,7 @@ panel.bwplotEx <-
 					{
 						assign(basename(paths),curPlotObj,envir=plotObjs)
 						
-						setSVGShapeURL(paths)
+						RSVGTipsDevice::setSVGShapeURL(paths)
 					}
 				}
 			}
@@ -496,7 +495,7 @@ panel.bwplotEx <-
 					if(!is.null(dest)&&plotAll!="none")
 					{
 						FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
-						setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
+						RSVGTipsDevice::setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
 						#				browser()
 						paths <- "f"
 						if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
@@ -507,7 +506,7 @@ panel.bwplotEx <-
 						assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
 						
 						
-						setSVGShapeURL(paths)
+						RSVGTipsDevice::setSVGShapeURL(paths)
 						
 					}
 #					browser()
@@ -583,7 +582,7 @@ panel.bwplotEx <-
     					, " Tube=",curGroup$Tube[1],sep="")
     			cur.btw.groups.outliers <- unique(curGroup[,gOutlier])
     			if(!is.null(dest))
-    				setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
+    				RSVGTipsDevice::setSVGShapeToolTip(title=groupTips,sub.special=FALSE)
     			##lattice plot for outlier group
     			
     			if(plotAll!="none"&&!is.null(dest))
@@ -606,7 +605,7 @@ panel.bwplotEx <-
     					{
     						assign(basename(paths),curPlotObj,envir=plotObjs)
     					
-    						setSVGShapeURL(paths)
+    						RSVGTipsDevice::setSVGShapeURL(paths)
     					}
     				}
     			}
@@ -681,7 +680,7 @@ panel.bwplotEx <-
     				if(!is.null(dest)&&plotAll!="none")
     				{
     					FileTips<-paste("uniqueID=",curOutRow[[eval(qa.par.get("idCol"))]]," file=",curOutRow$name,sep="")
-    					setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
+    					RSVGTipsDevice::setSVGShapeToolTip(title=FileTips,sub.special=FALSE)
     	#				browser()
     					paths <- "f"
     					if(!file.exists(file.path(dest,"individual")))system(paste("mkdir",file.path(dest,"individual")))
@@ -692,7 +691,7 @@ panel.bwplotEx <-
     					assign(basename(paths),qa.GroupPlot(db,curOutRow,statsType=statsType,par=scatterPar),envir=plotObjs)
     					
     					
-    					setSVGShapeURL(paths)
+    					RSVGTipsDevice::setSVGShapeURL(paths)
     					
     				}
     				

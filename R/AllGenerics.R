@@ -32,8 +32,8 @@ setGeneric("rFunc<-",function (x,value)standardGeneric("rFunc<-"))
 setGeneric("highlight",function (x)standardGeneric("highlight"))
 setGeneric("highlight<-",function (object,value)standardGeneric("highlight<-"))
 
-setGeneric("getQAStats",function (obj, ...)standardGeneric("getQAStats"))
+
 setGeneric("getPath",function (x, ...)standardGeneric("getPath"))
 
 
-setGeneric("queryStats",function (x, ...)standardGeneric("queryStats"))
+
