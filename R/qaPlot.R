@@ -307,7 +307,6 @@ setMethod("plot", signature=c(x="qaTask"),
           plot.qaTask(qaObj=x,y = y, ...)
             
 		})
-#' @importFrom RSVGTipsDevice devSVGTips
 #' @importFrom latticeExtra useOuterStrips
 plot.qaTask <- function(qaObj,y,subset,pop,width,height
 						,scatterPar=list()
@@ -419,7 +418,7 @@ plot.qaTask <- function(qaObj,y,subset,pop,width,height
 			stop(paste("folder '",dest,"' does not exist!",sep=""))
 		sfile<-tempfile(pattern=getName(qaObj),tmpdir=dest,fileext=".svg")
 #		browser()
-		devSVGTips(sfile,width=width,height=height)
+		RSVGTipsDevice::devSVGTips(sfile,width=width,height=height)
 		isSvg<-TRUE
 	}else
 	{

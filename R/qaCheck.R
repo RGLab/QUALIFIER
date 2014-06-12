@@ -1,5 +1,6 @@
-#' \code{clearCheck} function removes the outlier results detected by the
-#' previous \code{qaCheck} call on a particular gating set.
+#' @description 
+#' code{clearCheck} function removes the outlier results detected by the previous \code{qaCheck} call on a particular gating set.
+#' 
 #' @export 
 #' @rdname qaCheck-methods
 clearCheck <- function(obj, gsid)
@@ -13,10 +14,11 @@ clearCheck <- function(obj, gsid)
 	
 }
 #'Perform the quality assessment for the qaTask object
+#' @description 
+#' Perform the quality assessment for a particular QA Task based on the
+#' information provided by \code{\link{qaTask}} object.
 #'
-#'Perform the quality assessment for a particular QA Task based on the
-#'information provided by \code{\link{qaTask}} object.
-#'
+#' @details 
 #'\code{qaCheck} method parses the formula stored in qaTask or explicitly
 #'provided by the argument and select the appropriate gated population,extract
 #'the statistics that is pre-calculated by \code{\link{getQAStats}} and perform
