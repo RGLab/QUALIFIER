@@ -1,17 +1,17 @@
 Package: QUALIFIER
 Type: Package
 Title: Quality Control of Gated Flow Cytometry Experiments
-Version: 1.13.0
+Version: 1.13.1
 Author: Mike Jiang,Greg Finak,Raphael Gottardo
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Depends: R (>= 2.14.0),flowCore,flowViz,ncdfFlow,flowWorkspace,
         data.table,reshape
 Imports:
     MASS,hwriter,lattice,stats4,flowCore,flowViz,methods,flowWorkspace,latticeExtra,grDevices,tools,
-    Biobase,XML
+    Biobase,XML,grid
 Description: Provides quality control and quality assessment tools for gated
     flow cytometry data.
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
-Suggests:
-    RSVGTipsDevice
+Suggests: RSVGTipsDevice, knitr
+VignetteBuilder: knitr
