@@ -5,6 +5,7 @@
 ###############################################################################
 
 ##reverse the order of strip plotting for conditional vairables
+#' @import grid
 stripEx <-
 		function(which.given,
 				which.panel,
