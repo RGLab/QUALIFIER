@@ -14,5 +14,5 @@ Description: Provides quality control and quality assessment tools for gated
     flow cytometry data.
 License: Artistic-2.0
 biocViews: Infrastructure, FlowCytometry, CellBasedAssays
-Suggests:
-    RSVGTipsDevice
+Suggests: RSVGTipsDevice, knitr
+VignetteBuilder: knitr
