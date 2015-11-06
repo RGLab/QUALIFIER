@@ -133,38 +133,39 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 #' @importFrom Biobase rowMedians
 .getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, ...){
 			
-    			message("reading GatingHierarchy:",getSample(obj))
+    			message("reading GatingHierarchy:",sampleNames(obj))
     			if(isMFI){
                   isChannel <- TRUE
                 }
                 
     			#check if data is gated
     			isGated <- obj@flag
-                
-    			nodes<-getNodes(obj, isPath = FALSE, showHidden = TRUE)
-                nodePaths<-getNodes(obj, isPath = TRUE, showHidden = TRUE)
-                #convert to QUALIFIER's path
-                nodePaths[1]<-paste("/",nodePaths[1],sep="")
-                nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
-                
-                #subset the nodes
+          #isPath is deperated and prefixed node name is no longer supported
+    			#thus nodePaths is the same as nodes
+		      nodes<-getNodes(obj, showHidden = TRUE)
+          # nodePaths<-getNodes(obj, isPath = TRUE, showHidden = TRUE)
+          #convert to QUALIFIER's path
+          # nodePaths[1]<-paste("/",nodePaths[1],sep="")
+          # nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
           
-                if(!is.null(pops)){
-                  if(is.numeric(pops)){
-                    nodes <- nodes[pops]
-                    nodePaths <- nodePaths[pops]
-                  }else{
-                    nodes <- nodes[match(pops,nodes)]
-                    
-                    #validity check for pops
-                    invalidNodes <- is.na(nodes)
-                    if(any(invalidNodes))
-                      stop("Invalid pops:", paste0(pops[invalidNodes]))
-                    
-                    nodePaths <- nodePaths[match(pops,nodes)]
-                  }
-                  
-                }
+          #subset the nodes
+    
+          if(!is.null(pops)){
+            if(is.numeric(pops)){
+              nodes <- nodes[pops]
+              # nodePaths <- nodePaths[pops]
+            }else{
+              nodes <- nodes[match(pops,nodes)]
+              
+              #validity check for pops
+              invalidNodes <- is.na(nodes)
+              if(any(invalidNodes))
+                stop("Invalid pops:", paste0(pops[invalidNodes]))
+              
+              # nodePaths <- nodePaths[match(pops,nodes)]
+            }
+            
+          }
                 
                 
     			nNodes<-length(nodes)
@@ -179,7 +180,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                           
     			statslist <- lapply(1:nNodes,function(i){
     
-    			curPopName<-nodePaths[i]
+    			# curPopName<-nodePaths[i]
     			curNode<-nodes[i]
                 
                 
@@ -213,26 +214,26 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   					stain<-as.character(NA)
   				else
   				{
-  					stain<-unname(pd[match(chnl,pd[,"name"]),"desc"])
+  					stain<-as.vector(pd[match(chnl,pd[,"name"]),"desc"])
   				}
-                ##get count and proportion
-                statsOfNode <- flowWorkspace:::.getPopStat(obj,flowWorkspace:::.getNodeInd(obj,curNode))
-                
-                if(isFlowCore)
-                {
-                  statsOfNode <- statsOfNode$flowCore
-                }else
-                {
-                  statsOfNode<-statsOfNode$flowJo
-                }
-                #reset chnl for 2d gate since channel are meaningless for counts and % 
-                if(!is.na(chnl)&&length(chnl)>1){
-                  thisChnl <- as.character(NA)
-                  thisStain <- as.character(NA)
-                }else{
-                  thisChnl <- chnl
-                  thisStain <- stain
-                }
+          ##get count and proportion
+          statsOfNode <- flowWorkspace:::.getPopStat(obj,curNode)
+          
+          if(isFlowCore)
+          {
+            statsOfNode <- statsOfNode$flowCore
+          }else
+          {
+            statsOfNode<-statsOfNode$flowJo
+          }
+          #reset chnl for 2d gate since channel are meaningless for counts and % 
+          if(!is.na(chnl)&&length(chnl)>1){
+            thisChnl <- as.character(NA)
+            thisStain <- as.character(NA)
+          }else{
+            thisChnl <- chnl
+            thisStain <- stain
+          }
 #                browser()
   				statsOfNode <- data.table(channel=thisChnl
                                           ,stain=thisStain
@@ -252,7 +253,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   						stop("Invalid name of variable (", time, ") recording the ",
   								"\ntime domain specified as 'time' argument.", call.=FALSE)
   					nonTimeChnls<-params[!params%in%time]
-  					stain<-unname(pd[match(nonTimeChnls,pd[,"name"]),"desc"])
+  					stain<-as.vector(pd[match(nonTimeChnls,pd[,"name"]),"desc"])
   					
   					spikes <- unlist(lapply(nonTimeChnls,.timelineplot,x=fdata, binSize=50))
   					
@@ -277,6 +278,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   					MFI<-rowMedians(t(mat))#using rowMedian to speed up
   
   					if(all(!is.na(MFI)))
+  					  
   						statsOfNode <- rbindlist(list(statsOfNode
                                                         ,data.table(channel=chnames
                                                                     ,stain=stain
@@ -285,9 +287,9 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                                                          )
                                                      )
   				}
-                  #append two columns
+                  #append two columns (they are currently redudant and should only keep one)
                   statsOfNode[, node := curNode]
-                  statsOfNode[, population := curPopName]
+                  statsOfNode[, population := curNode]
                   statsOfNode
   			})
             
