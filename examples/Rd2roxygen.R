@@ -4,8 +4,9 @@ library(roxygen2)
 #                  )
 #    , sep  = "\n"
 #    )
-
-roxygenize("/home/wjiang2/rglab/workspace/QUALIFIER/")
+pkg_path <- "/home/wjiang2/rglab/workspace/QUALIFIER/"
+roxygenize(pkg_path)
+checkDocFiles(dir = pkg_path)
 
 setwd("/home/wjiang2/rglab/workspace/QUALIFIER/inst/doc/")
 library(tools)

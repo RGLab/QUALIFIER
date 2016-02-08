@@ -66,10 +66,15 @@
 #'\code{\link[=GatingSetList-class]{GatingSetList}} containing multiple
 #'\code{gating hierarchies} or an \code{environment} that stores the
 #'\code{GatingSet} and all other information.
-#'@param ...  isFlowCore: A logical scalar indicating whether the statistics
-#'are the original ones in flowJo xml workspace or the re-calculated version by
-#'flowCore in R.  nslaves: An integer scalar indicating the number of nodes
-#'used for parallel computing when obj is \code{GatingHierarchy} or
+#'@param ...  other arguments
+#'
+#' isFlowCore: A \code{logical} scalar indicating whether the statistics are the original ones in flowJo xml workspace or the re-calculated version by flowCore in R.  
+#' isMFI a \code{logical} flag indicating whether to calculate MFI which causes the reading of raw data 
+#' isSpike a \code{logical} flag indicating whether to calculate spike for each channel which causes the reading of raw data
+#' isRaw \code{logical} whether to calculate the MFI value in raw scale.
+#' pops a \code{numeric} or \code{character} vector as the population indices specifing a subset of populations to extract stats from
+#' isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
+#' nslaves: An \code{integer} scalar indicating the number of nodes. It is used for parallel computing when obj is \code{GatingHierarchy} or
 #'\code{GatingSet}.  When the \code{parallel} package is loaded and nslaves is
 #'NULL, its value is automatically decided by available number of nodes.  When
 #'it is set to 1, then forced to run in serial mode.
@@ -127,15 +132,19 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
 #' @param isFlowCore a \code{logical} flag indicating whether to extract flowCore stats or flowJo stats
 #' @param isMFI a \code{logical} flag indicating whether to calculate MFI which causes the reading of raw data 
 #' @param isSpike a \code{logical} flag indicating whether to calculate spike for each channel which causes the reading of raw data
+#' @param isRaw \code{logical} whether to calculate the MFI value in raw scale.
 #' @param pops a \code{numeric} or \code {character} vector as the population indices specifing a subset of populations to extract stats from
 #' @param isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
 #' it is automatically set to TRUE when isMFI is TRUE
 #' @importFrom Biobase rowMedians
-.getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, ...){
+.getQAStats.gh <- function(obj,isFlowCore=TRUE,isMFI = FALSE,isSpike = FALSE, isChannel = FALSE, pops = NULL, isRaw = FALSE, ...){
 			
     			message("reading GatingHierarchy:",sampleNames(obj))
+          
     			if(isMFI){
                   isChannel <- TRUE
+                  if(isRaw)
+                    inv.list <- getTransformations(obj, inverse = TRUE)
                 }
                 
     			#check if data is gated
@@ -271,14 +280,24 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   				#get MIF meatures
   				if(!is.na(chnl)&&isMFI)
   				{
-                      curData<-getData(obj,curNode)
-  #					browser()
-  					mat<-exprs(curData)[,chnl,drop=FALSE]
-  					chnames<-colnames(mat)
-  					MFI<-rowMedians(t(mat))#using rowMedian to speed up
-  
-  					if(all(!is.na(MFI)))
-  					  
+            curData <- getData(obj,curNode)
+  					
+  					mat <- exprs(curData)[,chnl,drop=FALSE]
+  					chnames <- colnames(mat)
+  					MFI <- rowMedians(t(mat))#using rowMedian to speed up
+            
+  					if(all(!is.na(MFI))){
+  					  if(isRaw){
+  					    #inverse transform the MFI
+  					   MFI <- mapply(chnames, MFI, FUN = function(ch, thisMFI){
+  					      ind <- grep(ch, names(inv.list))
+  					      if(length(ind) > 0){
+  					        inv.fun <- inv.list[[ind]]
+  					        thisMFI <- inv.fun(thisMFI)
+  					      }
+  					      thisMFI
+  					    }, USE.NAMES = FALSE)
+  					  }
   						statsOfNode <- rbindlist(list(statsOfNode
                                                         ,data.table(channel=chnames
                                                                     ,stain=stain
@@ -286,12 +305,14 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                                                                      ,value=MFI)
                                                          )
                                                      )
-  				}
-                  #append two columns (they are currently redudant and should only keep one)
-                  statsOfNode[, node := curNode]
-                  statsOfNode[, population := curNode]
-                  statsOfNode
-  			})
+  					}
+				}
+        #append two columns (they are currently redudant and should only keep one)
+        statsOfNode[, node := curNode]
+        statsOfNode[, population := curNode]
+        statsOfNode
+
+			})
             
             ##merge to one table
             statsOfGh<-rbindlist(statslist)
