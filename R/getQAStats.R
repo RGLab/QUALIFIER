@@ -69,15 +69,20 @@
 #'@param ...  other arguments
 #'
 #' isFlowCore: A \code{logical} scalar indicating whether the statistics are the original ones in flowJo xml workspace or the re-calculated version by flowCore in R.  
+#' 
 #' isMFI a \code{logical} flag indicating whether to calculate MFI which causes the reading of raw data 
+#' 
 #' isSpike a \code{logical} flag indicating whether to calculate spike for each channel which causes the reading of raw data
+#' 
 #' isRaw \code{logical} whether to calculate the MFI value in raw scale.
+#' 
 #' pops a \code{numeric} or \code{character} vector as the population indices specifing a subset of populations to extract stats from
+#' 
 #' isChannel a \code{logical} flag indicating whether to extract channel information from 1d gates in order to perform channel-specific QA
+#' 
 #' nslaves: An \code{integer} scalar indicating the number of nodes. It is used for parallel computing when obj is \code{GatingHierarchy} or
-#'\code{GatingSet}.  When the \code{parallel} package is loaded and nslaves is
-#'NULL, its value is automatically decided by available number of nodes.  When
-#'it is set to 1, then forced to run in serial mode.
+#' \code{GatingSet}.  When the \code{parallel} package is loaded and nslaves is NULL, its value is automatically decided by available number of nodes.  
+#' When it is set to 1, then forced to run in serial mode.
 #' 
 #' 
 #'@return
@@ -93,8 +98,9 @@
 #'
 #'\dontrun{
 #' 
-#'getQAStats(G[[1]])#extract stats from a gating hierarchy
-#'getQAStats(G)#from a gating set
+#'  getQAStats(G[[1]])#extract stats from a gating hierarchy
+#'  getQAStats(G[[1]], isMFI = TRUE, pops = c("/boundary/lymph/CD3/CD4"))#extract stats from a gating hierarchy
+#'  getQAStats(G)#from a gating set
 #' 
 #'}
 #' 
