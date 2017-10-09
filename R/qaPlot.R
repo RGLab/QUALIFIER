@@ -31,7 +31,7 @@ qa.GroupPlot<-function(db,df,statsType,par)
 	
 		curGate <- getGate(curGh, curNode)
         
-        curProp <- getProp(curGh, curNode, flowJo = FALSE)
+        curProp <- getProp(curGh, curNode, xml = FALSE)
         fr_pd <- pData(parameters(getData(curGh, use.exprs = FALSE)))
         thiscolnames <- fr_pd[, "name"]
 #        browser()

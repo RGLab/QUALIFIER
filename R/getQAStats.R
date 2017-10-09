@@ -236,10 +236,10 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
           
           if(isFlowCore)
           {
-            statsOfNode <- statsOfNode$flowCore
+            statsOfNode <- statsOfNode$openCyto
           }else
           {
-            statsOfNode<-statsOfNode$flowJo
+            statsOfNode<-statsOfNode$openCyto
           }
           #reset chnl for 2d gate since channel are meaningless for counts and % 
           if(!is.na(chnl)&&length(chnl)>1){
