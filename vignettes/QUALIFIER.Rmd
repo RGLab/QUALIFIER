@@ -29,13 +29,13 @@ QUALIFIER:::qa.par.get("idCol")
 ```
 
 ## Parsing the QA gating template
-`parseWorkspace` function from `flowWorkspace` package is used to parse the flowJo workspace.
+`flowjo_to_gatingset` function from `flowWorkspace` package is used to parse the flowJo workspace.
 Since we are only interested in the gating strategy (gates defined in the template),`execute` can be set as FALSE  
 to skip the actual gating process. `useInternal` is set as TRUE to use internal structure (c++) for faster parsing. 
-Please see the documentation of `flowWorkspace` package for more details regarding how to use `parseWorkspace` function. 
-```{r parseWorkspace, eval=FALSE, echo=TRUE,results='markup'}
-ws<-openWorkspace("./data/QA_MFI_RBC_bounary_eventsV3.xml")##should replace with your own xml workspace file path
-GT<-parseWorkspace(ws,execute=FALSE,useInternal=TRUE)
+Please see the documentation of `flowWorkspace` package for more details regarding how to use `flowjo_to_gatingset` function. 
+```{r flowjo_to_gatingset, eval=FALSE, echo=TRUE,results='markup'}
+ws<-open_flowjo_xml("./data/QA_MFI_RBC_bounary_eventsV3.xml")##should replace with your own xml workspace file path
+GT<-flowjo_to_gatingset(ws,execute=FALSE,useInternal=TRUE)
 ```
 
 ## Apply the gating template to the data
@@ -46,11 +46,11 @@ gh_template<-GT[[1]]
 ```
 
 The `GatingSet` method here is the contructor that takes a `gatingHierarchy` object as the template and a list of FCS file names (`filenames`) that need the quality assurance.
-The result "G" is the `GatingSet` that contains the gated data and some of the cell population statistics that can be viewed by `getPopStats` method.
+The result "G" is the `GatingSet` that contains the gated data and some of the cell population statistics that can be viewed by `gh_pop_compare_stats` method.
 ```{r gh_template2, eval=FALSE, echo=TRUE,results='markup'}
 ##datapath is the path where FCS files stores
 G<-GatingSet(gh_template,filenames,path="./data")
-getPopStats(G[[1]])
+gh_pop_compare_stats(G[[1]])
 ```
 Optionally, `isNcdf` can be set to TRUE to support netCDF storage of large flow datasets when memory resource is limited. 
 

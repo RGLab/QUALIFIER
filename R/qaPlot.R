@@ -29,10 +29,10 @@ qa.GroupPlot<-function(db,df,statsType,par)
 		curGh <- db$gs[[gsid]][[curRow["name"]]]
 		curNode <- as.character(curRow["node"])
 	
-		curGate <- getGate(curGh, curNode)
+		curGate <- gh_pop_get_gate(curGh, curNode)
         
-        curProp <- getProp(curGh, curNode, xml = FALSE)
-        fr_pd <- pData(parameters(getData(curGh, use.exprs = FALSE)))
+        curProp <- gh_pop_get_proportion(curGh, curNode, xml = FALSE)
+        fr_pd <- pData(parameters(gh_pop_get_data(curGh, use.exprs = FALSE)))
         thiscolnames <- fr_pd[, "name"]
 #        browser()
         
@@ -58,10 +58,10 @@ qa.GroupPlot<-function(db,df,statsType,par)
           }
             
         if(curNode == "root"){
-          fr <- getData(curGh, j = param)
+          fr <- gh_pop_get_data(curGh, j = param)
         }else{
-          parentNode <- getParent(curGh, curNode)
-          fr <- getData(curGh,parentNode, j = param)
+          parentNode <- gs_pop_get_parent(curGh, curNode)
+          fr <- gh_pop_get_data(curGh,parentNode, j = param)
         }
 		list(frame = fr ,gate = curGate, stats = curProp, param = param)
 	})

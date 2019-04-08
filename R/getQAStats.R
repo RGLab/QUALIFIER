@@ -44,7 +44,7 @@
 #'
 #' @details 
 #'This is the second preprocessing step followed by parsing gating template
-#'from flowJo workspace with \code{\link{parseWorkspace}}.  Different QA checks
+#'from flowJo workspace with \code{\link{flowjo_to_gatingset}}.  Different QA checks
 #'can be performed after this step is done.  when obj is an \code{environment}
 #'the results are stored as a dataframe with the name of "statsOfGS" in the
 #'environment.
@@ -150,15 +150,15 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
     			if(isMFI){
                   isChannel <- TRUE
                   if(isRaw)
-                    inv.list <- getTransformations(obj, inverse = TRUE)
+                    inv.list <- gh_get_transformations(obj, inverse = TRUE)
                 }
                 
     			#check if data is gated
     			isGated <- obj@flag
           #isPath is deperated and prefixed node name is no longer supported
     			#thus nodePaths is the same as nodes
-		      nodes<-getNodes(obj, showHidden = TRUE)
-          # nodePaths<-getNodes(obj, isPath = TRUE, showHidden = TRUE)
+		      nodes<-gs_get_pop_paths(obj, showHidden = TRUE)
+          # nodePaths<-gs_get_pop_paths(obj, isPath = TRUE, showHidden = TRUE)
           #convert to QUALIFIER's path
           # nodePaths[1]<-paste("/",nodePaths[1],sep="")
           # nodePaths[-1]<-paste("/root",nodePaths[-1],sep="")
@@ -186,7 +186,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
     			nNodes<-length(nodes)
                 
                 if(isGated&&(isSpike||isMFI||isChannel)){
-                  fdata<-getData(obj, use.exprs = isGated&&(isSpike||isMFI))#only spike and MFI require the actual raw data reading
+                  fdata<-gh_pop_get_data(obj, use.exprs = isGated&&(isSpike||isMFI))#only spike and MFI require the actual raw data reading
                   pd<-pData(parameters(fdata))
                   params <- pd$name
   
@@ -212,7 +212,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
                 chnl <- as.character(NA)   #convert from logical NA to character NA for rbindlist to behave appropriately
                 if(isGated&&!.isRoot(obj,curNode)&&isChannel)
   				{
-                    curGate<-getGate(obj,curNode)
+                    curGate<-gh_pop_get_gate(obj,curNode)
                   #only extract chnl info gates:
                   #1. non bool gate
                   #2. MFI is true
@@ -286,7 +286,7 @@ setMethod("getQAStats",signature("GatingHierarchy"),function(obj, ...){
   				#get MIF meatures
   				if(!is.na(chnl)&&isMFI)
   				{
-            curData <- getData(obj,curNode)
+            curData <- gh_pop_get_data(obj,curNode)
   					
   					mat <- exprs(curData)[,chnl,drop=FALSE]
   					chnames <- colnames(mat)

@@ -18,7 +18,7 @@ GT<-parseWorkspace(ws
 					,subset=1
 					)
 gh_template<-GT[[1]]					
-getPopStats(gh_template)[,2:3]
+gs_pop_get_count_fast(gh_template)[,2:3]
 
 #test the matchNode
 
@@ -36,7 +36,7 @@ G<-GatingSet(gh_template
 			,isNcdf=T
 #			,dMode=4
 			)
-getPopStats(G[[1]])[,2:3]
+gs_pop_get_count_fast(G[[1]])[,2:3]
 plotGate(G[[1]],merge=F)
 ################################################################################  
 #3.extract stats (6 min for 500 samples, 12 min for 1k samples)

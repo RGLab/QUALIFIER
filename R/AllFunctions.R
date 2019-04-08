@@ -211,7 +211,7 @@ matchStatType <- function(db,formuRes)
 
 .isRoot<-function(gh,node)
 {
-#	return(ifelse(length(getParent(gh,node))==0,TRUE,FALSE))
+#	return(ifelse(length(gs_pop_get_parent(gh,node))==0,TRUE,FALSE))
 	node=="root"
 }
 
@@ -306,7 +306,7 @@ saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname=
 	
 	
 	###append the data to db
-	result<-try(colnames(getData(gs[[1]])),silent=TRUE)
+	result<-try(colnames(gh_pop_get_data(gs[[1]])),silent=TRUE)
 	if(!inherits(result,"try-error")){
 		db$params<-result
 	}
@@ -337,7 +337,7 @@ saveToDB <- function(db=.db,gs,gs.name="default gatingSet",metaFile,fcs.colname=
 #' @return \code{logical} vector as the matching result
 #' @examples 
 #' \dontrun{
-#'  nodes <- getNodes(gh, isPath = TRUE) #fetch all the population (with path) from gating hierarchy
+#'  nodes <- gs_get_pop_paths(gh, isPath = TRUE) #fetch all the population (with path) from gating hierarchy
 #'  nodes
 #'    
 #'  # exact match by population name (terminal/base name in the path)
